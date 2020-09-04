@@ -1,37 +1,150 @@
-## Welcome to GitHub Pages
+frgaal.org compiler
+-------------------
 
-You can use the [editor on GitHub](https://github.com/eppleton/frgaal/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+This is a compiler for a Java-like language:
+```java
+import java.util.List;
+import java.util.Arrays;
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+public class Main {
+    private static List<Integer> useVar() {
+        var list = Arrays.asList(6, 1, 3, 5);
+        useTextBlock(list);
+        return list;
+    }
 
-### Markdown
+    private static void useTextBlock(List<Integer> list) {
+        String text = """
+            initial list content
+            is...""";
+        System.err.println(text + list);
+    }
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
+    private static String useInstanceOf(List<?> list) {
+        final Object element = list.get(1);
+        if (element instanceof Integer number) {
+            return useSwitchExpr(number);
+        }
+        return "not a number!";
+    }
 
-# Header 1
-## Header 2
-### Header 3
+    private static String useSwitchExpr(int number) {
+        return switch (number) {
+            case 3 -> "ok";
+            default -> "bad";
+        };
+    }
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+    public static void main(String... args) {
+        List<Integer> list = useVar();
+        list.sort(null);
+        System.err.println("after sorting: " + list);
+        String switchTest = useInstanceOf(list);
+        System.err.println(switchTest);
+    }
+}
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+The features of the language are similar to features of the Java language,
+but unlike in Java, many of them can be compiled to run on Java 8.
 
-### Jekyll Themes
+Supported Features
+------------------
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/eppleton/frgaal/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+When targetting Java 8 or later (i.e. using `-target 10` or later), all Java 8 language features are supported.
+In addition to this the following features are supported:
 
-### Support or Contact
+ * "var" local variables, introduced in Java 10. Must use `-source 10` to enable.
+ * switch expressions, introduced in Java 14. Must use `-source 14` to enable.
+ * text blocks, introduced as preview in Java 13. Must use `-source 14 --enable-safe-preview` to enable, classfiles will be usable on the target version specified by `-target <version>`.
+ * pattern matching in instanceof, introduced as preview in Java 14. Must use `-source 14 --enable-safe-preview` to enable, classfiles will be usable on the target version specified by `-target <version>`.
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+Usage with Maven
+----------------
+
+To use this compiler, specify following in your pom.xml file build section:
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
+            <dependencies>
+                <dependency>
+                    <groupId>org.frgaal</groupId>
+                    <artifactId>compiler-maven-plugin</artifactId>
+                    <version>14.0.1</version>
+                </dependency>
+            </dependencies>
+            <configuration>
+                <compilerId>frgaal</compilerId>
+                <source>14</source>
+                <target>1.8</target>
+                <compilerArgs>
+                    <arg>-Xlint:deprecation</arg>
+                    <arg>--enable-safe-preview</arg>
+                </compilerArgs>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+With such a change the compiler of your project no longer depends on the
+used JDK. All the compiler code is downloaded from Maven central and it can
+run on anything from JDK8 up. If you want to update your compiler to
+get a bugfix or to use latest language feature, you can change <version>
+to something newer. However, until you do that, no matter what
+breaking changes appear in the JDK, your project is still going to compile
+into exactly the same .class files.
+
+Usage on command line
+---------------------
+
+To use the frgaal compiler, run it as follows:
+
+ $ java -jar compiler.jar <javac-parameters>
+
+When running through reflection, run the org.frgaal.Main class.
+
+Preview Features
+----------------
+
+Some features are preview features in Java. These generally require command line parameters `--enable-preview -source <version>`, where `<version>` is the
+version of the JDK that is compiling the sources. The resulting classfiles are marked as preview, and can only be used in conjuction with `--enable-preview`
+and a matching JDK version. Preview features may change incompatibly between JDK versions.
+
+This mode is supported by the frgaal compiler, but there is also a safe preview mode provided. Not all preview features have this safe preview mode enabled, though.
+The safe preview mode is enabled by: `--enable-safe-preview -source <version>`, where `<version>` must match the major version of the frgaal compiler. The classfiles
+produced by frgaal will not be marked as preview, and will be usable on the selected target Java version, or newer Java versions. The source code may not compiler on
+newer versions of the frgaal compiler, and may need adjustments.
+
+System Paths
+------------
+
+By default, the frgaal compiler uses system classes that correspond to the specified target platform version.
+That means that regardless of the platform on which the frgaal compiler runs, only APIs from the target platform
+can be used. To disable this behavior use:
+
+ * -bootclasspath, -Xbootclasspath or -system and specify the desired target platform API
+ * -XDignore.symbol.file to disable this behavior and use runtime platform's APIs (which may or may not match the target version)
+
+Caveats
+-------
+
+The current caveats include:
+
+ * module-info.java cannot be compiled with target 8.
+ * the records preview feature, introduced in Java 14 cannot be used in the safe preview mode.
+
+Building
+--------
+
+Run the "build.sh" script. The compiler will be in the dist/compiler-*.jar file.
+
+License
+-------
+
+The license is GPLv2+CPE.
