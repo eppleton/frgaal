@@ -2,6 +2,7 @@ frgaal - a retrofit compiler for Java
 -------------------------------------
 
 This is a compiler for a Java-like language:
+
 ```java
 import java.util.List;
 import java.util.Arrays;
@@ -52,18 +53,25 @@ but unlike in Java, many of them can be compiled to run on Java 8.
 Supported Features
 ------------------
 
-When targetting Java 8 or later (i.e. using `-target 10` or later), all Java 8 language features are supported.
-In addition to this the following features are supported:
+When targetting Java 8 or later (i.e. using `-target 8` or later), all Java 8 language features are supported.
+In addition following features are supported:
 
- * "var" local variables, introduced in Java 10. Must use `-source 10` to enable.
- * switch expressions, introduced in Java 14. Must use `-source 14` to enable.
- * text blocks, introduced as preview in Java 13. Must use `-source 14 --enable-safe-preview` to enable, classfiles will be usable on the target version specified by `-target <version>`.
- * pattern matching in instanceof, introduced as preview in Java 14. Must use `-source 14 --enable-safe-preview` to enable, classfiles will be usable on the target version specified by `-target <version>`.
+ * `var` local variables, introduced in Java 10. Must use `-source 10` to
+enable.
+ * switch expressions, introduced in Java 14. Must use `-source 14` to
+enable.
+ * text blocks, introduced as preview in Java 13. Must use `-source 14 --
+enable-safe-preview` to enable
+ * pattern matching in `instanceof`, introduced as preview in Java 14. Must
+use `-source 14 --enable-safe-preview` to enable
+
+See "Preview Features" section below for more details.
 
 Usage with Maven
 ----------------
 
 To use this compiler, specify following in your pom.xml file build section:
+
 ```xml
 <build>
     <plugins>
@@ -75,7 +83,7 @@ To use this compiler, specify following in your pom.xml file build section:
                 <dependency>
                     <groupId>org.frgaal</groupId>
                     <artifactId>compiler-maven-plugin</artifactId>
-                    <version>14.0.1</version>
+                    <version>14.0.2</version>
                 </dependency>
             </dependencies>
             <configuration>
@@ -96,9 +104,9 @@ With such a change the compiler of your project no longer depends on the
 used JDK. All the compiler code is downloaded from Maven central and it can
 run on anything from JDK8 up. If you want to update your compiler to
 get a bugfix or to use latest language feature, you can change <version>
-to something newer. However, until you do that, no matter what
+to some newer version. However, until you do that, no matter what
 breaking changes appear in the JDK, your project is still going to compile
-into exactly the same .class files.
+into exactly the same `.class` files.
 
 Usage on command line
 ---------------------
@@ -142,7 +150,8 @@ The current caveats include:
 Building
 --------
 
-Run the "build.sh" script. The compiler will be in the dist/compiler-*.jar file.
+Run the `build.sh` script. The compiler will be in the `dist/compiler-*.jar`
+file.
 
 License
 -------
