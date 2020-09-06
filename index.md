@@ -1,5 +1,5 @@
-frgaal.org compiler
--------------------
+frgaal - a retrofit compiler for Java
+-------------------------------------
 
 This is a compiler for a Java-like language:
 ```java
