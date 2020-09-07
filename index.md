@@ -132,12 +132,26 @@ newer versions of the frgaal compiler, and may need adjustments.
 System Paths
 ------------
 
-By default, the frgaal compiler uses system classes that correspond to the specified target platform version.
-That means that regardless of the platform on which the frgaal compiler runs, only APIs from the target platform
-can be used. To disable this behavior use:
+Regardless of the platform on which the frgaal compiler runs, APIs from the target platform
+are available.
+Even if you run the compiler on JDK8, you can use JDK11 APIs in your `Code.java`
+when specifying `-target 11`:
 
- * -bootclasspath, -Xbootclasspath or -system and specify the desired target platform API
- * -XDignore.symbol.file to disable this behavior and use runtime platform's APIs (which may or may not match the target version)
+```bash
+$ cat >Code.java <<END
+class Code {
+  public static void main(String[] args) {
+    var unavailableOnJDK8 = java.lang.Module.class;
+    System.out.println(unavailableOnJDK8.getName());
+  }
+}
+END
+$ jdk1.8.0/bin/java -jar compiler.jar -source 14 -target 11 Code.java
+```
+
+To disable this behavior use `-bootclasspath`, `-Xbootclasspath` or `-system` 
+and specify the desired target platform API. Or use `-XDignore.symbol.file` 
+to disable this behavior and use runtime platform APIs.
 
 Caveats
 -------
