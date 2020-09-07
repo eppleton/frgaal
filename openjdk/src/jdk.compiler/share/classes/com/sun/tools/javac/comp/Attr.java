@@ -103,6 +103,7 @@ public class Attr extends JCTree.Visitor {
     final Analyzer analyzer;
     final DeferredAttr deferredAttr;
     final Check chk;
+    final ExtraSymbolInfo esi;
     final Flow flow;
     final MemberEnter memberEnter;
     final TypeEnter typeEnter;
@@ -137,6 +138,7 @@ public class Attr extends JCTree.Visitor {
         rs = Resolve.instance(context);
         operators = Operators.instance(context);
         chk = Check.instance(context);
+        esi = ExtraSymbolInfo.instance(context);
         flow = Flow.instance(context);
         memberEnter = MemberEnter.instance(context);
         typeEnter = TypeEnter.instance(context);
@@ -161,14 +163,15 @@ public class Attr extends JCTree.Visitor {
         Options options = Options.instance(context);
 
         Source source = Source.instance(context);
-        allowPoly = Feature.POLY.allowedInSource(source);
-        allowTypeAnnos = Feature.TYPE_ANNOTATIONS.allowedInSource(source);
-        allowLambda = Feature.LAMBDA.allowedInSource(source);
-        allowDefaultMethods = Feature.DEFAULT_METHODS.allowedInSource(source);
-        allowStaticInterfaceMethods = Feature.STATIC_INTERFACE_METHODS.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowPoly = Feature.POLY.allowedInSource(source, target);
+        allowTypeAnnos = Feature.TYPE_ANNOTATIONS.allowedInSource(source, target);
+        allowLambda = Feature.LAMBDA.allowedInSource(source, target);
+        allowDefaultMethods = Feature.DEFAULT_METHODS.allowedInSource(source, target);
+        allowStaticInterfaceMethods = Feature.STATIC_INTERFACE_METHODS.allowedInSource(source, target);
         allowReifiableTypesInInstanceof =
-                Feature.REIFIABLE_TYPES_INSTANCEOF.allowedInSource(source) &&
-                (!preview.isPreview(Feature.REIFIABLE_TYPES_INSTANCEOF) || preview.isEnabled());
+                Feature.REIFIABLE_TYPES_INSTANCEOF.allowedInSource(source, target) &&
+                (!preview.isPreview(Feature.REIFIABLE_TYPES_INSTANCEOF) || preview.isEnabled(Feature.REIFIABLE_TYPES_INSTANCEOF));
         sourceName = source.name;
         useBeforeDeclarationWarning = options.isSet("useBeforeDeclarationWarning");
 
@@ -4401,6 +4404,7 @@ public class Attr extends JCTree.Visitor {
                 chk.checkSunAPI(tree.pos(), sym);
                 chk.checkProfile(tree.pos(), sym);
                 chk.checkPreview(tree.pos(), sym);
+                esi.checkSymbolRemovedDeprecatedInFutureRelease(tree.pos(), sym);
             }
 
             // If symbol is a variable, check that its type and

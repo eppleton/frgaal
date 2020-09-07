@@ -149,6 +149,8 @@ public class ClassReader {
      */
     Preview preview;
 
+    ExtraSymbolInfo esi;
+
     /** The current scope where type variables are entered.
      */
     protected WriteableScope typevars;
@@ -266,10 +268,12 @@ public class ClassReader {
         verbose         = options.isSet(Option.VERBOSE);
 
         Source source = Source.instance(context);
+        Target target = Target.instance(context);
         preview = Preview.instance(context);
-        allowModules     = Feature.MODULES.allowedInSource(source);
-        allowRecords = (!preview.isPreview(Feature.RECORDS) || preview.isEnabled()) &&
-                Feature.RECORDS.allowedInSource(source);
+        esi = ExtraSymbolInfo.instance(context);
+        allowModules     = Feature.MODULES.allowedInSource(source, target);
+        allowRecords = (!preview.isPreview(Feature.RECORDS) || preview.isEnabled(Feature.RECORDS)) &&
+                Feature.RECORDS.allowedInSource(source, target);
 
         saveParameterNames = options.isSet(PARAMETERS);
 
@@ -1404,6 +1408,24 @@ public class ClassReader {
                             if (c.type == syms.intType && ((Integer)c.value) > profile.value) {
                                 sym.flags_field |= NOT_IN_PROFILE;
                             }
+                        }
+                    }
+                }
+            } else if (proxy.type.tsym.flatName() == syms.frgaalFutureRemoveAnnotationType.tsym.flatName()) {
+                for (Pair<Name, Attribute> v : proxy.values) {
+                    if (v.fst == names.value && v.snd instanceof Attribute.Constant) {
+                        Attribute.Constant c = (Attribute.Constant)v.snd;
+                        if (c.type == syms.intType) {
+                            esi.symbolRemovedInRelease(sym, (Integer)c.value);
+                        }
+                    }
+                }
+            } else if (proxy.type.tsym.flatName() == syms.frgaalFutureDeprecatedAnnotationType.tsym.flatName()) {
+                for (Pair<Name, Attribute> v : proxy.values) {
+                    if (v.fst == names.value && v.snd instanceof Attribute.Constant) {
+                        Attribute.Constant c = (Attribute.Constant)v.snd;
+                        if (c.type == syms.intType) {
+                            esi.symbolDeprecatedInRelease(sym, (Integer)c.value);
                         }
                     }
                 }
@@ -2553,7 +2575,7 @@ public class ClassReader {
         }
 
         if (minorVersion == ClassFile.PREVIEW_MINOR_VERSION) {
-            if (!preview.isEnabled()) {
+            if (!preview.isEnabledUnconditionally()) {
                 log.error(preview.disabledError(currentClassFile, majorVersion));
             } else {
                 preview.warnPreview(c.classfile, majorVersion);

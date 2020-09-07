@@ -76,7 +76,7 @@ public class SimpleAnnotationValueVisitor7<R, P> extends SimpleAnnotationValueVi
      * @deprecated Release 7 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="12")
+    @Deprecated(/*since="12"*/)
     protected SimpleAnnotationValueVisitor7() {
         super(null); // Superclass constructor deprecated too
     }
@@ -90,7 +90,7 @@ public class SimpleAnnotationValueVisitor7<R, P> extends SimpleAnnotationValueVi
      * @deprecated Release 7 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="12")
+    @Deprecated(/*since="12"*/)
     protected SimpleAnnotationValueVisitor7(R defaultValue) {
         super(defaultValue); // Superclass constructor deprecated too
     }

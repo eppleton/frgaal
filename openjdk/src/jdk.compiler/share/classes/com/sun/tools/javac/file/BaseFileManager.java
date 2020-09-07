@@ -320,7 +320,7 @@ public abstract class BaseFileManager implements JavaFileManager {
             decoder = getDecoder(encName, ignoreEncodingErrors);
         } catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
             log.error(Errors.UnsupportedEncoding(encName));
-            return CharBuffer.allocate(1).flip();
+            return (CharBuffer) CharBuffer.allocate(1).flip();
         }
 
         // slightly overestimate the buffer size to avoid reallocation.
@@ -406,16 +406,16 @@ public abstract class BaseFileManager implements JavaFileManager {
         while (in.available() != 0) {
             if (position >= limit)
                 // expand buffer
-                result = ByteBuffer.
-                    allocate(limit <<= 1).
-                    put(result.flip());
+                result = ((ByteBuffer) ByteBuffer.
+                    allocate(limit <<= 1)).
+                    put((ByteBuffer) result.flip());
             int count = in.read(result.array(),
                 position,
                 limit - position);
             if (count < 0) break;
             result.position(position += count);
         }
-        return result.flip();
+        return (ByteBuffer) result.flip();
     }
 
     public void recycleByteBuffer(ByteBuffer bb) {
@@ -431,7 +431,7 @@ public abstract class BaseFileManager implements JavaFileManager {
             if (capacity < 20480) capacity = 20480;
             ByteBuffer result =
                 (cached != null && cached.capacity() >= capacity)
-                ? cached.clear()
+                ? (ByteBuffer) cached.clear()
                 : ByteBuffer.allocate(capacity + capacity>>1);
             cached = null;
             return result;

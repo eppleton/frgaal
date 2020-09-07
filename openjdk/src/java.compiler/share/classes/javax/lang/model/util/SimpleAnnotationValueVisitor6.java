@@ -93,7 +93,7 @@ public class SimpleAnnotationValueVisitor6<R, P>
      * @deprecated Release 6 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     protected SimpleAnnotationValueVisitor6() {
         super();
         DEFAULT_VALUE = null;
@@ -107,7 +107,7 @@ public class SimpleAnnotationValueVisitor6<R, P>
      * @deprecated Release 6 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     protected SimpleAnnotationValueVisitor6(R defaultValue) {
         super();
         DEFAULT_VALUE = defaultValue;

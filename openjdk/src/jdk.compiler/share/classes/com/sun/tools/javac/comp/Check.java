@@ -226,6 +226,18 @@ public class Check {
         }
     }
 
+    public void reportWarningToRemovalHandler(DiagnosticPosition pos, Warning warning) {
+        if (!lint.isSuppressed(LintCategory.REMOVAL)) {
+            removalHandler.report(pos, warning);
+        }
+    }
+
+    public void reportWarningToDeprecationHandler(DiagnosticPosition pos, Warning warning) {
+        if (!lint.isSuppressed(LintCategory.DEPRECATION)) {
+            deprecationHandler.report(pos, warning);
+        }
+    }
+
     /** Warn about deprecated symbol.
      *  @param pos        Position to be used for error reporting.
      *  @param sym        The deprecated symbol.
@@ -828,7 +840,7 @@ public class Check {
                 t.isErroneous()) {
             return checkClassType(tree.clazz.pos(), t, true);
         } else {
-            if (tree.def != null && !Feature.DIAMOND_WITH_ANONYMOUS_CLASS_CREATION.allowedInSource(source)) {
+            if (tree.def != null && !Feature.DIAMOND_WITH_ANONYMOUS_CLASS_CREATION.allowedInSource(source, target)) {
                 log.error(DiagnosticFlag.SOURCE_LEVEL, tree.clazz.pos(),
                         Errors.CantApplyDiamond1(t, Feature.DIAMOND_WITH_ANONYMOUS_CLASS_CREATION.fragment(source.name)));
             }
@@ -927,7 +939,7 @@ public class Check {
         }
         if (hasTrustMeAnno && !isTrustMeAllowedOnMethod(m)) {
             if (varargElemType != null) {
-                JCDiagnostic msg = Feature.PRIVATE_SAFE_VARARGS.allowedInSource(source) ?
+                JCDiagnostic msg = Feature.PRIVATE_SAFE_VARARGS.allowedInSource(source, target) ?
                         diags.fragment(Fragments.VarargsTrustmeOnVirtualVarargs(m)) :
                         diags.fragment(Fragments.VarargsTrustmeOnVirtualVarargsFinalOnly(m));
                 log.error(tree,
@@ -954,7 +966,7 @@ public class Check {
             return (s.flags() & VARARGS) != 0 &&
                 (s.isConstructor() ||
                     (s.flags() & (STATIC | FINAL |
-                                  (Feature.PRIVATE_SAFE_VARARGS.allowedInSource(source) ? PRIVATE : 0) )) != 0);
+                                  (Feature.PRIVATE_SAFE_VARARGS.allowedInSource(source, target) ? PRIVATE : 0) )) != 0);
         }
 
     Type checkLocalVarType(DiagnosticPosition pos, Type t, Name name) {
@@ -2495,7 +2507,7 @@ public class Check {
                 if (m2 == m1) continue;
                 //if (i) the signature of 'sym' is not a subsignature of m1 (seen as
                 //a member of 'site') and (ii) m1 has the same erasure as m2, issue an error
-                if (!types.isSubSignature(sym.type, types.memberType(site, m2), Feature.STRICT_METHOD_CLASH_CHECK.allowedInSource(source)) &&
+                if (!types.isSubSignature(sym.type, types.memberType(site, m2), Feature.STRICT_METHOD_CLASH_CHECK.allowedInSource(source, target)) &&
                         types.hasSameArgs(m2.erasure(types), m1.erasure(types))) {
                     sym.flags_field |= CLASH;
                     if (m1 == sym) {
@@ -2540,7 +2552,7 @@ public class Check {
         for (Symbol s : types.membersClosure(site, true).getSymbolsByName(sym.name, cf)) {
             //if (i) the signature of 'sym' is not a subsignature of m1 (seen as
             //a member of 'site') and (ii) 'sym' has the same erasure as m1, issue an error
-            if (!types.isSubSignature(sym.type, types.memberType(site, s), Feature.STRICT_METHOD_CLASH_CHECK.allowedInSource(source))) {
+            if (!types.isSubSignature(sym.type, types.memberType(site, s), Feature.STRICT_METHOD_CLASH_CHECK.allowedInSource(source, target))) {
                 if (types.hasSameArgs(s.erasure(types), sym.erasure(types))) {
                     log.error(pos,
                               Errors.NameClashSameErasureNoHide(sym, sym.location(), s, s.location()));
@@ -2642,7 +2654,7 @@ public class Check {
     void checkPotentiallyAmbiguousOverloads(DiagnosticPosition pos, Type site,
             MethodSymbol msym1, MethodSymbol msym2) {
         if (msym1 != msym2 &&
-                Feature.DEFAULT_METHODS.allowedInSource(source) &&
+                Feature.DEFAULT_METHODS.allowedInSource(source, target) &&
                 lint.isEnabled(LintCategory.OVERLOADS) &&
                 (msym1.flags() & POTENTIALLY_AMBIGUOUS) == 0 &&
                 (msym2.flags() & POTENTIALLY_AMBIGUOUS) == 0) {
@@ -3436,7 +3448,7 @@ public class Check {
 
     void checkPreview(DiagnosticPosition pos, Symbol s) {
         if ((s.flags() & PREVIEW_API) != 0) {
-            if ((s.flags() & PREVIEW_ESSENTIAL_API) != 0 && !preview.isEnabled()) {
+            if ((s.flags() & PREVIEW_ESSENTIAL_API) != 0 && !preview.isEnabledUnconditionally()) {
                 log.error(pos, Errors.IsPreview(s));
             } else {
                 deferredLintHandler.report(() -> warnPreview(pos, s));
@@ -3818,7 +3830,7 @@ public class Check {
             if (!imp.staticImport && TreeInfo.name(imp.qualid) == names.asterisk) {
                 TypeSymbol tsym = ((JCFieldAccess)imp.qualid).selected.type.tsym;
                 if (tsym.kind == PCK && tsym.members().isEmpty() &&
-                    !(Feature.IMPORT_ON_DEMAND_OBSERVABLE_PACKAGES.allowedInSource(source) && tsym.exists())) {
+                    !(Feature.IMPORT_ON_DEMAND_OBSERVABLE_PACKAGES.allowedInSource(source, target) && tsym.exists())) {
                     log.error(DiagnosticFlag.RESOLVE_ERROR, imp.pos, Errors.DoesntExist(tsym));
                 }
             }

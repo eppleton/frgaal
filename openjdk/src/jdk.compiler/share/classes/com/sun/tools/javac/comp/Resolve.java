@@ -98,6 +98,7 @@ public class Resolve {
     Attr attr;
     DeferredAttr deferredAttr;
     Check chk;
+    ExtraSymbolInfo esi;
     Infer infer;
     ClassFinder finder;
     ModuleFinder moduleFinder;
@@ -127,6 +128,7 @@ public class Resolve {
         attr = Attr.instance(context);
         deferredAttr = DeferredAttr.instance(context);
         chk = Check.instance(context);
+        esi = ExtraSymbolInfo.instance(context);
         infer = Infer.instance(context);
         finder = ClassFinder.instance(context);
         moduleFinder = ModuleFinder.instance(context);
@@ -139,14 +141,14 @@ public class Resolve {
                 options.isUnset(Option.XDIAGS) && options.isUnset("rawDiagnostics");
         verboseResolutionMode = VerboseResolutionMode.getVerboseResolutionMode(options);
         Target target = Target.instance(context);
-        allowFunctionalInterfaceMostSpecific = Feature.FUNCTIONAL_INTERFACE_MOST_SPECIFIC.allowedInSource(source);
-        allowLocalVariableTypeInference = Feature.LOCAL_VARIABLE_TYPE_INFERENCE.allowedInSource(source);
-        allowYieldStatement = (!preview.isPreview(Feature.SWITCH_EXPRESSION) || preview.isEnabled()) &&
-                Feature.SWITCH_EXPRESSION.allowedInSource(source);
+        allowFunctionalInterfaceMostSpecific = Feature.FUNCTIONAL_INTERFACE_MOST_SPECIFIC.allowedInSource(source, target);
+        allowLocalVariableTypeInference = Feature.LOCAL_VARIABLE_TYPE_INFERENCE.allowedInSource(source, target);
+        allowYieldStatement = (!preview.isPreview(Feature.SWITCH_EXPRESSION) || preview.isEnabled(Feature.SWITCH_EXPRESSION)) &&
+                Feature.SWITCH_EXPRESSION.allowedInSource(source, target);
         checkVarargsAccessAfterResolution =
-                Feature.POST_APPLICABILITY_VARARGS_ACCESS_CHECK.allowedInSource(source);
+                Feature.POST_APPLICABILITY_VARARGS_ACCESS_CHECK.allowedInSource(source, target);
         polymorphicSignatureScope = WriteableScope.create(syms.noSymbol);
-        allowModules = Feature.MODULES.allowedInSource(source);
+        allowModules = Feature.MODULES.allowedInSource(source, target);
     }
 
     /** error symbols, which are returned when resolution fails
@@ -2826,6 +2828,7 @@ public class Resolve {
                                     useVarargs);
         chk.checkDeprecated(pos, env.info.scope.owner, sym);
         chk.checkPreview(pos, sym);
+        esi.checkSymbolRemovedDeprecatedInFutureRelease(pos, sym);
         return sym;
     }
 

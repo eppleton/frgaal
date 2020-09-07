@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.sun.tools.javac.main.Option.PREVIEW;
+import static com.sun.tools.javac.main.Option.SAFE_PREVIEW;
 
 /**
  * Helper class to handle preview language features. This class maps certain language features
@@ -58,8 +59,11 @@ import static com.sun.tools.javac.main.Option.PREVIEW;
  */
 public class Preview {
 
-    /** flag: are preview features enabled */
+    /** flag: are (all) preview features enabled */
     private final boolean enabled;
+
+    /** flag: are (safe) preview features enabled */
+    private final boolean safeEnabled;
 
     /** the diag handler to manage preview feature usage diagnostics */
     private final MandatoryWarningHandler previewHandler;
@@ -88,6 +92,7 @@ public class Preview {
         context.put(previewKey, this);
         Options options = Options.instance(context);
         enabled = options.isSet(PREVIEW);
+        safeEnabled = options.isSet(SAFE_PREVIEW);
         log = Log.instance(context);
         lint = Lint.instance(context);
         this.previewHandler =
@@ -125,7 +130,7 @@ public class Preview {
      * @param feature the preview feature used.
      */
     public void warnPreview(DiagnosticPosition pos, Feature feature) {
-        Assert.check(isEnabled());
+        Assert.check(isEnabled(feature));
         Assert.check(isPreview(feature));
         if (!lint.isSuppressed(LintCategory.PREVIEW)) {
             previewHandler.report(pos, feature.isPlural() ?
@@ -140,7 +145,7 @@ public class Preview {
      * @param majorVersion the major version found in the classfile.
      */
     public void warnPreview(JavaFileObject classfile, int majorVersion) {
-        Assert.check(isEnabled());
+        Assert.check(isEnabledUnconditionally());
         if (!lint.isSuppressed(LintCategory.PREVIEW)) {
             previewHandler.report(null,
                     Warnings.PreviewFeatureUseClassfile(classfile, majorVersionToSource.get(majorVersion).name));
@@ -155,7 +160,23 @@ public class Preview {
      * Are preview features enabled?
      * @return true, if preview features are enabled.
      */
-    public boolean isEnabled() {
+    public boolean isEnabled(Feature feature) {
+        if (enabled) {
+            return true;
+        }
+        if (isSafe(feature)) {
+            return safeEnabled;
+        }
+        return false;
+    }
+
+    public boolean isSafe(Feature feature) {
+        return feature == Feature.PATTERN_MATCHING_IN_INSTANCEOF ||
+               feature == Feature.REIFIABLE_TYPES_INSTANCEOF ||
+               feature == Feature.TEXT_BLOCKS;
+    }
+
+    public boolean isEnabledUnconditionally() {
         return enabled;
     }
 
@@ -183,7 +204,12 @@ public class Preview {
      * @return the diagnostic.
      */
     public Error disabledError(Feature feature) {
-        Assert.check(!isEnabled());
+        Assert.check(!isEnabled(feature));
+        if (isSafe(feature)) {
+            return feature.isPlural() ?
+                    Errors.PreviewFeatureDisabledPluralSafe(feature.nameFragment()) :
+                    Errors.PreviewFeatureDisabledSafe(feature.nameFragment());
+        }
         return feature.isPlural() ?
                 Errors.PreviewFeatureDisabledPlural(feature.nameFragment()) :
                 Errors.PreviewFeatureDisabled(feature.nameFragment());
@@ -196,7 +222,7 @@ public class Preview {
      * @param majorVersion the major version found in the classfile.
      */
     public Error disabledError(JavaFileObject classfile, int majorVersion) {
-        Assert.check(!isEnabled());
+        Assert.check(!isEnabledUnconditionally());
         return Errors.PreviewFeatureDisabledClassfile(classfile, majorVersionToSource.get(majorVersion).name);
     }
 
