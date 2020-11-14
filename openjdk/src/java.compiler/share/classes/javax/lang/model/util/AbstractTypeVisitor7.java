@@ -57,7 +57,7 @@ public abstract class AbstractTypeVisitor7<R, P> extends AbstractTypeVisitor6<R,
      * @deprecated Release 7 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="12")
+    @Deprecated(/*since="12"*/)
     protected AbstractTypeVisitor7() {
         super();  // Superclass constructor deprecated too
     }

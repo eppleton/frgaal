@@ -35,6 +35,7 @@ import com.sun.source.tree.ModuleTree.ModuleKind;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Source.Feature;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.parser.Tokens.*;
 import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
 import com.sun.tools.javac.resources.CompilerProperties.Errors;
@@ -96,6 +97,7 @@ public class JavacParser implements Parser {
 
     /** The Source language setting. */
     private Source source;
+    private Target target;
 
     /** The Preview language setting. */
     private Preview preview;
@@ -174,6 +176,7 @@ public class JavacParser implements Parser {
         this.log = fac.log;
         this.names = fac.names;
         this.source = fac.source;
+        this.target = fac.target;
         this.preview = fac.preview;
         this.allowStringFolding = fac.options.getBoolean("allowStringFolding", true);
         this.keepDocComments = keepDocComments;
@@ -183,11 +186,11 @@ public class JavacParser implements Parser {
         this.errorTree = F.Erroneous();
         endPosTable = newEndPosTable(keepEndPositions);
         this.allowYieldStatement = (!preview.isPreview(Feature.SWITCH_EXPRESSION) || preview.isEnabled()) &&
-                Feature.SWITCH_EXPRESSION.allowedInSource(source);
+                Feature.SWITCH_EXPRESSION.allowedInSource(source, target);
         this.allowRecords = (!preview.isPreview(Feature.RECORDS) || preview.isEnabled()) &&
-                Feature.RECORDS.allowedInSource(source);
+                Feature.RECORDS.allowedInSource(source, target);
         this.allowSealedTypes = (!preview.isPreview(Feature.SEALED_CLASSES) || preview.isEnabled()) &&
-                Feature.SEALED_CLASSES.allowedInSource(source);
+                Feature.SEALED_CLASSES.allowedInSource(source, target);
     }
 
     protected AbstractEndPosTable newEndPosTable(boolean keepEndPositions) {
@@ -593,7 +596,7 @@ public class JavacParser implements Parser {
                 return names.error;
             }
         } else if (token.kind == UNDERSCORE) {
-            if (Feature.UNDERSCORE_IDENTIFIER.allowedInSource(source)) {
+            if (Feature.UNDERSCORE_IDENTIFIER.allowedInSource(source, target)) {
                 log.warning(token.pos, Warnings.UnderscoreAsIdentifier);
             } else {
                 log.error(DiagnosticFlag.SYNTAX, token.pos, Errors.UnderscoreAsIdentifier);
@@ -1805,7 +1808,7 @@ public class JavacParser implements Parser {
                         (restrictedTypeName = restrictedTypeName(param.vartype, false)) != null &&
                         param.vartype.hasTag(TYPEARRAY)) {
                     log.error(DiagnosticFlag.SYNTAX, param.pos,
-                        Feature.VAR_SYNTAX_IMPLICIT_LAMBDAS.allowedInSource(source)
+                        Feature.VAR_SYNTAX_IMPLICIT_LAMBDAS.allowedInSource(source, target)
                             ? Errors.RestrictedTypeNotAllowedArray(restrictedTypeName) : Errors.RestrictedTypeNotAllowedHere(restrictedTypeName));
                 }
                 lambdaClassifier.addParameter(param);
@@ -1876,7 +1879,7 @@ public class JavacParser implements Parser {
                 kind = LambdaParameterKind.ERROR;
                 boolean varIndex = currentKind.index == LambdaParameterKind.VAR.index ||
                         newKind.index == LambdaParameterKind.VAR.index;
-                diagFragment = Feature.VAR_SYNTAX_IMPLICIT_LAMBDAS.allowedInSource(source) || !varIndex ?
+                diagFragment = Feature.VAR_SYNTAX_IMPLICIT_LAMBDAS.allowedInSource(source, target) || !varIndex ?
                         decisionTable[currentKind.index][newKind.index] : null;
             }
         }
@@ -3333,7 +3336,7 @@ public class JavacParser implements Parser {
 
     Source restrictedTypeNameStartingAtSource(Name name, int pos, boolean shouldWarn) {
         if (name == names.var) {
-            if (Feature.LOCAL_VARIABLE_TYPE_INFERENCE.allowedInSource(source)) {
+            if (Feature.LOCAL_VARIABLE_TYPE_INFERENCE.allowedInSource(source, target)) {
                 return Source.JDK10;
             } else if (shouldWarn) {
                 log.warning(pos, Warnings.RestrictedTypeNotAllowed(name, Source.JDK10));
@@ -4735,7 +4738,7 @@ public class JavacParser implements Parser {
         if (preview.isPreview(feature) && !preview.isEnabled()) {
             //preview feature without --preview flag, error
             log.error(DiagnosticFlag.SOURCE_LEVEL, pos, preview.disabledError(feature));
-        } else if (!feature.allowedInSource(source)) {
+        } else if (!feature.allowedInSource(source, target)) {
             //incompatible source level, error
             log.error(DiagnosticFlag.SOURCE_LEVEL, pos, feature.error(source.name));
         } else if (preview.isPreview(feature)) {

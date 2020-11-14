@@ -78,7 +78,7 @@ public abstract class AbstractTypeVisitor6<R, P> implements TypeVisitor<R, P> {
      * @deprecated Release 6 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     protected AbstractTypeVisitor6() {}
 
     /**

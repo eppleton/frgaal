@@ -89,7 +89,7 @@ public class ElementFilter {
 
     @SuppressWarnings("preview")
     private static final Set<ElementKind> RECORD_COMPONENT_KIND =
-        Set.of(ElementKind.RECORD_COMPONENT);
+        Collections.singleton(ElementKind.RECORD_COMPONENT);
 
     /**
      * Returns a list of fields in {@code elements}.
@@ -124,8 +124,8 @@ public class ElementFilter {
      * @param elements the elements to filter
      * @since 14
      */
-    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
-                                 essentialAPI=false)
+//    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
+//                                 essentialAPI=false)
     @SuppressWarnings("preview")
     public static List<RecordComponentElement>
         recordComponentsIn(Iterable<? extends Element> elements) {
@@ -145,8 +145,8 @@ public class ElementFilter {
      * @param elements the elements to filter
      * @since 14
      */
-    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
-                                 essentialAPI=false)
+//    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
+//                                 essentialAPI=false)
     @SuppressWarnings("preview")
     public static Set<RecordComponentElement>
     recordComponentsIn(Set<? extends Element> elements) {

@@ -274,6 +274,7 @@ public class JavaCompiler {
     /** The language version.
      */
     protected Source source;
+    protected Target target;
 
     /** The preview language version.
      */
@@ -409,6 +410,7 @@ public class JavaCompiler {
             log.error(Errors.CantAccess(ex.sym, ex.getDetailValue()));
         }
         source = Source.instance(context);
+        target = Target.instance(context);
         preview = Preview.instance(context);
         attr = Attr.instance(context);
         analyzer = Analyzer.instance(context);
@@ -693,7 +695,7 @@ public class JavaCompiler {
         if (sep == -1) {
             msym = modules.getDefaultModule();
             typeName = name;
-        } else if (Feature.MODULES.allowedInSource(source)) {
+        } else if (Feature.MODULES.allowedInSource(source, target)) {
             Name modName = names.fromString(name.substring(0, sep));
 
             msym = moduleFinder.findModule(modName);
@@ -1562,7 +1564,7 @@ public class JavaCompiler {
             env.tree = TransPatterns.instance(context).translateTopLevelClass(env, env.tree, localMake);
             compileStates.put(env, CompileState.TRANSPATTERNS);
 
-            if (Feature.LAMBDA.allowedInSource(source) && scanner.hasLambdas) {
+            if (Feature.LAMBDA.allowedInSource(source, target) && scanner.hasLambdas) {
                 if (shouldStop(CompileState.UNLAMBDA))
                     return;
 

@@ -56,6 +56,7 @@ import static com.sun.tools.javac.code.Scope.LookupKind.NON_RECURSIVE;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.CLASS;
 import static com.sun.tools.javac.code.TypeTag.ERROR;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.resources.CompilerProperties.Fragments;
 
 import static com.sun.tools.javac.code.TypeTag.*;
@@ -142,8 +143,9 @@ public class TypeEnter implements Completer {
         typeEnvs = TypeEnvs.instance(context);
         dependencies = Dependencies.instance(context);
         Source source = Source.instance(context);
-        allowTypeAnnos = Feature.TYPE_ANNOTATIONS.allowedInSource(source);
-        allowDeprecationOnImport = Feature.DEPRECATION_ON_IMPORT.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowTypeAnnos = Feature.TYPE_ANNOTATIONS.allowedInSource(source, target);
+        allowDeprecationOnImport = Feature.DEPRECATION_ON_IMPORT.allowedInSource(source, target);
     }
 
     /** Switch: support type annotations.

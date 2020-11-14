@@ -89,7 +89,7 @@ public class TypeKindVisitor6<R, P> extends SimpleTypeVisitor6<R, P> {
      * @deprecated Release 6 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     protected TypeKindVisitor6() {
         super(null);
     }
@@ -103,7 +103,7 @@ public class TypeKindVisitor6<R, P> extends SimpleTypeVisitor6<R, P> {
      * @deprecated Release 6 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     protected TypeKindVisitor6(R defaultValue) {
         super(defaultValue);
     }

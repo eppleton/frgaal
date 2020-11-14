@@ -25,6 +25,7 @@
 
 package javax.lang.model.element;
 
+import java.util.Collections;
 import java.util.List;
 import javax.lang.model.type.*;
 import javax.lang.model.util.*;
@@ -197,11 +198,11 @@ public interface TypeElement extends Element, Parameterizable, QualifiedNameable
      *
      * @since 14
      */
-    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
-                                 essentialAPI=false)
+//    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
+//                                 essentialAPI=false)
     @SuppressWarnings("preview")
     default List<? extends RecordComponentElement> getRecordComponents() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     /**
@@ -221,10 +222,10 @@ public interface TypeElement extends Element, Parameterizable, QualifiedNameable
      *
      * @since 15
      */
-    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.SEALED_CLASSES,
-                                 essentialAPI=false)
+//    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.SEALED_CLASSES,
+//                                 essentialAPI=false)
     default List<? extends TypeMirror> getPermittedSubclasses() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     /**
