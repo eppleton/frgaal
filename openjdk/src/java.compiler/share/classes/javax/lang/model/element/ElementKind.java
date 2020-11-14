@@ -120,8 +120,8 @@ public enum ElementKind {
      * A record type.
      * @since 14
      */
-    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
-                                 essentialAPI=false)
+//    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
+//                                 essentialAPI=false)
     RECORD,
 
     /**
@@ -135,8 +135,8 @@ public enum ElementKind {
      * A record component of a {@code record}.
      * @since 14
      */
-    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
-                                 essentialAPI=false)
+//    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
+//                                 essentialAPI=false)
     RECORD_COMPONENT,
 
     /**
@@ -152,8 +152,8 @@ public enum ElementKind {
      * A binding variable in a pattern .
      * @since 14
      */
-    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.PATTERN_MATCHING_IN_INSTANCEOF,
-                                 essentialAPI=false)
+//    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.PATTERN_MATCHING_IN_INSTANCEOF,
+//                                 essentialAPI=false)
     BINDING_VARIABLE;
 
     /**

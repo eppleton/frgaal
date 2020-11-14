@@ -30,6 +30,7 @@ import com.sun.tools.javac.code.Lint.LintCategory;
 import com.sun.tools.javac.code.Preview;
 import com.sun.tools.javac.code.Source;
 import com.sun.tools.javac.code.Source.Feature;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
 import com.sun.tools.javac.resources.CompilerProperties.Errors;
 import com.sun.tools.javac.resources.CompilerProperties.Warnings;
@@ -60,6 +61,7 @@ public class JavaTokenizer {
     /** The source language setting.
      */
     private Source source;
+    private Target target;
 
     /** The preview language setting. */
     private Preview preview;
@@ -139,6 +141,7 @@ public class JavaTokenizer {
         this.log = fac.log;
         this.tokens = fac.tokens;
         this.source = fac.source;
+        this.target = fac.target;
         this.preview = fac.preview;
         this.reader = reader;
         this.lint = fac.lint;
@@ -148,7 +151,7 @@ public class JavaTokenizer {
         if (preview.isPreview(feature) && !preview.isEnabled()) {
             //preview feature without --preview flag, error
             lexError(DiagnosticFlag.SOURCE_LEVEL, pos, preview.disabledError(feature));
-        } else if (!feature.allowedInSource(source)) {
+        } else if (!feature.allowedInSource(source, target)) {
             //incompatible source level, error
             lexError(DiagnosticFlag.SOURCE_LEVEL, pos, feature.error(source.name));
         } else if (preview.isPreview(feature)) {
@@ -272,7 +275,7 @@ public class JavaTokenizer {
          */
         private static Method getStringMethodOrNull(String name) {
             try {
-                return String.class.getMethod(name);
+                return JavaTokenizerStringShims.class.getMethod(name, String.class);
             } catch (Exception ex) {
                 // Method not available, return null.
             }
@@ -296,7 +299,7 @@ public class JavaTokenizer {
         /** Return the leading whitespace count (indentation) of the line.
          */
         private static int indent(String line) {
-            return line.length() - line.stripLeading().length();
+            return line.length() - JavaTokenizerStringShims.stripLeading(line).length();
         }
 
         enum WhitespaceChecks {
@@ -328,7 +331,7 @@ public class JavaTokenizer {
                 outdent = indent(lastLine);
                 for (String line : lines) {
                     // Blanks lines have no influence (last line accounted for.)
-                    if (!line.isBlank()) {
+                    if (!JavaTokenizerStringShims.isBlank(line)) {
                         outdent = Integer.min(outdent, indent(line));
                         if (outdent == 0) {
                             break;
@@ -340,7 +343,7 @@ public class JavaTokenizer {
             String start = lastLine.substring(0, outdent);
             for (String line : lines) {
                 // Fail if a line does not have the same indentation.
-                if (!line.isBlank() && !line.startsWith(start)) {
+                if (!JavaTokenizerStringShims.isBlank(line) && !line.startsWith(start)) {
                     // Mix of different white space
                     checks.add(WhitespaceChecks.INCONSISTENT);
                 }
@@ -361,7 +364,7 @@ public class JavaTokenizer {
          */
         static String stripIndent(String string) {
             try {
-                string = (String)stripIndent.invoke(string);
+                string = (String)stripIndent.invoke(null, string);
             } catch (InvocationTargetException | IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             }
@@ -372,7 +375,7 @@ public class JavaTokenizer {
          */
         static String translateEscapes(String string) {
             try {
-                string = (String)translateEscapes.invoke(string);
+                string = (String)translateEscapes.invoke(null, string);
             } catch (InvocationTargetException | IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             }

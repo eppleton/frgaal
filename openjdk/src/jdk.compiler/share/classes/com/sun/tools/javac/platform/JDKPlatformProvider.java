@@ -67,9 +67,13 @@ import com.sun.tools.javac.code.Source.Feature;
 import com.sun.tools.javac.file.CacheFSInfo;
 import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.jvm.Target;
+import com.sun.tools.javac.main.Arguments;
+import com.sun.tools.javac.main.Arguments.CtSymRoot;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.StringUtils;
+import java.io.Closeable;
+import java.net.URISyntaxException;
 
 /** PlatformProvider for JDK N.
  *
@@ -111,15 +115,17 @@ public class JDKPlatformProvider implements PlatformProvider {
 
     static {
         SUPPORTED_JAVA_PLATFORM_VERSIONS = new TreeSet<>(NUMERICAL_COMPARATOR);
-        Path ctSymFile = findCtSym();
-        if (Files.exists(ctSymFile)) {
-            try (FileSystem fs = FileSystems.newFileSystem(ctSymFile, (ClassLoader)null);
+        {
+            try (CtSymRoot ctSymRoot = Arguments.ctSymRoot();
                  DirectoryStream<Path> dir =
-                         Files.newDirectoryStream(fs.getRootDirectories().iterator().next())) {
+                         Files.newDirectoryStream(ctSymRoot.root)) {
                 for (Path section : dir) {
                     if (section.getFileName().toString().contains("-"))
                         continue;
                     for (char ver : section.getFileName().toString().toCharArray()) {
+                        if (ver == '/') {
+                            continue;
+                        }
                         String verString = Character.toString(ver);
                         Target t = Target.lookup("" + Integer.parseInt(verString, 16));
 
@@ -128,7 +134,7 @@ public class JDKPlatformProvider implements PlatformProvider {
                         }
                     }
                 }
-            } catch (IOException | ProviderNotFoundException ex) {
+            } catch (IOException | ProviderNotFoundException | URISyntaxException ex) {
             }
         }
     }
@@ -139,7 +145,7 @@ public class JDKPlatformProvider implements PlatformProvider {
 
     static class PlatformDescriptionImpl implements PlatformDescription {
 
-        private final Map<Path, FileSystem> ctSym2FileSystem = new HashMap<>();
+        private final List<Closeable> closeables = new ArrayList<>();
         private final String sourceVersion;
         private final String ctSymVersion;
 
@@ -246,18 +252,13 @@ public class JDKPlatformProvider implements PlatformProvider {
 
             };
 
-            Path file = findCtSym();
-            // file == ${jdk.home}/lib/ct.sym
-            if (Files.exists(file)) {
+            {
                 try {
-                    FileSystem fs = ctSym2FileSystem.get(file);
-                    if (fs == null) {
-                        ctSym2FileSystem.put(file, fs = FileSystems.newFileSystem(file, (ClassLoader)null));
-                    }
-
-                    Path root = fs.getRootDirectories().iterator().next();
+                    CtSymRoot ctSymRoot = Arguments.ctSymRoot();
+                    closeables.add(ctSymRoot);
+                    Path root = ctSymRoot.root;
                     boolean hasModules =
-                            Feature.MODULES.allowedInSource(Source.lookup(sourceVersion));
+                            Feature.MODULES.allowedInSource(Source.lookup(sourceVersion), Target.lookup(sourceVersion));
                     Path systemModules = root.resolve(ctSymVersion).resolve("system-modules");
                     Charset utf8 = Charset.forName("UTF-8");
 
@@ -299,7 +300,10 @@ public class JDKPlatformProvider implements PlatformProvider {
                                     !section.getFileName().toString().contains("-")) {
                                     try (DirectoryStream<Path> modules = Files.newDirectoryStream(section)) {
                                         for (Path module : modules) {
-                                            module2Paths.computeIfAbsent(module.getFileName().toString(), dummy -> new ArrayList<>()).add(module);
+                                            String moduleName = module.getFileName().toString();
+                                            if (moduleName.endsWith("/"))
+                                                moduleName = moduleName.substring(0, moduleName.length() - 1);
+                                            module2Paths.computeIfAbsent(moduleName, dummy -> new ArrayList<>()).add(module);
                                         }
                                     }
                                 }
@@ -316,11 +320,9 @@ public class JDKPlatformProvider implements PlatformProvider {
                     }
 
                     return fm;
-                } catch (IOException ex) {
+                } catch (IOException | URISyntaxException ex) {
                     throw new IllegalStateException(ex);
                 }
-            } else {
-                throw new IllegalStateException("Cannot find ct.sym!");
             }
         }
 
@@ -382,21 +384,12 @@ public class JDKPlatformProvider implements PlatformProvider {
 
         @Override
         public void close() throws IOException {
-            for (FileSystem fs : ctSym2FileSystem.values()) {
+            for (Closeable fs : closeables) {
                 fs.close();
             }
-            ctSym2FileSystem.clear();
+            closeables.clear();
         }
 
-    }
-
-    static Path findCtSym() {
-        String javaHome = System.getProperty("java.home");
-        Path file = Paths.get(javaHome);
-        // file == ${jdk.home}
-        for (String name : symbolFileLocation)
-            file = file.resolve(name);
-        return file;
     }
 
 }

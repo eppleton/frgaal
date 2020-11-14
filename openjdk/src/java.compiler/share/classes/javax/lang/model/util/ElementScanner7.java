@@ -82,7 +82,7 @@ public class ElementScanner7<R, P> extends ElementScanner6<R, P> {
      * @deprecated Release 7 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="12")
+    @Deprecated(/*since="12"*/)
     protected ElementScanner7(){
         super(null); // Superclass constructor deprecated too
     }
@@ -96,7 +96,7 @@ public class ElementScanner7<R, P> extends ElementScanner6<R, P> {
      * @deprecated Release 7 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="12")
+    @Deprecated(/*since="12"*/)
     protected ElementScanner7(R defaultValue){
         super(defaultValue); // Superclass constructor deprecated too
     }

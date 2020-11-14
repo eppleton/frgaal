@@ -92,7 +92,7 @@ public class ElementKindVisitor6<R, P>
      * @deprecated Release 6 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     protected ElementKindVisitor6() {
         super(null);
     }
@@ -105,7 +105,7 @@ public class ElementKindVisitor6<R, P>
      * @deprecated Release 6 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     protected ElementKindVisitor6(R defaultValue) {
         super(defaultValue);
     }
@@ -234,8 +234,8 @@ public class ElementKindVisitor6<R, P>
      *
      * @since 14
      */
-    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
-                                 essentialAPI=false)
+//    @jdk.internal.PreviewFeature(feature=jdk.internal.PreviewFeature.Feature.RECORDS,
+//                                 essentialAPI=false)
     public R visitTypeAsRecord(TypeElement e, P p) {
         return visitUnknown(e, p);
     }
