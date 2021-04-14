@@ -65,7 +65,7 @@ See "Preview Features" section below for more details.
 Usage with Maven
 ----------------
 
-To use this compiler, specify following in your pom.xml file build section:
+To use this compiler, specify following in your `pom.xml file build section:
 
 ```xml
 <build>
@@ -93,6 +93,47 @@ To use this compiler, specify following in your pom.xml file build section:
         </plugin>
     </plugins>
 </build>
+```
+
+With such a change the compiler of your project no longer depends on the
+used JDK. All the compiler code is downloaded from Maven central and it can
+run on anything from JDK8 up. If you want to update your compiler to
+get a bugfix or to use latest language feature, you can change <version>
+to some newer version. However, until you do that, no matter what
+breaking changes appear in the JDK, your project is still going to compile
+into exactly the same `.class` files.
+
+Usage with Gradle
+-----------------
+
+To use this compiler, specify following in your `build.gradle` file:
+
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.frgaal:compiler-gradle-plugin:15.0.0"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.frgaal.compiler'
+
+repositories {
+    mavenCentral()
+}
+
+targetCompatibility = '1.8'
+sourceCompatibility = '15'
+
+compileJava {
+    options.compilerArgs << '-Xlint:deprecation' << '--enable-preview'
+}
+compileTestJava {
+    options.compilerArgs << '-Xlint:deprecation' << '--enable-preview'
+}
 ```
 
 With such a change the compiler of your project no longer depends on the
