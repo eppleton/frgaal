@@ -104,9 +104,54 @@ to some newer version. However, until you do that, no matter what
 breaking changes appear in the JDK, your project is still going to compile
 into exactly the same `.class` files.
 
+Usage with Gradle DSL style
+-----------------
+
+You need gradle 6.8.x to be able to use this compiler.
+To use this compiler, specify following in your `build.gradle` file:
+
+```groovy
+plugins {
+    id 'java'
+    id 'org.frgaal.compiler'
+}
+
+targetCompatibility = '1.8'
+sourceCompatibility = '15'
+
+compileJava {
+    options.compilerArgs << '-Xlint:deprecation' << '--enable-preview'
+}
+
+compileTestJava {
+    options.compilerArgs << '-Xlint:deprecation' << '--enable-preview'
+}
+```
+
+To be able to resolve the frgaal compiler plugin you need to specifiy the following in your `settings.gradle` file, at the top:
+
+```groovy
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == 'org.frgaal') {
+                useModule('org.frgaal:compiler-gradle-plugin:15.0.0')
+            }
+        }
+    }
+    repositories {
+        maven {
+            url 'https://mvnrepository.com/artifact/org.frgaal'
+        }
+        gradlePluginPortal()
+    }
+}
+```
+
 Usage with Gradle
 -----------------
 
+You need gradle 6.8.x to be able to use this compiler.
 To use this compiler, specify following in your `build.gradle` file:
 
 ```groovy
