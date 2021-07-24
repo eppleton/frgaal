@@ -135,7 +135,7 @@ pluginManagement {
     resolutionStrategy {
         eachPlugin {
             if (requested.id.namespace == 'org.frgaal') {
-                useModule('org.frgaal:compiler-gradle-plugin:15.0.0')
+                useModule('org.frgaal:compiler-gradle-plugin:<Version>')
             }
         }
     }
@@ -160,7 +160,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.frgaal:compiler-gradle-plugin:15.0.0"
+        classpath "org.frgaal:compiler-gradle-plugin:<Version>"
     }
 }
 
