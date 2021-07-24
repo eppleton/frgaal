@@ -148,7 +148,6 @@ into exactly the same `.class` files.
 Usage on command line
 ---------------------
 
-
 To use the frgaal compiler, run it as follows:
 
 ```bash
@@ -161,7 +160,7 @@ Preview Features
 ----------------
 
 Frgaal compiler supports _preview features_ of the Java language. Certain
-_preview features_ can be used with `--target 1.8`. Namely:
+_preview features_ can be used with `-target 1.8`. Namely:
 
 * `instanceof Type variableName`
 
@@ -206,9 +205,9 @@ Caveats
 
 The current caveats include:
 
- * module-info.java cannot be compiled with `--target 8`
- * the records preview feature, introduced in Java 14, can only be used with `--target 15`
- * the sealed classes preview feature, introduced in Java 15, can only be used with `--target 15`
+ * module-info.java cannot be compiled with `-target 8`
+ * the records preview feature, introduced in Java 14, can only be used with `-target 15`
+ * the sealed classes preview feature, introduced in Java 15, can only be used with `-target 15`
 
 Building
 --------
