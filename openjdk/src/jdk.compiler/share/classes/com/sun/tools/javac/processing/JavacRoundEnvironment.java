@@ -67,7 +67,7 @@ public class JavacRoundEnvironment implements RoundEnvironment {
         this.errorRaised = errorRaised;
         this.rootElements = rootElements;
         this.processingEnv = processingEnv;
-        this.allowModules = Feature.MODULES.allowedInSource(processingEnv.source);
+        this.allowModules = Feature.MODULES.allowedInSource(processingEnv.source, processingEnv.target);
         this.eltUtils = processingEnv.getElementUtils();
     }
 
@@ -272,7 +272,7 @@ public class JavacRoundEnvironment implements RoundEnvironment {
         if (annotationElement != null)
             return annotationElement;
         else if (allowModules) {
-            String moduleName = Objects.requireNonNullElse(annotation.getModule().getName(), "");
+            String moduleName = "";//XXX: Objects.requireNonNullElse(annotation.getModule().getName(), "");
             return eltUtils.getTypeElement(eltUtils.getModuleElement(moduleName), name);
         } else {
             return null;

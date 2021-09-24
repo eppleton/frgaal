@@ -185,13 +185,13 @@ public class HtmlConfiguration extends BaseConfiguration {
         messages = new Messages(this, msgResources);
         options = new HtmlOptions(this);
 
-        Runtime.Version v;
-        try {
+        Versions.Version v;
+//        try {
             v = Versions.javadocVersion();
-        } catch (RuntimeException e) {
-            assert false : e;
-            v = Runtime.version(); // arguably, the only sensible default
-        }
+//        } catch (RuntimeException e) {
+//            assert false : e;
+//            v = Runtime.version(); // arguably, the only sensible default
+//        }
         docletVersion = v;
 
         conditionalPages = EnumSet.noneOf(ConditionalPage.class);
@@ -202,11 +202,11 @@ public class HtmlConfiguration extends BaseConfiguration {
         contents = new Contents(this);
     }
 
-    private final Runtime.Version docletVersion;
+    private final Versions.Version docletVersion;
     public final Date startTime = new Date();
 
     @Override
-    public Runtime.Version getDocletVersion() {
+    public Versions.Version getDocletVersion() {
         return docletVersion;
     }
 

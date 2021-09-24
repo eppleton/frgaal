@@ -70,6 +70,7 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
 import static com.sun.tools.javac.code.TypeTag.*;
+import com.sun.tools.javac.jvm.Target;
 
 /** Helper class for type parameter inference, used by the attribution phase.
  *
@@ -119,7 +120,8 @@ public class Infer {
         log = Log.instance(context);
         Options options = Options.instance(context);
         Source source = Source.instance(context);
-        allowGraphInference = Feature.GRAPH_INFERENCE.allowedInSource(source)
+        Target target = Target.instance(context);
+        allowGraphInference = Feature.GRAPH_INFERENCE.allowedInSource(source, target)
                 && options.isUnset("useLegacyInference");
         dependenciesFolder = options.get("debug.dumpInferenceGraphsTo");
         pendingGraphs = List.nil();

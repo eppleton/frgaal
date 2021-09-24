@@ -52,6 +52,7 @@ import static com.sun.tools.javac.code.Flags.BLOCK;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.BOOLEAN;
 import static com.sun.tools.javac.code.TypeTag.VOID;
+import com.sun.tools.javac.jvm.Target;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 
 /** This pass implements dataflow analysis for Java programs though
@@ -328,7 +329,8 @@ public class Flow {
         rs = Resolve.instance(context);
         diags = JCDiagnostic.Factory.instance(context);
         Source source = Source.instance(context);
-        allowEffectivelyFinalInInnerClasses = Feature.EFFECTIVELY_FINAL_IN_INNER_CLASSES.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowEffectivelyFinalInInnerClasses = Feature.EFFECTIVELY_FINAL_IN_INNER_CLASSES.allowedInSource(source, target);
     }
 
     /**

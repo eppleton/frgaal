@@ -153,6 +153,8 @@ public class ClassReader {
      */
     Preview preview;
 
+    ExtraSymbolInfo esi;
+
     /** The current scope where type variables are entered.
      */
     protected WriteableScope typevars;
@@ -270,11 +272,12 @@ public class ClassReader {
         verbose         = options.isSet(Option.VERBOSE);
 
         Source source = Source.instance(context);
+        Target target = Target.instance(context);
         preview = Preview.instance(context);
-        allowModules     = Feature.MODULES.allowedInSource(source);
-        allowRecords = Feature.RECORDS.allowedInSource(source);
+        allowModules     = Feature.MODULES.allowedInSource(source, target);
+        allowRecords = Feature.RECORDS.allowedInSource(source, target);
         allowSealedTypes = (!preview.isPreview(Feature.SEALED_CLASSES) || preview.isEnabled()) &&
-                Feature.SEALED_CLASSES.allowedInSource(source);
+                Feature.SEALED_CLASSES.allowedInSource(source, target);
 
         saveParameterNames = options.isSet(PARAMETERS);
 
@@ -285,6 +288,8 @@ public class ClassReader {
         lintClassfile = Lint.instance(context).isEnabled(LintCategory.CLASSFILE);
 
         initAttributeReaders();
+
+        esi = ExtraSymbolInfo.instance(context);
     }
 
     /** Add member to class unless it is synthetic.
@@ -1440,6 +1445,24 @@ public class ClassReader {
             } else if (proxy.type.tsym.flatName() == syms.previewFeatureInternalType.tsym.flatName()) {
                 sym.flags_field |= PREVIEW_API;
                 setFlagIfAttributeTrue(proxy, sym, names.essentialAPI, PREVIEW_ESSENTIAL_API);
+            } else if (proxy.type.tsym.flatName() == syms.frgaalFutureRemoveAnnotationType.tsym.flatName()) {
+                for (Pair<Name, Attribute> v : proxy.values) {
+                    if (v.fst == names.value && v.snd instanceof Attribute.Constant) {
+                        Attribute.Constant c = (Attribute.Constant)v.snd;
+                        if (c.type == syms.intType) {
+                            esi.symbolRemovedInRelease(sym, (Integer)c.value);
+                        }
+                    }
+                }
+            } else if (proxy.type.tsym.flatName() == syms.frgaalFutureDeprecatedAnnotationType.tsym.flatName()) {
+                for (Pair<Name, Attribute> v : proxy.values) {
+                    if (v.fst == names.value && v.snd instanceof Attribute.Constant) {
+                        Attribute.Constant c = (Attribute.Constant)v.snd;
+                        if (c.type == syms.intType) {
+                            esi.symbolDeprecatedInRelease(sym, (Integer)c.value);
+                        }
+                    }
+                }
             } else {
                 if (proxy.type.tsym == syms.annotationTargetType.tsym) {
                     target = proxy;

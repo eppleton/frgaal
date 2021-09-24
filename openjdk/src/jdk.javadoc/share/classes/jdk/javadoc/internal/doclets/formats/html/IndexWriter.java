@@ -53,6 +53,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexItem;
+import org.frgaal.CollectionShims;
 
 /**
  * Generator for either a single index or split index for all
@@ -90,7 +91,7 @@ public class IndexWriter extends HtmlDocletWriter {
                 Character ch = iter.next();
                 DocPath file = DocPaths.INDEX_FILES.resolve(DocPaths.indexN(iter.nextIndex()));
                 IndexWriter writer = new IndexWriter(configuration, file);
-                writer.generateIndexFile(firstCharacters, List.of(ch));
+                writer.generateIndexFile(firstCharacters, CollectionShims.list(ch));
             }
         } else {
             IndexWriter writer = new IndexWriter(configuration, DocPaths.INDEX_ALL);

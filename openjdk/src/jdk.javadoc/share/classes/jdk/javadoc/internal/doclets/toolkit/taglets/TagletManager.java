@@ -80,6 +80,7 @@ import static com.sun.source.doctree.DocTree.Kind.THROWS;
 import static com.sun.source.doctree.DocTree.Kind.USES;
 import static com.sun.source.doctree.DocTree.Kind.VERSION;
 import static javax.tools.DocumentationTool.Location.TAGLET_PATH;
+import org.frgaal.StringShims;
 
 /**
  * Manages the {@code Taglet}s used by doclets.
@@ -750,6 +751,6 @@ public class TagletManager {
     }
 
     private String format(boolean b, String s) {
-        return b ? s : ".".repeat(s.length()); // "replace" all with "."
+        return b ? s : StringShims.repeat(".", s.length()); // "replace" all with "."
     }
 }

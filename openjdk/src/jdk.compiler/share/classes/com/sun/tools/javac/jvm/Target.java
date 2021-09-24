@@ -92,7 +92,7 @@ public enum Target {
             Options options = Options.instance(context);
             String targetString = options.get(TARGET);
             if (targetString != null) instance = lookup(targetString);
-            if (instance == null) instance = DEFAULT;
+            if (instance == null) instance = FRGAAL_DEFAULT;
             context.put(targetKey, instance);
         }
         return instance;
@@ -125,6 +125,7 @@ public enum Target {
     }
 
     public static final Target DEFAULT = values()[values().length - 1];
+    public static final Target FRGAAL_DEFAULT = JDK1_8;
 
     public static Target lookup(String name) {
         return tab.get(name);

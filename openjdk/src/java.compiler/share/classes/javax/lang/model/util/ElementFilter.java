@@ -89,7 +89,7 @@ public class ElementFilter {
 
     @SuppressWarnings("preview")
     private static final Set<ElementKind> RECORD_COMPONENT_KIND =
-        Set.of(ElementKind.RECORD_COMPONENT);
+        Collections.singleton(ElementKind.RECORD_COMPONENT);
 
     /**
      * {@return a list of fields in {@code elements}}

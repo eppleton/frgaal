@@ -77,7 +77,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardJavaFileManager.PathFactory;
 import javax.tools.StandardLocation;
 
-import jdk.internal.jmod.JmodFile;
+//import jdk.internal.jmod.JmodFile;
 
 import com.sun.tools.javac.code.Lint;
 import com.sun.tools.javac.code.Lint.LintCategory;
@@ -771,7 +771,7 @@ public class Locations {
 
             // If invoked via a java VM (not the javac launcher), use the
             // platform class path
-            if (cp == null && System.getProperty("application.home") == null) {
+            if (cp == null && System.getProperty("application.home") == null && System.getProperty("frgaal.disable.java.class.path") == null) {
                 cp = System.getProperty("java.class.path");
             }
 
@@ -1457,7 +1457,7 @@ public class Locations {
                 if (p.getFileName().toString().endsWith(".jmod")) {
                     try {
                         // check if the JMOD file is valid
-                        JmodFile.checkMagic(p);
+//                        JmodFile.checkMagic(p);
 
                         // No JMOD file system.  Use JarFileSystem to
                         // workaround for now
@@ -1968,7 +1968,7 @@ public class Locations {
                                     Collections.singletonMap("java.home", systemJavaHome.toString());
                             jrtfs = FileSystems.newFileSystem(jrtURI, attrMap);
                         } catch (ProviderNotFoundException ex) {
-                            URL javaHomeURL = systemJavaHome.resolve("jrt-fs.jar").toUri().toURL();
+                            URL javaHomeURL = systemJavaHome.resolve("lib/jrt-fs.jar").toUri().toURL();
                             ClassLoader currentLoader = Locations.class.getClassLoader();
                             URLClassLoader fsLoader =
                                     new URLClassLoader(new URL[] {javaHomeURL}, currentLoader);

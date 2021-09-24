@@ -63,6 +63,7 @@ import com.sun.tools.javac.code.Symbol.ModuleSymbol;
 import com.sun.tools.javac.code.Symbol.PackageSymbol;
 import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.comp.Modules;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.main.JavaCompiler;
 import com.sun.tools.javac.tree.JCTree.JCClassDecl;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
@@ -213,6 +214,7 @@ public class ElementsTable {
         this.messager = Messager.instance0(context);
         this.compiler = JavaCompiler.instance(context);
         Source source = Source.instance(context);
+        Target target = Target.instance(context);
 
         List<Location> locs = new ArrayList<>();
         if (modules.multiModuleMode) {
@@ -223,7 +225,7 @@ public class ElementsTable {
             else
                 locs.add(StandardLocation.CLASS_PATH);
         }
-        if (Feature.MODULES.allowedInSource(source) && toolEnv.fileManager.hasLocation(StandardLocation.PATCH_MODULE_PATH))
+        if (Feature.MODULES.allowedInSource(source, target) && toolEnv.fileManager.hasLocation(StandardLocation.PATCH_MODULE_PATH))
             locs.add(StandardLocation.PATCH_MODULE_PATH);
         this.locations = Collections.unmodifiableList(locs);
 

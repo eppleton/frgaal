@@ -28,6 +28,7 @@ import static javax.lang.model.element.Modifier.NATIVE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STRICTFP;
 import static javax.lang.model.element.Modifier.SYNCHRONIZED;
+import org.frgaal.StringShims;
 
 public class Signatures {
 
@@ -430,7 +431,7 @@ public class Signatures {
 
             // Exceptions
             if (exceptions != null && !exceptions.isEmpty()) {
-                CharSequence indent = " ".repeat(Math.max(0, indentSize + 1 - 7));
+                CharSequence indent = StringShims.repeat(" ", Math.max(0, indentSize + 1 - 7));
                 htmlTree.add(DocletConstants.NL)
                         .add(indent)
                         .add("throws ")

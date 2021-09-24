@@ -69,6 +69,7 @@ import com.sun.tools.javac.util.Names;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.*;
+import com.sun.tools.javac.jvm.Target;
 
 /** A class that defines all predefined constants and operators
  *  as well as special classes such as java.lang.Object, which need
@@ -220,6 +221,8 @@ public class Symtab {
     public final Type previewFeatureInternalType;
     public final Type typeDescriptorType;
     public final Type recordType;
+    public final Type frgaalFutureRemoveAnnotationType;
+    public final Type frgaalFutureDeprecatedAnnotationType;
     public final Type valueBasedType;
 
     /** The symbol representing the length field of an array.
@@ -504,7 +507,7 @@ public class Symtab {
         scope.enter(errSymbol);
 
         Source source = Source.instance(context);
-        if (Feature.MODULES.allowedInSource(source)) {
+        if (Feature.MODULES.allowedInSource(source, target)) {
             java_base = enterModule(names.java_base);
             //avoid completing java.base during the Symtab initialization
             java_base.completer = Completer.NULL_COMPLETER;
@@ -585,6 +588,8 @@ public class Symtab {
         previewFeatureInternalType = enterSyntheticAnnotation("jdk.internal.PreviewFeature+Annotation");
         typeDescriptorType = enterClass("java.lang.invoke.TypeDescriptor");
         recordType = enterClass("java.lang.Record");
+        frgaalFutureRemoveAnnotationType = enterClass("frgaal.internal.Future+Removed+Annotation");
+        frgaalFutureDeprecatedAnnotationType = enterClass("frgaal.internal.Future+Deprecated+Annotation");
         valueBasedType = enterClass("jdk.internal.ValueBased");
 
         synthesizeEmptyInterfaceIfMissing(autoCloseableType);

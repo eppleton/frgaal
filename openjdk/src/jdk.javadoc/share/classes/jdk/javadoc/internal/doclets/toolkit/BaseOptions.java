@@ -46,6 +46,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocletConstants;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
+import org.frgaal.CollectionShims;
 
 /**
  * Storage for the format-independent options supported by the toolkit.
@@ -287,7 +288,7 @@ public abstract class BaseOptions {
         Messages messages = config.getMessages();
         Reporter reporter = config.getReporter();
 
-        List<Option> options = List.of(
+        List<Option> options = CollectionShims.list(
                 new Option(resources, "-author") {
                     @Override
                     public boolean process(String opt, List<String> args) {

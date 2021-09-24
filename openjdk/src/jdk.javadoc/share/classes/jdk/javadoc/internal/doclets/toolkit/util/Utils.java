@@ -129,6 +129,7 @@ import static javax.lang.model.type.TypeKind.*;
 
 import static com.sun.source.doctree.DocTree.Kind.*;
 import static jdk.javadoc.internal.doclets.toolkit.builders.ConstantsSummaryBuilder.MAX_CONSTANT_VALUE_INDEX_LENGTH;
+import org.frgaal.StringShims;
 
 /**
  * Utilities Class for Doclets.
@@ -1430,7 +1431,7 @@ public class Utils {
             return text;
 
         final int tabLength = options.sourceTabSize();
-        final String whitespace = " ".repeat(tabLength);
+        final String whitespace = StringShims.repeat(" ", tabLength);
         final int textLength = text.length();
         StringBuilder result = new StringBuilder(textLength);
         int pos = 0;

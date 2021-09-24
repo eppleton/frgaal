@@ -38,6 +38,7 @@ import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
+import org.frgaal.CollectionShims;
 
 
 /**
@@ -312,7 +313,7 @@ public class HelpWriter extends HtmlDocletWriter {
 
     private HtmlTree newHelpSectionList(Content first, Content... rest) {
         HtmlTree list = HtmlTree.UL(HtmlStyle.helpSectionList, HtmlTree.LI(first));
-        List.of(rest).forEach(i -> list.add(HtmlTree.LI(i)));
+        CollectionShims.list(rest).forEach(i -> list.add(HtmlTree.LI(i)));
         return list;
     }
 }

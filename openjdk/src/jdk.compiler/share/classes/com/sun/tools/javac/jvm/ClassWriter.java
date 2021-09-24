@@ -1632,7 +1632,7 @@ public class ClassWriter extends ClassFile {
         acount += writeExtraAttributes(c);
 
         poolbuf.appendInt(JAVA_MAGIC);
-        if (preview.isEnabled()) {
+        if (preview.isEnabled() && target == Target.DEFAULT) {
             poolbuf.appendChar(ClassFile.PREVIEW_MINOR_VERSION);
         } else {
             poolbuf.appendChar(target.minorVersion);

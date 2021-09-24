@@ -248,11 +248,11 @@ public class BasicJavacTask extends JavacTask {
     }
 
     private void initPlugin(Plugin p, String... args) {
-        Module m = p.getClass().getModule();
-        if (m.isNamed() && options.isSet("accessInternalAPI")) {
-            ModuleHelper.addExports(getClass().getModule(), m);
-        }
-        p.init(this, args);
+//        Module m = p.getClass().getModule();
+//        if (m.isNamed() && options.isSet("accessInternalAPI")) {
+//            ModuleHelper.addExports(getClass().getModule(), m);
+//        }
+//        p.init(this, args);
     }
 
     public void initDocLint(List<String> docLintOpts) {

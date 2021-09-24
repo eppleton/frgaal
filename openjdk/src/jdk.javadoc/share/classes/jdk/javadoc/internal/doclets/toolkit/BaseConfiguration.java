@@ -63,6 +63,7 @@ import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 import jdk.javadoc.doclet.StandardDoclet;
 import jdk.javadoc.doclet.Taglet;
+import jdk.javadoc.internal.Versions;
 import jdk.javadoc.internal.doclets.toolkit.builders.BuilderFactory;
 import jdk.javadoc.internal.doclets.toolkit.taglets.TagletManager;
 import jdk.javadoc.internal.doclets.toolkit.util.Comparators;
@@ -174,7 +175,7 @@ public abstract class BaseConfiguration {
      *
      * @return the version
      */
-    public abstract Runtime.Version getDocletVersion();
+    public abstract Versions.Version getDocletVersion();
 
     /**
      * This method should be defined in all those doclets (configurations),
@@ -395,8 +396,8 @@ public abstract class BaseConfiguration {
 
         PackageElement unnamedPackage;
         Elements elementUtils = utils.elementUtils;
-        if (docEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_9) >= 0) {
-            ModuleElement unnamedModule = elementUtils.getModuleElement("");
+        ModuleElement unnamedModule = elementUtils.getModuleElement("");
+        if (unnamedModule != null) {
             unnamedPackage = elementUtils.getPackageElement(unnamedModule, "");
         } else {
             unnamedPackage = elementUtils.getPackageElement("");
