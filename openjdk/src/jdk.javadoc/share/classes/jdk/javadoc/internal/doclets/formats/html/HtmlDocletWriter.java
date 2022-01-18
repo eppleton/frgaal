@@ -120,6 +120,8 @@ import static com.sun.source.doctree.DocTree.Kind.LINK_PLAIN;
 import static com.sun.source.doctree.DocTree.Kind.SEE;
 import static com.sun.source.doctree.DocTree.Kind.TEXT;
 import static jdk.javadoc.internal.doclets.toolkit.util.CommentHelper.SPACER;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 
 /**
@@ -1029,8 +1031,9 @@ public class HtmlDocletWriter {
                 commentTagsToContent(see, element, label, context));
 
         // The signature from the @see tag. We will output this text when a label is not specified.
+        String sig = ch.getReferencedSignature(see);
         Content text = plainOrCode(isLinkPlain,
-                Text.of(Objects.requireNonNullElse(ch.getReferencedSignature(see), "")));
+                Text.of(sig != null ? sig : ""));
 
         TypeElement refClass = ch.getReferencedClass(see);
         Element refMem =       ch.getReferencedMember(see);
@@ -1600,11 +1603,11 @@ public class HtmlDocletWriter {
                 private CharSequence textCleanup(String text, boolean isLast, boolean stripLeading) {
                     boolean stripTrailing = context.isFirstSentence && isLast;
                     if (stripLeading && stripTrailing) {
-                        text = text.strip();
+                        text = StringShims.strip(text);
                     } else if (stripLeading) {
-                        text = text.stripLeading();
+                        text = StringShims.stripLeading(text);
                     } else if (stripTrailing) {
-                        text = text.stripTrailing();
+                        text = StringShims.stripTrailing(text);
                     }
                     text = utils.replaceTabs(text);
                     return utils.normalizeNewlines(text);
@@ -2034,7 +2037,7 @@ public class HtmlDocletWriter {
             }
             @Override
             public Content visitAnnotation(AnnotationMirror a, Void p) {
-                List<Content> list = getAnnotations(List.of(a), false);
+                List<Content> list = getAnnotations(CollectionShims.list(a), false);
                 ContentBuilder buf = new ContentBuilder();
                 for (Content c : list) {
                     buf.add(c);

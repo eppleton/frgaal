@@ -25,6 +25,7 @@
 
 package jdk.javadoc.internal.doclets.formats.html;
 
+import com.sun.tools.javac.file.FSInfo;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -338,8 +339,8 @@ public class HtmlDoclet extends AbstractDoclet {
         String legalNotices = configuration.getOptions().legalNotices();
         switch (legalNotices) {
             case "", "default" -> {
-                Path javaHome = Path.of(System.getProperty("java.home"));
-                legalNoticesDir = javaHome.resolve("legal").resolve(getClass().getModule().getName());
+                Path javaHome = FSInfo.of(System.getProperty("java.home"));
+                legalNoticesDir = javaHome.resolve("legal").resolve("jdk.javadoc"/*getClass().getModule().getName()*/);
             }
 
             case "none" -> {
@@ -348,7 +349,7 @@ public class HtmlDoclet extends AbstractDoclet {
 
             default -> {
                 try {
-                    legalNoticesDir = Path.of(legalNotices);
+                    legalNoticesDir = FSInfo.of(legalNotices);
                 } catch (InvalidPathException e) {
                     messages.error("doclet.Error_invalid_path_for_legal_notices",
                             legalNotices, e.getMessage());

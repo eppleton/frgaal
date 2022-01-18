@@ -129,6 +129,8 @@ import static javax.lang.model.type.TypeKind.*;
 
 import static com.sun.source.doctree.DocTree.Kind.*;
 import static jdk.javadoc.internal.doclets.toolkit.builders.ConstantsSummaryBuilder.MAX_CONSTANT_VALUE_INDEX_LENGTH;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 /**
  * Utilities Class for Doclets.
@@ -1341,7 +1343,7 @@ public class Utils {
             return text;
 
         final int tabLength = options.sourceTabSize();
-        final String whitespace = " ".repeat(tabLength);
+        final String whitespace = StringShims.repeat(" ", tabLength);
         final int textLength = text.length();
         StringBuilder result = new StringBuilder(textLength);
         int pos = 0;
@@ -2001,21 +2003,21 @@ public class Utils {
     public List<TypeElement> getOrdinaryClasses(Element e) {
         return getClasses(e).stream()
                 .filter(te -> (!isException(te) && !isError(te)))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<TypeElement> getErrors(Element e) {
         return getClasses(e)
                 .stream()
                 .filter(this::isError)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<TypeElement> getExceptions(Element e) {
         return getClasses(e)
                 .stream()
                 .filter(this::isException)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -2104,7 +2106,7 @@ public class Utils {
         return e.getEnclosedElements().stream()
                 .filter(e_ -> select.test(e_) && (all || shouldDocument(e_)))
                 .map(clazz::cast)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private SimpleElementVisitor14<Boolean, Void> shouldDocumentVisitor = null;
@@ -2540,7 +2542,7 @@ public class Utils {
         return getBlockTags(element).stream()
                 .filter(t -> t.getKind() != ERRONEOUS)
                 .filter(filter)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public <T extends DocTree> List<? extends T> getBlockTags(Element element, Predicate<DocTree> filter, Class<T> tClass) {
@@ -2548,7 +2550,7 @@ public class Utils {
                 .filter(t -> t.getKind() != ERRONEOUS)
                 .filter(filter)
                 .map(tClass::cast)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<? extends DocTree> getBlockTags(Element element, DocTree.Kind kind) {
@@ -2927,7 +2929,7 @@ public class Utils {
     }
 
     public enum DeclarationPreviewLanguageFeatures {
-        NONE(List.of(""));
+        NONE(CollectionShims.list(""));
         public final List<String> features;
 
         DeclarationPreviewLanguageFeatures(List<String> features) {
@@ -2944,25 +2946,25 @@ public class Utils {
                 for (TypeParameterElement tpe : te.getTypeParameters()) {
                     usedInDeclaration.addAll(types2Classes(tpe.getBounds()));
                 }
-                usedInDeclaration.addAll(types2Classes(List.of(te.getSuperclass())));
+                usedInDeclaration.addAll(types2Classes(CollectionShims.list(te.getSuperclass())));
                 usedInDeclaration.addAll(types2Classes(te.getInterfaces()));
                 usedInDeclaration.addAll(types2Classes(te.getPermittedSubclasses()));
-                usedInDeclaration.addAll(types2Classes(te.getRecordComponents().stream().map(Element::asType).toList())); //TODO: annotations on record components???
+                usedInDeclaration.addAll(types2Classes(te.getRecordComponents().stream().map(Element::asType).collect(Collectors.toList()))); //TODO: annotations on record components???
             }
             case CONSTRUCTOR, METHOD -> {
                 ExecutableElement ee = (ExecutableElement) el;
                 for (TypeParameterElement tpe : ee.getTypeParameters()) {
                     usedInDeclaration.addAll(types2Classes(tpe.getBounds()));
                 }
-                usedInDeclaration.addAll(types2Classes(List.of(ee.getReturnType())));
-                usedInDeclaration.addAll(types2Classes(List.of(ee.getReceiverType())));
+                usedInDeclaration.addAll(types2Classes(CollectionShims.list(ee.getReturnType())));
+                usedInDeclaration.addAll(types2Classes(CollectionShims.list(ee.getReceiverType())));
                 usedInDeclaration.addAll(types2Classes(ee.getThrownTypes()));
-                usedInDeclaration.addAll(types2Classes(ee.getParameters().stream().map(VariableElement::asType).toList()));
+                usedInDeclaration.addAll(types2Classes(ee.getParameters().stream().map(VariableElement::asType).collect(Collectors.toList())));
                 usedInDeclaration.addAll(annotationValue2Classes(ee.getDefaultValue()));
             }
             case FIELD, ENUM_CONSTANT, RECORD_COMPONENT -> {
                 VariableElement ve = (VariableElement) el;
-                usedInDeclaration.addAll(types2Classes(List.of(ve.asType())));
+                usedInDeclaration.addAll(types2Classes(CollectionShims.list(ve.asType())));
             }
             case MODULE, PACKAGE -> {
             }
@@ -3024,7 +3026,7 @@ public class Utils {
     private Collection<TypeElement> annotation2Classes(AnnotationMirror am) {
         List<TypeElement> result = new ArrayList<>();
 
-        result.addAll(types2Classes(List.of(am.getAnnotationType())));
+        result.addAll(types2Classes(CollectionShims.list(am.getAnnotationType())));
         am.getElementValues()
           .values()
           .stream()
@@ -3036,7 +3038,7 @@ public class Utils {
 
     private Collection<TypeElement> annotationValue2Classes(AnnotationValue value) {
         if (value == null) {
-            return List.of();
+            return CollectionShims.list();
         }
 
         List<TypeElement> result = new ArrayList<>();
@@ -3056,7 +3058,7 @@ public class Utils {
 
             @Override
             public Object visitType(TypeMirror t, Object p) {
-                result.addAll(types2Classes(List.of(t)));
+                result.addAll(types2Classes(CollectionShims.list(t)));
                 return super.visitType(t, p);
             }
 

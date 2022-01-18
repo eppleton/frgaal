@@ -38,6 +38,7 @@ import com.sun.tools.javac.file.PathFileObject;
 import com.sun.tools.javac.tree.JCTree.*;
 
 import static com.sun.tools.javac.api.DiagnosticFormatter.PositionKind.*;
+import org.frgaal.CollectionShims;
 
 /**
  * A raw formatter for diagnostic messages.
@@ -171,7 +172,7 @@ public final class RawDiagnosticFormatter extends AbstractDiagnosticFormatter {
         return (arg instanceof JCDiagnostic) ? "(" + s + ")" : s;
     }
     //where:
-        private static final Set<String> CODES_NEEDING_SOURCE_NORMALIZATION = Set.of(
+        private static final Set<String> CODES_NEEDING_SOURCE_NORMALIZATION = CollectionShims.set(
                 "compiler.note.preview.filename", "compiler.note.preview.plural");
 
     @Override

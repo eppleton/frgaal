@@ -39,6 +39,7 @@ import com.sun.source.doctree.DocTree;
 import com.sun.source.doctree.DocTree.Kind;
 import com.sun.source.doctree.SinceTree;
 import com.sun.source.doctree.UnknownBlockTagTree;
+import java.util.stream.Collectors;
 import jdk.javadoc.internal.doclets.toolkit.ClassWriter;
 import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.MemberSummaryWriter;
@@ -405,7 +406,7 @@ public abstract class MemberSummaryBuilder extends AbstractMemberBuilder {
 
             List<? extends Element> members = inheritedMembersFromMap.stream()
                     .filter(e -> utils.getEnclosingTypeElement(e) == inheritedClass)
-                    .toList();
+                    .collect(Collectors.toList());
 
             if (!members.isEmpty()) {
                 SortedSet<Element> inheritedMembers = new TreeSet<>(comparator);

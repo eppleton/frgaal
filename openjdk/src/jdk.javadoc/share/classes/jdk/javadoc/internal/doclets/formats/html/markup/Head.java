@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import jdk.javadoc.internal.Versions;
 import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
@@ -49,7 +50,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
  *  deletion without notice.</b>
  */
 public class Head extends Content {
-    private final Runtime.Version docletVersion;
+    private final Versions.Version docletVersion;
     private final Date generatedDate;
     private final DocPath pathToRoot;
     private String title;
@@ -76,7 +77,7 @@ public class Head extends Content {
      * @param path the path for the file that will include this HEAD element
      * @param docletVersion the doclet version
      */
-    public Head(DocPath path, Runtime.Version docletVersion, Date generatedDate) {
+    public Head(DocPath path, Versions.Version docletVersion, Date generatedDate) {
         this.docletVersion = docletVersion;
         this.generatedDate = generatedDate;
         pathToRoot = path.parent().invert();

@@ -259,10 +259,20 @@ public enum SourceVersion {
      * need to be updated accordingly.
      */
     private static SourceVersion getLatestSupported() {
-        int intVersion = Runtime.version().feature();
-        return (intVersion >= 11) ?
-            valueOf("RELEASE_" + Math.min(17, intVersion)):
-            RELEASE_10;
+        String runtimeSpecVersion = System.getProperty("java.specification.version");
+        if ("1.8".equals(runtimeSpecVersion)) {
+            runtimeSpecVersion = "8";
+        }
+//        int intVersion = Runtime.version().feature();
+//        return (intVersion >= 11) ?
+//            valueOf("RELEASE_" + Math.min(16, intVersion)):
+//            RELEASE_10;
+        try {
+            return valueOf("RELEASE_" + runtimeSpecVersion);
+        } catch (IllegalArgumentException ex) {
+            //presumably too new runtime:
+            return latest();
+        }
     }
 
     /**

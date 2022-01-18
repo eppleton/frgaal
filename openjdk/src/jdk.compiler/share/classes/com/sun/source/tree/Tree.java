@@ -25,7 +25,7 @@
 
 package com.sun.source.tree;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 /**
  * Common interface for all nodes in an abstract syntax tree.
@@ -233,7 +233,7 @@ public interface Tree {
          *
          * @since 17
          */
-        @PreviewFeature(feature=PreviewFeature.Feature.SWITCH_PATTERN_MATCHING, reflective=true)
+//        @PreviewFeature(feature=PreviewFeature.Feature.SWITCH_PATTERN_MATCHING, reflective=true)
         GUARDED_PATTERN(GuardedPatternTree.class),
 
         /**
@@ -241,7 +241,7 @@ public interface Tree {
          *
          * @since 17
          */
-        @PreviewFeature(feature=PreviewFeature.Feature.SWITCH_PATTERN_MATCHING, reflective=true)
+//        @PreviewFeature(feature=PreviewFeature.Feature.SWITCH_PATTERN_MATCHING, reflective=true)
         PARENTHESIZED_PATTERN(ParenthesizedPatternTree.class),
 
         /**
@@ -249,7 +249,7 @@ public interface Tree {
          *
          * @since 17
          */
-        @PreviewFeature(feature=PreviewFeature.Feature.SWITCH_PATTERN_MATCHING, reflective=true)
+//        @PreviewFeature(feature=PreviewFeature.Feature.SWITCH_PATTERN_MATCHING, reflective=true)
         DEFAULT_CASE_LABEL(DefaultCaseLabelTree.class),
 
         /**

@@ -56,9 +56,11 @@ import static com.sun.tools.javac.code.Scope.LookupKind.NON_RECURSIVE;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.CLASS;
 import static com.sun.tools.javac.code.TypeTag.ERROR;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.resources.CompilerProperties.Fragments;
 
 import static com.sun.tools.javac.code.TypeTag.*;
+import com.sun.tools.javac.main.JavaCompiler;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 
 import com.sun.tools.javac.util.Dependencies.CompletionCause;
@@ -114,6 +116,7 @@ public class TypeEnter implements Completer {
     private final Lint lint;
     private final TypeEnvs typeEnvs;
     private final Dependencies dependencies;
+    private final JavaCompiler javaCompiler;
     private final Preview preview;
 
     public static TypeEnter instance(Context context) {
@@ -142,10 +145,13 @@ public class TypeEnter implements Completer {
         lint = Lint.instance(context);
         typeEnvs = TypeEnvs.instance(context);
         dependencies = Dependencies.instance(context);
+        javaCompiler = JavaCompiler.instance(context);
         preview = Preview.instance(context);
         Source source = Source.instance(context);
-        allowTypeAnnos = Feature.TYPE_ANNOTATIONS.allowedInSource(source);
-        allowDeprecationOnImport = Feature.DEPRECATION_ON_IMPORT.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowTypeAnnos = Feature.TYPE_ANNOTATIONS.allowedInSource(source, target);
+        allowDeprecationOnImport = Feature.DEPRECATION_ON_IMPORT.allowedInSource(source, target);
+        hasRecordRuntime = target.hasRecordRuntime();
     }
 
     /** Switch: support type annotations.
@@ -156,6 +162,8 @@ public class TypeEnter implements Completer {
      * Switch: should deprecation warnings be issued on import
      */
     boolean allowDeprecationOnImport;
+
+    boolean hasRecordRuntime;
 
     /** A flag to disable completion from time to time during member
      *  enter, as we only need to look up types.  This avoids
@@ -694,7 +702,7 @@ public class TypeEnter implements Completer {
                                   true, false, false)
                 : (sym.fullname == names.java_lang_Object)
                 ? Type.noType
-                : sym.isRecord() ? syms.recordType : syms.objectType;
+                : getImplicitSuperClass(env.toplevel.sourcefile, sym);
             }
             ct.supertype_field = modelMissingTypes(baseEnv, supertype, extending, false);
 
@@ -744,6 +752,18 @@ public class TypeEnter implements Completer {
             //where:
             protected JCExpression clearTypeParams(JCExpression superType) {
                 return superType;
+            }
+            private Type getImplicitSuperClass(JavaFileObject source, ClassSymbol forClass) {
+                if (forClass.isRecord()) {
+                    if (hasRecordRuntime) {
+                        return syms.recordType;
+                    } else {
+                        javaCompiler.recompileForVersion(source, Target.JDK1_16);
+                        return syms.objectType;
+                    }
+                } else {
+                    return syms.objectType;
+                }
             }
     }
 

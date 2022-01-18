@@ -89,6 +89,7 @@ import com.sun.tools.javac.util.JCDiagnostic.Error;
 import jdk.internal.misc.VM;
 
 import static javax.tools.JavaFileObject.Kind.SOURCE;
+import org.frgaal.CollectionShims;
 
 /**
  * Compiles a source file, and executes the main method it contains.
@@ -297,7 +298,7 @@ public class Main {
             if (source == null) {
                 throw new Fault(Errors.InvalidValueForSource(sourceOpt));
             }
-            javacOpts.addAll(List.of("--release", sourceOpt));
+            javacOpts.addAll(CollectionShims.list("--release", sourceOpt));
         }
 
         for (int i = 0; i < runtimeArgs.length; i++) {
@@ -378,7 +379,7 @@ public class Main {
             throw new java.lang.Error("unexpected exception from file manager", e);
         }
         JavaFileManager fm = context.getFileManager(stdFileMgr);
-        JavacTask t = javaCompiler.getTask(out, fm, null, javacOpts, null, List.of(fo));
+        JavacTask t = javaCompiler.getTask(out, fm, null, javacOpts, null, CollectionShims.list(fo));
         MainClassListener l = new MainClassListener(t);
         Boolean ok = t.call();
         if (!ok) {
