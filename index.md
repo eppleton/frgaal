@@ -198,15 +198,29 @@ $ jdk1.8.0/bin/java -jar compiler.jar -source 15 -target 11 Code.java
 To disable this behavior use `-bootclasspath`, `-Xbootclasspath` or `-system`
 and specify the desired target platform API. Or use `-XDignore.symbol.file`
 to disable this behavior and use runtime platform APIs.
-
+    
 Caveats
 -------
 
 The current caveats include:
 
  * module-info.java cannot be compiled with `--target 8`
- * the records preview feature, introduced in Java 14, can only be used with `--target 15`
- * the sealed classes preview feature, introduced in Java 15, can only be used with `--target 15`
+ * the sealed classes preview feature, introduced in Java 15, can only be used with `--target 16`
+
+### Record Classes
+
+The record classes depend on a number of runtime features, and are impossible to
+fully support for older versions of the platform. frgaal will allow to compile
+record classes with the following caveats:
+
+ * `Serializable` record classes are only supported with `--target 16` and later.
+ * for targets below 16, the super class of the record class is `java.lang.Object`,
+   and the support for record classes in the standard libraries is missing.
+   Some serialization libraries may not recognize the class as a record class.
+ * the frgaal compiler will produce a separate class file of the record class under
+   `META-INF/versions/16`, which will have the proper superclass and other runtime
+   support. If the classfiles are packed into a jar marked as a multi-release jar,
+   the runtime may be able to use the JDK 16 version with the better runtime support.
 
 Building
 --------
