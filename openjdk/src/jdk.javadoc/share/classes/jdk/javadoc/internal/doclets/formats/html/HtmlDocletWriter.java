@@ -119,6 +119,8 @@ import static com.sun.source.doctree.DocTree.Kind.LINK_PLAIN;
 import static com.sun.source.doctree.DocTree.Kind.SEE;
 import static com.sun.source.doctree.DocTree.Kind.TEXT;
 import static jdk.javadoc.internal.doclets.toolkit.util.CommentHelper.SPACER;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 
 /**
@@ -405,7 +407,7 @@ public class HtmlDocletWriter {
                                   String description,
                                   Content body)
             throws DocFileIOException {
-        printHtmlDocument(metakeywords, description, new ContentBuilder(), List.of(), body);
+        printHtmlDocument(metakeywords, description, new ContentBuilder(), CollectionShims.list(), body);
     }
 
     /**
@@ -1029,8 +1031,9 @@ public class HtmlDocletWriter {
                 commentTagsToContent(element, label, context));
 
         // The signature from the @see tag. We will output this text when a label is not specified.
+        String sig = ch.getReferencedSignature(see);
         Content text = plainOrCode(isLinkPlain,
-                Text.of(Objects.requireNonNullElse(ch.getReferencedSignature(see), "")));
+                Text.of(sig != null ? sig : ""));
 
         TypeElement refClass = ch.getReferencedClass(see);
         Element refMem =       ch.getReferencedMember(see);
@@ -1501,7 +1504,7 @@ public class HtmlDocletWriter {
                 // Ignore any trailing whitespace OR whitespace after removed html comment
                 if ((isLastNode || commentRemoved)
                         && tag.getKind() == TEXT
-                        && ch.getText(tag).isBlank())
+                        && StringShims.isBlank(ch.getText(tag)))
                     continue;
 
                 // Ignore any leading html comments
@@ -1717,11 +1720,11 @@ public class HtmlDocletWriter {
                 private CharSequence textCleanup(String text, boolean isLast, boolean stripLeading) {
                     boolean stripTrailing = context.isFirstSentence && isLast;
                     if (stripLeading && stripTrailing) {
-                        text = text.strip();
+                        text = StringShims.strip(text);
                     } else if (stripLeading) {
-                        text = text.stripLeading();
+                        text = StringShims.stripLeading(text);
                     } else if (stripTrailing) {
-                        text = text.stripTrailing();
+                        text = StringShims.stripTrailing(text);
                     }
                     text = utils.replaceTabs(text);
                     return utils.normalizeNewlines(text);
@@ -1788,7 +1791,7 @@ public class HtmlDocletWriter {
      * @return the output
      */
     protected Content invalidTagOutput(String summary, Optional<Content> detail) {
-        if (detail.isEmpty() || detail.get().isEmpty()) {
+        if (!detail.isPresent() || detail.get().isEmpty()) {
             return HtmlTree.SPAN(HtmlStyle.invalidTag, Text.of(summary));
         }
         return HtmlTree.DETAILS(HtmlStyle.invalidTag)
@@ -2168,7 +2171,7 @@ public class HtmlDocletWriter {
             }
             @Override
             public Content visitAnnotation(AnnotationMirror a, Void p) {
-                List<Content> list = getAnnotations(List.of(a), false);
+                List<Content> list = getAnnotations(CollectionShims.list(a), false);
                 ContentBuilder buf = new ContentBuilder();
                 for (Content c : list) {
                     buf.add(c);

@@ -25,6 +25,7 @@
 
 package javax.tools;
 
+import com.sun.tools.javac.api.JavacTool;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Objects;
@@ -59,8 +60,7 @@ public class ToolProvider {
      * and {@code null} otherwise.
      */
     public static JavaCompiler getSystemJavaCompiler() {
-        return getSystemTool(JavaCompiler.class,
-                systemJavaCompilerModule, systemJavaCompilerName);
+        return JavacTool.create();
     }
 
     private static final String systemDocumentationToolModule = "jdk.javadoc";
@@ -95,7 +95,7 @@ public class ToolProvider {
      * locate system tools as well as user-installed tools.
      * @return a class loader, or {@code null}
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     public static ClassLoader getSystemToolClassLoader() {
         return null;
     }
@@ -136,11 +136,12 @@ public class ToolProvider {
      */
     @SuppressWarnings("removal")
     private static <T> boolean matches(T tool, String moduleName) {
-        PrivilegedAction<Boolean> pa = () -> {
-            Module toolModule = tool.getClass().getModule();
-            String toolModuleName = toolModule.getName();
-            return Objects.equals(toolModuleName, moduleName);
-        };
-        return AccessController.doPrivileged(pa);
+//        PrivilegedAction<Boolean> pa = () -> {
+//            Module toolModule = tool.getClass().getModule();
+//            String toolModuleName = toolModule.getName();
+//            return Objects.equals(toolModuleName, moduleName);
+//        };
+//        return AccessController.doPrivileged(pa);
+        return true;
     }
 }

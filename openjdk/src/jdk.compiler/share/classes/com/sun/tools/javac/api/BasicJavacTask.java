@@ -204,7 +204,7 @@ public class BasicJavacTask extends JavacTask {
                 java.util.List<String> options =
                         pluginDesc.getOptions().entrySet().stream()
                                 .map(e -> e.getKey() + "=" + e.getValue())
-                                .toList();
+                                .collect(Collectors.toList());
                 try {
                     initPlugin(pluginDesc.getPlugin(), options.toArray(new String[options.size()]));
                 } catch (RuntimeException ex) {
@@ -248,11 +248,11 @@ public class BasicJavacTask extends JavacTask {
     }
 
     private void initPlugin(Plugin p, String... args) {
-        Module m = p.getClass().getModule();
-        if (m.isNamed() && options.isSet("accessInternalAPI")) {
-            ModuleHelper.addExports(getClass().getModule(), m);
-        }
-        p.init(this, args);
+//        Module m = p.getClass().getModule();
+//        if (m.isNamed() && options.isSet("accessInternalAPI")) {
+//            ModuleHelper.addExports(getClass().getModule(), m);
+//        }
+//        p.init(this, args);
     }
 
     public void initDocLint(List<String> docLintOpts) {

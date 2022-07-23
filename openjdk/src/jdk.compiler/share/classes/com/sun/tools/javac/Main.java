@@ -37,7 +37,7 @@ public class Main {
     /**
      * Do not call.
      */
-    @Deprecated(since="16", forRemoval=true)
+//    @Deprecated(since="16", forRemoval=true)
     public Main(){}
 
     /** Main entry point for the launcher.
@@ -59,6 +59,18 @@ public class Main {
      * javac, see the man page for details.
      */
     public static int compile(String[] args) {
+        return org.frgaal.Main.compile(args, null);
+    }
+
+    /** Programmatic interface to the Java Programming Language
+     * compiler, javac.
+     *
+     * @param args The command line arguments that would normally be
+     * passed to the javac program as described in the man page.
+     * @return an integer equivalent to the exit value from invoking
+     * javac, see the man page for details.
+     */
+    public static int compile2(String[] args) {
         com.sun.tools.javac.main.Main compiler =
             new com.sun.tools.javac.main.Main("javac");
         return compiler.compile(args).exitCode;
@@ -77,6 +89,20 @@ public class Main {
      * javac, see the man page for details.
      */
     public static int compile(String[] args, PrintWriter out) {
+        return org.frgaal.Main.compile(args, out);
+    }
+
+    /** Programmatic interface to the Java Programming Language
+     * compiler, javac.
+     *
+     * @param args The command line arguments that would normally be
+     * passed to the javac program as described in the man page.
+     * @param out PrintWriter to which the compiler's diagnostic
+     * output is directed.
+     * @return an integer equivalent to the exit value from invoking
+     * javac, see the man page for details.
+     */
+    public static int compile2(String[] args, PrintWriter out) {
         com.sun.tools.javac.main.Main compiler =
             new com.sun.tools.javac.main.Main("javac", out);
         return compiler.compile(args).exitCode;

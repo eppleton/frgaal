@@ -119,7 +119,7 @@ public abstract class OptionHelper {
     void traverse(String[] args) {
         Iterable<String> allArgs;
         try {
-            allArgs = CommandLine.parse(List.of(args)); // Detect @file and load it as a command line.
+            allArgs = CommandLine.parse(Arrays.asList(args)); // Detect @file and load it as a command line.
         } catch (java.io.IOException e) {
             throw new IllegalArgumentException("Problem reading @"+e.getMessage());
         }

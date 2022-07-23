@@ -40,6 +40,8 @@ import java.util.regex.PatternSyntaxException;
 
 import jdk.javadoc.internal.doclets.toolkit.Resources;
 import jdk.javadoc.internal.doclets.toolkit.taglets.SnippetTaglet;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 /*
  * Semantics of a EOL comment; plus
@@ -182,7 +184,7 @@ public final class Parser {
 
             thisLineTags.clear();
 
-            append(text, line.isBlank() && hasMarkup ? Set.of(new Style.Markup()) : Set.of(), line);
+            append(text, StringShims.isBlank(line) && hasMarkup ? CollectionShims.set(new Style.Markup()) : CollectionShims.set(), line);
             // TODO: mark up trailing whitespace!
             lineStart += line.length();
         }
@@ -258,7 +260,7 @@ public final class Parser {
                                     + t.markupLineOffset + t.nameLineOffset,
                                     "doclet.snippet.markup.attribute.absent", "region"));
                     String regionValue = region.value();
-                    if (regionValue.isBlank()) {
+                    if (StringShims.isBlank(regionValue)) {
                         throw newParseException(t.lineSourceOffset + t.markupLineOffset
                                 + region.valueStartPosition(), "doclet.snippet.markup.attribute.value.invalid");
                     }
@@ -305,7 +307,7 @@ public final class Parser {
         if (substring.isPresent()) {
             // this Pattern.compile *cannot* throw an exception
             pattern = Pattern.compile(Pattern.quote(substring.get().value()));
-        } else if (regex.isEmpty()) {
+        } else if (!regex.isPresent()) {
             // this Pattern.compile *should not* throw an exception
             pattern = Pattern.compile(defaultRegex);
         } else {
@@ -358,9 +360,9 @@ public final class Parser {
                 }
             }
         } else {
-            if (region.isEmpty() || region.get() instanceof Attribute.Valueless) {
+            if (!region.isPresent() || region.get() instanceof Attribute.Valueless) {
                 Optional<Tag> tag = regions.removeLast();
-                if (tag.isEmpty()) {
+                if (!tag.isPresent()) {
                     throw newParseException(t.lineSourceOffset + t.markupLineOffset
                             + t.nameLineOffset, "doclet.snippet.markup.region.none");
                 }
@@ -369,7 +371,7 @@ public final class Parser {
                 assert region.get() instanceof Attribute.Valued;
                 String name = ((Attribute.Valued) region.get()).value();
                 Optional<Tag> tag = regions.removeNamed(name);
-                if (tag.isEmpty()) {
+                if (!tag.isPresent()) {
                     throw newParseException(t.lineSourceOffset + t.markupLineOffset
                             + region.get().nameStartPosition(), "doclet.snippet.markup.region.unpaired", name);
                 }
@@ -445,7 +447,7 @@ public final class Parser {
         private final ArrayList<Map.Entry<Optional<String>, Tag>> tags = new ArrayList<>();
 
         void addAnonymous(Tag i) {
-            tags.add(Map.entry(Optional.empty(), i));
+            tags.add(CollectionShims.mapEntry(Optional.empty(), i));
         }
 
         boolean addNamed(String name, Tag i) {
@@ -454,7 +456,7 @@ public final class Parser {
             if (matches) {
                 return false; // won't add a duplicate
             }
-            tags.add(Map.entry(Optional.of(name), i));
+            tags.add(CollectionShims.mapEntry(Optional.of(name), i));
             return true;
         }
 

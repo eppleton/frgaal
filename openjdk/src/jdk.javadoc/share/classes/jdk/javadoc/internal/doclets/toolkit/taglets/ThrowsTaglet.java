@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -51,6 +52,7 @@ import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.CollectionShims;
 
 /**
  * A taglet that processes {@link ThrowsTree}, which represents
@@ -139,7 +141,7 @@ public class ThrowsTaglet extends BaseTaglet implements InheritableTaglet {
             }
             return map;
         }
-        return Map.of();
+        return CollectionShims.map();
     }
 
     /**
@@ -222,7 +224,7 @@ public class ThrowsTaglet extends BaseTaglet implements InheritableTaglet {
                 }
                 List<ThrowsTree> inheritedTags = inheritedDoc.tagList.stream()
                         .map(t -> (ThrowsTree) t)
-                        .toList();
+                        .collect(Collectors.toList());
                 declaredExceptionTags.put(inheritedTags, (ExecutableElement) inheritedDoc.holder);
             }
         }

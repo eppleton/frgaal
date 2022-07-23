@@ -194,7 +194,7 @@ public class Modules extends JCTree.Visitor {
         fileManager = context.get(JavaFileManager.class);
         source = Source.instance(context);
         target = Target.instance(context);
-        allowModules = Feature.MODULES.allowedInSource(source);
+        allowModules = Feature.MODULES.allowedInSource(source, target);
         Options options = Options.instance(context);
 
         allowAccessIntoSystem = options.isUnset(Option.RELEASE);

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jdk.javadoc.internal.doclets.formats.html.markup.ContentBuilder;
 import jdk.javadoc.internal.doclets.formats.html.markup.HtmlAttr;
@@ -66,7 +67,7 @@ public class TableHeader extends Content {
     public TableHeader(Contents contents, String... colHeaderKeys) {
         this.cellContents = Arrays.stream(colHeaderKeys)
                 .map(contents::getContent)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**

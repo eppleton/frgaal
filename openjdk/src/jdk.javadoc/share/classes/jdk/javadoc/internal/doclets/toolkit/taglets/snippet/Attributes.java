@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.frgaal.CollectionShims;
 
 /**
  * Convenient access to attributes.
@@ -56,7 +57,7 @@ public final class Attributes {
      * the Attribute.class type.
      */
     public <T extends Attribute> Optional<T> get(String name, Class<T> type) {
-        return attributes.getOrDefault(name, List.of())
+        return attributes.getOrDefault(name, CollectionShims.list())
                 .stream()
                 .filter(type::isInstance)
                 .map(type::cast)

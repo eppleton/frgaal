@@ -150,20 +150,20 @@ public class PubapiVisitor extends ElementScanner14<Void, Void> {
     private List<PubApiTypeParam> getTypeParameters(List<? extends TypeParameterElement> elements) {
         return elements.stream()
                        .map(e -> new PubApiTypeParam(e.getSimpleName().toString(), getTypeDescs(e.getBounds())))
-                       .toList();
+                       .collect(Collectors.toList());
     }
 
     private List<TypeMirror> getParamTypes(ExecutableElement e) {
         return e.getParameters()
                 .stream()
                 .map(VariableElement::asType)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private List<TypeDesc> getTypeDescs(List<? extends TypeMirror> list) {
         return list.stream()
                    .map(TypeDesc::fromType)
-                   .toList();
+                   .collect(Collectors.toList());
     }
 
     public PubApi getCollectedPubApi() {

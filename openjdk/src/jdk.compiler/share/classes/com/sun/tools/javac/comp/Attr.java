@@ -78,6 +78,7 @@ import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.*;
 import static com.sun.tools.javac.code.TypeTag.WILDCARD;
+import com.sun.tools.javac.main.JavaCompiler;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticFlag;
 
@@ -106,6 +107,7 @@ public class Attr extends JCTree.Visitor {
     final Analyzer analyzer;
     final DeferredAttr deferredAttr;
     final Check chk;
+    final ExtraSymbolInfo esi;
     final Flow flow;
     final MemberEnter memberEnter;
     final TypeEnter typeEnter;
@@ -124,6 +126,7 @@ public class Attr extends JCTree.Visitor {
     final ArgumentAttr argumentAttr;
     final MatchBindingsComputer matchBindingsComputer;
     final AttrRecover attrRecover;
+    final JavaCompiler javaCompiler;
 
     public static Attr instance(Context context) {
         Attr instance = context.get(attrKey);
@@ -141,6 +144,7 @@ public class Attr extends JCTree.Visitor {
         rs = Resolve.instance(context);
         operators = Operators.instance(context);
         chk = Check.instance(context);
+        esi = ExtraSymbolInfo.instance(context);
         flow = Flow.instance(context);
         memberEnter = MemberEnter.instance(context);
         typeEnter = TypeEnter.instance(context);
@@ -162,21 +166,24 @@ public class Attr extends JCTree.Visitor {
         argumentAttr = ArgumentAttr.instance(context);
         matchBindingsComputer = MatchBindingsComputer.instance(context);
         attrRecover = AttrRecover.instance(context);
+        javaCompiler = JavaCompiler.instance(context);
 
         Options options = Options.instance(context);
 
         Source source = Source.instance(context);
-        allowPoly = Feature.POLY.allowedInSource(source);
-        allowTypeAnnos = Feature.TYPE_ANNOTATIONS.allowedInSource(source);
-        allowLambda = Feature.LAMBDA.allowedInSource(source);
-        allowDefaultMethods = Feature.DEFAULT_METHODS.allowedInSource(source);
-        allowStaticInterfaceMethods = Feature.STATIC_INTERFACE_METHODS.allowedInSource(source);
-        allowReifiableTypesInInstanceof = Feature.REIFIABLE_TYPES_INSTANCEOF.allowedInSource(source);
-        allowRecords = Feature.RECORDS.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowPoly = Feature.POLY.allowedInSource(source, target);
+        allowTypeAnnos = Feature.TYPE_ANNOTATIONS.allowedInSource(source, target);
+        allowLambda = Feature.LAMBDA.allowedInSource(source, target);
+        allowDefaultMethods = Feature.DEFAULT_METHODS.allowedInSource(source, target);
+        allowStaticInterfaceMethods = Feature.STATIC_INTERFACE_METHODS.allowedInSource(source, target);
+        allowReifiableTypesInInstanceof = Feature.REIFIABLE_TYPES_INSTANCEOF.allowedInSource(source, target);
+        allowRecords = Feature.RECORDS.allowedInSource(source, target);
+        allowSerializableRecords = target.supportsSerializableRecords();
         allowPatternSwitch = (preview.isEnabled() || !preview.isPreview(Feature.PATTERN_SWITCH)) &&
-                             Feature.PATTERN_SWITCH.allowedInSource(source);
+                             Feature.PATTERN_SWITCH.allowedInSource(source, target);
         allowUnconditionalPatternsInstanceOf = (preview.isEnabled() || !preview.isPreview(Feature.UNCONDITIONAL_PATTERN_IN_INSTANCEOF)) &&
-                                     Feature.UNCONDITIONAL_PATTERN_IN_INSTANCEOF.allowedInSource(source);
+                                     Feature.UNCONDITIONAL_PATTERN_IN_INSTANCEOF.allowedInSource(source, target);
         sourceName = source.name;
         useBeforeDeclarationWarning = options.isSet("useBeforeDeclarationWarning");
 
@@ -216,6 +223,8 @@ public class Attr extends JCTree.Visitor {
     /** Are records allowed
      */
     private final boolean allowRecords;
+
+    private final boolean allowSerializableRecords;
 
     /** Are patterns in switch allowed
      */
@@ -4751,6 +4760,7 @@ public class Attr extends JCTree.Visitor {
                 chk.checkSunAPI(tree.pos(), sym);
                 chk.checkProfile(tree.pos(), sym);
                 chk.checkPreview(tree.pos(), env.info.scope.owner, sym);
+                esi.checkSymbolRemovedDeprecatedInFutureRelease(tree.pos(), sym);
             }
 
             // If symbol is a variable, check that its type and
@@ -5430,6 +5440,9 @@ public class Attr extends JCTree.Visitor {
                         }
                     }
                 }
+                if (!target.hasSealedClasses()) {
+                    javaCompiler.recompileForVersion(env.toplevel.sourcefile, Target.JDK1_17);
+                }
             }
 
             List<ClassSymbol> sealedSupers = types.directSupertypes(c.type)
@@ -5507,6 +5520,9 @@ public class Attr extends JCTree.Visitor {
 
                 if (rs.isSerializable(c.type)) {
                     env.info.isSerializable = true;
+                    if (c.isRecord() && !allowSerializableRecords) {
+                        log.error(env.tree.pos(), Errors.SerializableRecords);
+                    }
                 }
 
                 attribClassBody(env, c);

@@ -153,6 +153,8 @@ public class ClassReader {
      */
     Preview preview;
 
+    ExtraSymbolInfo esi;
+
     /** The current scope where type variables are entered.
      */
     protected WriteableScope typevars;
@@ -275,10 +277,11 @@ public class ClassReader {
         verbose         = options.isSet(Option.VERBOSE);
 
         Source source = Source.instance(context);
+        Target target = Target.instance(context);
         preview = Preview.instance(context);
-        allowModules     = Feature.MODULES.allowedInSource(source);
-        allowRecords = Feature.RECORDS.allowedInSource(source);
-        allowSealedTypes = Feature.SEALED_CLASSES.allowedInSource(source);
+        allowModules     = Feature.MODULES.allowedInSource(source, target);
+        allowRecords = Feature.RECORDS.allowedInSource(source, target);
+        allowSealedTypes = Feature.SEALED_CLASSES.allowedInSource(source, target);
 
         saveParameterNames = options.isSet(PARAMETERS);
 
@@ -289,6 +292,8 @@ public class ClassReader {
         lintClassfile = Lint.instance(context).isEnabled(LintCategory.CLASSFILE);
 
         initAttributeReaders();
+
+        esi = ExtraSymbolInfo.instance(context);
     }
 
     /** Add member to class unless it is synthetic.
@@ -1240,6 +1245,22 @@ public class ClassReader {
                     }
                 }
             },
+            new AttributeReader(names.FrgaalPermittedSubclasses, V52, CLASS_ATTRIBUTE) {
+                @Override
+                protected boolean accepts(AttributeKind kind) {
+                    return super.accepts(kind) && allowSealedTypes;
+                }
+                protected void read(Symbol sym, int attrLen) {
+                    if (sym.kind == TYP) {
+                        ListBuffer<Symbol> subtypes = new ListBuffer<>();
+                        int numberOfPermittedSubtypes = nextChar();
+                        for (int i = 0; i < numberOfPermittedSubtypes; i++) {
+                            subtypes.add(poolReader.getClass(nextChar()));
+                        }
+                        ((ClassSymbol)sym).permitted = subtypes.toList();
+                    }
+                }
+            },
         };
 
         for (AttributeReader r: readers)
@@ -1446,6 +1467,24 @@ public class ClassReader {
             } else if (proxy.type.tsym.flatName() == syms.previewFeatureInternalType.tsym.flatName()) {
                 sym.flags_field |= PREVIEW_API;
                 setFlagIfAttributeTrue(proxy, sym, names.reflective, PREVIEW_REFLECTIVE);
+            } else if (proxy.type.tsym.flatName() == syms.frgaalFutureRemoveAnnotationType.tsym.flatName()) {
+                for (Pair<Name, Attribute> v : proxy.values) {
+                    if (v.fst == names.value && v.snd instanceof Attribute.Constant) {
+                        Attribute.Constant c = (Attribute.Constant)v.snd;
+                        if (c.type == syms.intType) {
+                            esi.symbolRemovedInRelease(sym, (Integer)c.value);
+                        }
+                    }
+                }
+            } else if (proxy.type.tsym.flatName() == syms.frgaalFutureDeprecatedAnnotationType.tsym.flatName()) {
+                for (Pair<Name, Attribute> v : proxy.values) {
+                    if (v.fst == names.value && v.snd instanceof Attribute.Constant) {
+                        Attribute.Constant c = (Attribute.Constant)v.snd;
+                        if (c.type == syms.intType) {
+                            esi.symbolDeprecatedInRelease(sym, (Integer)c.value);
+                        }
+                    }
+                }
             } else if (proxy.type.tsym.flatName() == syms.valueBasedInternalType.tsym.flatName()) {
                 Assert.check(sym.kind == TYP);
                 sym.flags_field |= VALUE_BASED;

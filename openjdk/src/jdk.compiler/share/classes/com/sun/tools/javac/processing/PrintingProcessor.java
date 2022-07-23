@@ -279,7 +279,7 @@ public class PrintingProcessor extends AbstractProcessor {
                          e.getEnclosedElements()
                          .stream()
                          .filter(elt -> elementUtils.getOrigin(elt) == Elements.Origin.EXPLICIT )
-                         .toList() ) )
+                         .collect(Collectors.toList()) ) )
                     this.visit(element);
             }
 

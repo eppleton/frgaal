@@ -28,6 +28,7 @@ package jdk.javadoc.internal.doclets.toolkit.taglets.snippet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.frgaal.CollectionShims;
 
 /**
  * An action that applies an additional style to text.
@@ -54,7 +55,7 @@ public final class AddStyle implements Action {
 
     @Override
     public void perform() {
-        var singleStyle = Set.of(style);
+        var singleStyle = CollectionShims.set(style);
         Matcher matcher = pattern.matcher(text.asCharSequence());
         while (matcher.find()) {
             int start = matcher.start();

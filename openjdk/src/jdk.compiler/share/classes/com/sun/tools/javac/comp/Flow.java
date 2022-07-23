@@ -57,6 +57,7 @@ import com.sun.tools.javac.code.Type.TypeVar;
 import static com.sun.tools.javac.code.TypeTag.BOOLEAN;
 import static com.sun.tools.javac.code.TypeTag.NONE;
 import static com.sun.tools.javac.code.TypeTag.VOID;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.resources.CompilerProperties.Fragments;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 import com.sun.tools.javac.util.JCDiagnostic.Fragment;
@@ -335,7 +336,8 @@ public class Flow {
         rs = Resolve.instance(context);
         diags = JCDiagnostic.Factory.instance(context);
         Source source = Source.instance(context);
-        allowEffectivelyFinalInInnerClasses = Feature.EFFECTIVELY_FINAL_IN_INNER_CLASSES.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowEffectivelyFinalInInnerClasses = Feature.EFFECTIVELY_FINAL_IN_INNER_CLASSES.allowedInSource(source, target);
     }
 
     /**

@@ -44,6 +44,8 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import com.sun.tools.javac.util.Context;
+import java.net.URI;
+import java.nio.file.FileSystemNotFoundException;
 
 /**
  * Get meta-info about files. Default direct (non-caching) implementation.
@@ -117,15 +119,40 @@ public class FSInfo {
                 try {
                     URL url = tryResolveFile(base, elt);
                     if (url != null) {
-                        list.add(Path.of(url.toURI()));
+                        list.add(of(url.toURI()));
                     }
                 } catch (URISyntaxException ex) {
-                    throw new IOException(ex);
+//                    throw new IOException(ex);
                 }
             }
 
             return list;
         }
+    }
+
+    //the following method is copied from java.nio.Path:
+    public static Path of(URI uri) {
+        String scheme =  uri.getScheme();
+        if (scheme == null)
+            throw new IllegalArgumentException("Missing scheme");
+
+        // check for default provider to avoid loading of installed providers
+        if (scheme.equalsIgnoreCase("file"))
+            return FileSystems.getDefault().provider().getPath(uri);
+
+        // try to find provider
+        for (FileSystemProvider provider: FileSystemProvider.installedProviders()) {
+            if (provider.getScheme().equalsIgnoreCase(scheme)) {
+                return provider.getPath(uri);
+            }
+        }
+
+        throw new FileSystemNotFoundException("Provider \"" + scheme + "\" not installed");
+    }
+
+    //the following method is copied from java.nio.Path:
+    public static Path of(String first, String... more) {
+        return FileSystems.getDefault().getPath(first, more);
     }
 
     /**

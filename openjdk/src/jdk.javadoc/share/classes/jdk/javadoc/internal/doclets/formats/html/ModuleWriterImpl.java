@@ -54,6 +54,7 @@ import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.ModuleSummaryWriter;
 import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
+import org.frgaal.CollectionShims;
 
 /**
  * Class to generate file for each module contents in the right-hand frame. This will list all the
@@ -185,7 +186,7 @@ public class ModuleWriterImpl extends HtmlDocletWriter implements ModuleSummaryW
     @Override
     protected Navigation getNavBar(PageMode pageMode, Element element) {
         return super.getNavBar(pageMode, element)
-                .setSubNavLinks(() -> List.of(
+                .setSubNavLinks(() -> CollectionShims.list(
                         links.createLink(HtmlIds.MODULE_DESCRIPTION, contents.navDescription,
                             !utils.getFullBody(mdle).isEmpty() && !options.noComment()),
                         links.createLink(HtmlIds.MODULES, contents.navModules,
@@ -242,11 +243,11 @@ public class ModuleWriterImpl extends HtmlDocletWriter implements ModuleSummaryW
         });
 
         // Get all packages if module is open or if displaying concealed modules
-        for (PackageElement pkg : utils.getModulePackageMap().getOrDefault(mdle, Set.of())) {
+        for (PackageElement pkg : utils.getModulePackageMap().getOrDefault(mdle, CollectionShims.set())) {
             if (shouldDocument(pkg) && (mdle.isOpen() || moduleMode == ModuleMode.ALL)) {
                 PackageEntry e = new PackageEntry();
                 if (mdle.isOpen()) {
-                    e.openedTo = Set.of();
+                    e.openedTo = CollectionShims.set();
                 }
                 packages.put(pkg, e);
             }
@@ -307,7 +308,7 @@ public class ModuleWriterImpl extends HtmlDocletWriter implements ModuleSummaryW
             }
             SortedSet<PackageElement> openPackages = new TreeSet<>(utils.comparators.makePackageComparator());
             if (module.isOpen()) {
-                openPackages.addAll(utils.getModulePackageMap().getOrDefault(module, Set.of()));
+                openPackages.addAll(utils.getModulePackageMap().getOrDefault(module, CollectionShims.set()));
             } else {
                 ElementFilter.opensIn(module.getDirectives()).forEach(directive -> {
                     PackageElement pkg = directive.getPackage();

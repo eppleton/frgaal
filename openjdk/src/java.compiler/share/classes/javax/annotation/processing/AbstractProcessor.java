@@ -80,7 +80,7 @@ public abstract class AbstractProcessor implements Processor {
     public Set<String> getSupportedOptions() {
         SupportedOptions so = this.getClass().getAnnotation(SupportedOptions.class);
         return (so == null) ?
-            Set.of() :
+            Collections.emptySet() :
             arrayToSet(so.value(), false, "option value", "@SupportedOptions");
     }
 
@@ -109,7 +109,7 @@ public abstract class AbstractProcessor implements Processor {
                                                              "No SupportedAnnotationTypes annotation " +
                                                              "found on " + this.getClass().getName() +
                                                              ", returning an empty set.");
-                return Set.of();
+                return Collections.emptySet();
             } else {
                 boolean stripModulePrefixes =
                         initialized &&
@@ -184,7 +184,7 @@ public abstract class AbstractProcessor implements Processor {
                                                          AnnotationMirror annotation,
                                                          ExecutableElement member,
                                                          String userText) {
-        return List.of();
+        return Collections.emptyList();
     }
 
     /**

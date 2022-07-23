@@ -48,6 +48,7 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.DocumentationTool;
 
 import jdk.javadoc.doclet.Reporter;
+import jdk.javadoc.internal.Versions;
 import jdk.javadoc.internal.doclets.toolkit.AbstractDoclet;
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.Resources;
@@ -343,7 +344,7 @@ public class Extern {
      * @return true if it is a pre-release version
      */
     private boolean isPrerelease(int sourceVersion) {
-        Runtime.Version docletVersion = configuration.getDocletVersion();
+        Versions.Version docletVersion = configuration.getDocletVersion();
         return docletVersion.feature() == sourceVersion && docletVersion.pre().isPresent();
     }
 

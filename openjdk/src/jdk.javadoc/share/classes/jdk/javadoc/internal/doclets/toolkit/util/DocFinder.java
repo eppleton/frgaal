@@ -36,6 +36,8 @@ import com.sun.source.doctree.DocTree;
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.taglets.InheritableTaglet;
 
+import org.frgaal.CollectionShims;
+
 /**
  * Search for the requested documentation.  Inherit documentation if necessary.
  */
@@ -176,7 +178,7 @@ public class DocFinder {
         /**
          * The inherited documentation.
          */
-        public List<? extends DocTree> inlineTags = List.of();
+        public List<? extends DocTree> inlineTags = CollectionShims.list();
 
         /**
          * False if documentation could not be inherited.

@@ -471,7 +471,7 @@ public class ClientCodeWrapper {
             }
         }
 
-        @Deprecated(since = "13")
+        @Deprecated(/*since = "13"*/)
         @Override @DefinedBy(Api.COMPILER)
         public Iterable<? extends JavaFileObject> getJavaFileObjectsFromPaths(Iterable<? extends Path> paths) {
             try {

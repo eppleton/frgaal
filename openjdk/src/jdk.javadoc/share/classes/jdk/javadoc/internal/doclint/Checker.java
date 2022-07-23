@@ -97,6 +97,7 @@ import com.sun.tools.javac.util.DefinedBy.Api;
 import jdk.javadoc.internal.doclint.HtmlTag.AttrKind;
 import jdk.javadoc.internal.doclint.HtmlTag.ElemKind;
 import static jdk.javadoc.internal.doclint.Messages.Group.*;
+import org.frgaal.StringShims;
 
 
 /**
@@ -1235,7 +1236,7 @@ public class Checker extends DocTreePathScanner<Void, Void> {
     }
 
     boolean hasNonWhitespace(TextTree tree) {
-        return !tree.getBody().isBlank();
+        return !StringShims.isBlank(tree.getBody());
     }
 
     // </editor-fold>

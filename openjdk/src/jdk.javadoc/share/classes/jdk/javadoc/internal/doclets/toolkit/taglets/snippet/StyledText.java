@@ -37,6 +37,8 @@ import java.util.Set;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import org.frgaal.CollectionShims;
+import org.frgaal.ObjectsShims;
 
 /**
  * A mutable sequence of individually styleable characters.
@@ -173,7 +175,7 @@ public class StyledText {
      * text and other views thereof.
      */
     public StyledText subText(int start, int end) {
-        Objects.checkFromToIndex(start, end, length());
+        ObjectsShims.checkFromToIndex(start, end, length());
         var s = new SubText(start, end);
         subtexts.add(new WeakReference<>(s));
         return s;
@@ -202,7 +204,7 @@ public class StyledText {
     }
 
     private void consumeBy(StyledText.Consumer consumer, int start, int end) {
-        Objects.checkFromToIndex(start, end, length());
+        ObjectsShims.checkFromToIndex(start, end, length());
         styles.consumeBy(consumer, chars, start, end);
     }
 
@@ -240,11 +242,11 @@ public class StyledText {
         }
 
         private void insert(int fromIndex, int length, Set<? extends Style> s) {
-            list.addAll(fromIndex, Collections.nCopies(length, Set.copyOf(s)));
+            list.addAll(fromIndex, Collections.nCopies(length, CollectionShims.setCopyOf(s)));
         }
 
         private void add(int fromIndex, int toIndex, Set<? extends Style> additional) {
-            Set<Style> copyOfAdditional = Set.copyOf(additional);
+            Set<Style> copyOfAdditional = CollectionShims.setCopyOf(additional);
             list.subList(fromIndex, toIndex).replaceAll(current -> sum(current, copyOfAdditional));
         }
 
@@ -256,7 +258,7 @@ public class StyledText {
             } else {
                 Set<Style> c = new HashSet<>(a);
                 c.addAll(b);
-                return Set.copyOf(c);
+                return CollectionShims.setCopyOf(c);
             }
         }
 
@@ -265,7 +267,7 @@ public class StyledText {
                 // an empty region doesn't have an associated set; special-cased
                 // for simplicity to avoid more complicated implementation of
                 // this method using a do-while loop
-                consumer.consume(Set.of(), "");
+                consumer.consume(CollectionShims.set(), "");
             } else {
                 for (int i = start, j = i + 1; i < end; i = j) {
                     var ith = list.get(i);

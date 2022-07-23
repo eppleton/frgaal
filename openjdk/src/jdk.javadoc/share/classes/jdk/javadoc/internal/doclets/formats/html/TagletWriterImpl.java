@@ -77,6 +77,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexItem;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.StringShims;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils.PreviewFlagProvider;
 
 /**
@@ -348,7 +349,7 @@ public class TagletWriterImpl extends TagletWriter {
         boolean hasLongLabels = links.stream()
                 .anyMatch(c -> c.charCount() > SEE_TAG_MAX_INLINE_LENGTH || c.toString().contains(","));
         var seeList = HtmlTree.UL(hasLongLabels ? HtmlStyle.seeListLong : HtmlStyle.seeList);
-        links.stream().filter(Predicate.not(Content::isEmpty)).forEach(item -> {
+        links.stream().filter(x -> !x.isEmpty()).forEach(item -> {
             seeList.add(HtmlTree.LI(item));
         });
 
@@ -379,12 +380,12 @@ public class TagletWriterImpl extends TagletWriter {
     protected Content snippetTagOutput(Element element, SnippetTree tag, StyledText content,
                                        String id, String lang) {
         var pre = new HtmlTree(TagName.PRE).setStyle(HtmlStyle.snippet);
-        if (id != null && !id.isBlank()) {
+        if (id != null && !StringShims.isBlank(id)) {
             pre.put(HtmlAttr.ID, id);
         }
         var code = new HtmlTree(TagName.CODE)
                 .addUnchecked(Text.EMPTY); // Make sure the element is always rendered
-        if (lang != null && !lang.isBlank()) {
+        if (lang != null && !StringShims.isBlank(lang)) {
             code.addStyle("language-" + lang);
         }
 
@@ -426,7 +427,7 @@ public class TagletWriterImpl extends TagletWriter {
                 } else if (linkEncountered) {
                     assert e != null;
                     String line = sequence.toString();
-                    String strippedLine = line.strip();
+                    String strippedLine = StringShims.strip(line);
                     int idx = line.indexOf(strippedLine);
                     assert idx >= 0; // because the stripped line is a substring of the line being stripped
                     Text whitespace = Text.of(utils.normalizeNewlines(line.substring(0, idx)));
@@ -539,7 +540,7 @@ public class TagletWriterImpl extends TagletWriter {
     @Override
     protected Content invalidTagOutput(String summary, Optional<String> detail) {
         return htmlWriter.invalidTagOutput(summary,
-                detail.isEmpty() || detail.get().isEmpty()
+                !detail.isPresent() || detail.get().isEmpty()
                         ? Optional.empty()
                         : Optional.of(Text.of(utils.normalizeNewlines(detail.get()))));
     }

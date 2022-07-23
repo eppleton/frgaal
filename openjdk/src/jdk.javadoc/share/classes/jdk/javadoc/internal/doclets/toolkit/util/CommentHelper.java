@@ -74,6 +74,7 @@ import com.sun.source.util.TreePath;
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
 
 import static com.sun.source.doctree.DocTree.Kind.*;
+import org.frgaal.CollectionShims;
 
 /**
  * A utility class.
@@ -566,7 +567,7 @@ public class CommentHelper {
         return new SimpleDocTreeVisitor<List<? extends DocTree>, Void>() {
 
             private List<DocTree> asList(String content) {
-                return List.of(configuration.cmtUtils.makeTextTree(content));
+                return CollectionShims.list(configuration.cmtUtils.makeTextTree(content));
             }
 
             @Override
@@ -661,7 +662,7 @@ public class CommentHelper {
 
             @Override
             protected List<? extends DocTree> defaultAction(DocTree node, Void p) {
-                return List.of();
+                return CollectionShims.list();
             }
         }.visit(dtree, null);
     }

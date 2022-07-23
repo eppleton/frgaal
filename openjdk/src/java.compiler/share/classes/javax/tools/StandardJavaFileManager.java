@@ -231,7 +231,7 @@ public interface StandardJavaFileManager extends JavaFileManager {
      * {@code Path} and have it be treated as an {@code Iterable} of its
      * components.
      */
-    @Deprecated(since = "13")
+    @Deprecated(/*since = "13"*/)
     default Iterable<? extends JavaFileObject> getJavaFileObjectsFromPaths(
             Iterable<? extends Path> paths) {
         return getJavaFileObjectsFromPaths(asCollection(paths));

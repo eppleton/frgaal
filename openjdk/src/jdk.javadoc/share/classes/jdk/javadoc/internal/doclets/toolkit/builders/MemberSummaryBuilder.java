@@ -44,6 +44,7 @@ import javax.tools.Diagnostic;
 
 import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.doctree.DocTree;
+import java.util.stream.Collectors;
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.ClassWriter;
 import jdk.javadoc.internal.doclets.toolkit.Content;
@@ -303,7 +304,7 @@ public abstract class MemberSummaryBuilder extends AbstractMemberBuilder {
 
             List<? extends Element> members = inheritedMembersFromMap.stream()
                     .filter(e -> utils.getEnclosingTypeElement(e) == inheritedClass)
-                    .toList();
+                    .collect(Collectors.toList());
 
             if (!members.isEmpty()) {
                 SortedSet<Element> inheritedMembers = new TreeSet<>(comparator);

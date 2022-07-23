@@ -34,6 +34,7 @@ import java.util.Objects;
 
 import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.*;
+import org.frgaal.CollectionShims;
 
 
 /**
@@ -579,7 +580,7 @@ public interface Elements {
                 // Conceptual instanceof TypeElement check. If the
                 // argument is a type element, put it into a
                 // one-element list, otherwise an empty list.
-                List<TypeElement> possibleTypeElement = ElementFilter.typesIn(List.of(enclosing));
+                List<TypeElement> possibleTypeElement = ElementFilter.typesIn(CollectionShims.list(enclosing));
                 if (!possibleTypeElement.isEmpty()) {
                     TypeElement typeElement = possibleTypeElement.get(0);
                     if (typeElement.getNestingKind() == NestingKind.TOP_LEVEL) {

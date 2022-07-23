@@ -53,6 +53,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexItem;
+import org.frgaal.CollectionShims;
 
 /**
  * Generator for either a single index or split index for all
@@ -85,7 +86,7 @@ public class IndexWriter extends HtmlDocletWriter {
                 Character ch = iter.next();
                 DocPath file = DocPaths.INDEX_FILES.resolve(DocPaths.indexN(iter.nextIndex()));
                 IndexWriter writer = new IndexWriter(configuration, file);
-                writer.generateIndexFile(firstCharacters, List.of(ch));
+                writer.generateIndexFile(firstCharacters, CollectionShims.list(ch));
             }
         } else {
             IndexWriter writer = new IndexWriter(configuration, DocPaths.INDEX_ALL);
@@ -361,7 +362,7 @@ public class IndexWriter extends HtmlDocletWriter {
                 .sorted((i1,i2)-> utils.compareStrings(i1.getLabel(), i2.getLabel()))
                 .map(i -> links.createLink(pathToRoot.resolve(i.getUrl()),
                         contents.getNonBreakString(i.getLabel())))
-                .toList();
+                .collect(Collectors.toList());
         content.add(contents.join(getVerticalSeparator(), pageLinks));
     }
 

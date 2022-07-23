@@ -63,6 +63,7 @@ import com.sun.tools.javac.code.Symbol.ModuleSymbol;
 import com.sun.tools.javac.code.Symbol.PackageSymbol;
 import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.comp.Modules;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.main.JavaCompiler;
 import com.sun.tools.javac.tree.JCTree.JCClassDecl;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
@@ -83,6 +84,7 @@ import static javax.tools.JavaFileObject.Kind.*;
 import static jdk.javadoc.internal.tool.Main.Result.*;
 import static jdk.javadoc.internal.tool.JavadocTool.isValidClassName;
 
+import org.frgaal.CollectionShims;
 
 /**
  * This class manages elements specified on the command line, and
@@ -185,8 +187,8 @@ public class ElementsTable {
     private Set<ModulePackage> excludePackages = new LinkedHashSet<>();
     private Set<ModulePackage> subPackages = new LinkedHashSet<>();
 
-    private List<JCClassDecl> classDecList = List.of();
-    private List<String> classArgList = List.of();
+    private List<JCClassDecl> classDecList = CollectionShims.list();
+    private List<String> classArgList = CollectionShims.list();
     private com.sun.tools.javac.util.List<JCCompilationUnit> classTreeList = null;
 
     private final Set<JavaFileObject.Kind> sourceKinds = EnumSet.of(JavaFileObject.Kind.SOURCE);
@@ -213,6 +215,7 @@ public class ElementsTable {
         this.log = JavadocLog.instance0(context);
         this.compiler = JavaCompiler.instance(context);
         Source source = Source.instance(context);
+        Target target = Target.instance(context);
 
         List<Location> locs = new ArrayList<>();
         if (modules.multiModuleMode) {
@@ -223,7 +226,7 @@ public class ElementsTable {
             else
                 locs.add(StandardLocation.CLASS_PATH);
         }
-        if (Feature.MODULES.allowedInSource(source) && toolEnv.fileManager.hasLocation(StandardLocation.PATCH_MODULE_PATH))
+        if (Feature.MODULES.allowedInSource(source, target) && toolEnv.fileManager.hasLocation(StandardLocation.PATCH_MODULE_PATH))
             locs.add(StandardLocation.PATCH_MODULE_PATH);
         this.locations = Collections.unmodifiableList(locs);
 
@@ -835,7 +838,7 @@ public class ElementsTable {
         ListBuffer<JavaFileObject> lb = new ListBuffer<>();
         List<Location> locs = getLocation(modpkg);
         if (locs.isEmpty()) {
-            return List.of();
+            return CollectionShims.list();
         }
         String pname = modpkg.packageName;
         for (Location packageLocn : locs) {
@@ -863,7 +866,7 @@ public class ElementsTable {
 
     private List<Location> getLocation(ModulePackage modpkg) throws ToolException {
         if (locations.size() == 1 && !locations.contains(StandardLocation.MODULE_SOURCE_PATH)) {
-            return List.of(locations.get(0));
+            return CollectionShims.list(locations.get(0));
         }
 
         if (modpkg.hasModule()) {
@@ -872,7 +875,7 @@ public class ElementsTable {
         // TODO: handle invalid results better.
         ModuleSymbol msym = findModuleOfPackageName(modpkg.packageName);
         if (msym == null) {
-            return List.of();
+            return CollectionShims.list();
         }
         return getModuleLocation(locations, msym.name.toString());
     }

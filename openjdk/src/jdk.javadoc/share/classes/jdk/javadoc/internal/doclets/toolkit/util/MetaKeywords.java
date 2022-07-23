@@ -36,6 +36,8 @@ import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.BaseOptions;
 import jdk.javadoc.internal.doclets.toolkit.Resources;
 
+import org.frgaal.CollectionShims;
+
 /**
  * Provides methods for creating an array of class, method and
  * field names to be included as meta keywords in the HTML header
@@ -87,7 +89,7 @@ public class MetaKeywords {
      */
     protected List<String> getClassKeyword(TypeElement typeElement) {
         String cltypelower = utils.isPlainInterface(typeElement) ? "interface" : "class";
-        return List.of(utils.getFullyQualifiedName(typeElement) + " " + cltypelower);
+        return CollectionShims.list(utils.getFullyQualifiedName(typeElement) + " " + cltypelower);
     }
 
     /**
@@ -95,9 +97,9 @@ public class MetaKeywords {
      */
     public List<String> getMetaKeywords(PackageElement packageElement) {
         if (options.keywords()) {
-            return List.of(utils.getPackageName(packageElement) + " " + "package");
+            return CollectionShims.list(utils.getPackageName(packageElement) + " " + "package");
         } else {
-            return List.of();
+            return CollectionShims.list();
         }
     }
 
@@ -108,9 +110,9 @@ public class MetaKeywords {
      */
     public List<String> getMetaKeywordsForModule(ModuleElement mdle) {
         if (options.keywords()) {
-            return List.of(mdle.getQualifiedName() + " " + "module");
+            return CollectionShims.list(mdle.getQualifiedName() + " " + "module");
         } else {
-            return List.of();
+            return CollectionShims.list();
         }
     }
 
@@ -121,12 +123,12 @@ public class MetaKeywords {
         if (options.keywords()) {
             String windowOverview = resources.getText(title);
             if (docTitle.length() > 0) {
-                return List.of(windowOverview + ", " + docTitle);
+                return CollectionShims.list(windowOverview + ", " + docTitle);
             } else {
-                return List.of(windowOverview);
+                return CollectionShims.list(windowOverview);
             }
         } else {
-            return List.of();
+            return CollectionShims.list();
         }
     }
 
