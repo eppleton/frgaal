@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
@@ -235,7 +236,7 @@ public class VisibleMemberTable {
 
         return visibleMembers.getOrDefault(kind, Collections.emptyList()).stream()
                 .filter(p)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -464,7 +465,7 @@ public class VisibleMemberTable {
             default:
                 List<Element> list = lmt.getOrderedMembers(kind).stream()
                         .filter(this::mustDocument)
-                        .toList();
+                        .collect(Collectors.toList());
                 visibleMembers.put(kind, list);
                 break;
         }
@@ -517,7 +518,7 @@ public class VisibleMemberTable {
         // Prefix local results first
         List<Element> list = Stream.concat(lmt.getOrderedMembers(kind).stream(), inheritedStream)
                                    .filter(this::mustDocument)
-                                   .toList();
+                                   .collect(Collectors.toList());
 
         visibleMembers.put(kind, list);
     }
@@ -548,7 +549,7 @@ public class VisibleMemberTable {
         // evaluated eagerly with toList().
         List<Element> inheritedMethodsList = inheritedMethods.stream()
                 .filter(e -> allowInheritedMethod((ExecutableElement) e, overriddenByTable, lmt))
-                .toList();
+                .collect(Collectors.toList());
 
         // Filter out the local methods, that do not override or simply
         // overrides a super method, or those methods that should not
@@ -567,7 +568,7 @@ public class VisibleMemberTable {
         // Final filtration of elements
         List<Element> list = Stream.concat(localStream,inheritedMethodsList.stream())
                 .filter(this::mustDocument)
-                .toList();
+                .collect(Collectors.toList());
 
         visibleMembers.put(Kind.METHODS, list);
 
@@ -851,14 +852,14 @@ public class VisibleMemberTable {
             return map.getOrDefault(key, Collections.emptyList())
                     .stream()
                     .map(e -> clazz.cast(e))
-                    .toList();
+                    .collect(Collectors.toList());
         }
 
         List<ExecutableElement> getPropertyMethods(String methodName, int argcount) {
             return getMembers(methodName + ":" + argcount, Kind.METHODS).stream()
                     .filter(m -> (utils.isPublic(m) || utils.isProtected(m)))
                     .map(m -> (ExecutableElement) m)
-                    .toList();
+                    .collect(Collectors.toList());
         }
     }
 
@@ -907,14 +908,14 @@ public class VisibleMemberTable {
         List<Element> list = visibleMembers.getOrDefault(Kind.METHODS, Collections.emptyList())
                 .stream()
                 .filter(e -> pUtils.isPropertyMethod((ExecutableElement) e))
-                .toList();
+                .collect(Collectors.toList());
 
         visibleMembers.put(Kind.PROPERTIES, list);
 
         List<ExecutableElement> propertyMethods = list.stream()
                 .map(e -> (ExecutableElement) e)
                 .filter(e -> utils.getEnclosingTypeElement(e) == te)
-                .toList();
+                .collect(Collectors.toList());
 
         // Compute additional properties related sundries.
         for (ExecutableElement propertyMethod : propertyMethods) {
@@ -984,7 +985,7 @@ public class VisibleMemberTable {
         ImplementedMethods imf = getImplementedMethodsFinder(method);
         return imf.getImplementedMethods().stream()
                 .filter(m -> getSimplyOverriddenMethod(m) == null)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public TypeMirror getImplementedMethodHolder(ExecutableElement method,

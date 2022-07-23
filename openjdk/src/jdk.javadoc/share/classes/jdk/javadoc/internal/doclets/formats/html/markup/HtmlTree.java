@@ -39,6 +39,7 @@ import java.util.Objects;
 import jdk.javadoc.internal.doclets.formats.html.markup.HtmlAttr.Role;
 import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.util.DocletConstants;
+import org.frgaal.CollectionShims;
 
 /**
  * A tree node representing an HTML element, containing the name of the element,
@@ -76,13 +77,13 @@ public class HtmlTree extends Content {
      * The attributes for the HTML element.
      * The keys and values in this map are never {@code null}.
      */
-    private Map<HtmlAttr, String> attrs = Map.of();
+    private Map<HtmlAttr, String> attrs = CollectionShims.map();
 
     /**
      * The enclosed content ("inner HTML") for this HTML element.
      * The items in this list are never null.
      */
-    private List<Content> content = List.of();
+    private List<Content> content = CollectionShims.list();
 
     /**
      * A sentinel value to explicitly indicate empty content.

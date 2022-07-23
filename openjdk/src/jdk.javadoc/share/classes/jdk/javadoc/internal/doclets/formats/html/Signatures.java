@@ -62,6 +62,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.element.Modifier.STRICTFP;
 import static javax.lang.model.element.Modifier.SYNCHRONIZED;
+import org.frgaal.StringShims;
 
 public class Signatures {
 
@@ -188,7 +189,7 @@ public class Signatures {
             List<? extends TypeMirror> permits = typeElement.getPermittedSubclasses();
             List<? extends TypeMirror> linkablePermits = permits.stream()
                     .filter(t -> utils.isLinkable(utils.asTypeElement(t)))
-                    .toList();
+                    .collect(Collectors.toList());
             if (!linkablePermits.isEmpty()) {
                 Content permitsSpan = new HtmlTree(TagName.SPAN).setStyle(HtmlStyle.permits);
                 boolean isFirst = true;
@@ -575,7 +576,7 @@ public class Signatures {
 
             // Exceptions
             if (exceptions != null && !exceptions.isEmpty()) {
-                CharSequence indent = " ".repeat(Math.max(0, indentSize + 1 - 7));
+                CharSequence indent = StringShims.repeat(" ", Math.max(0, indentSize + 1 - 7));
                 htmlTree.add(DocletConstants.NL)
                         .add(indent)
                         .add("throws ")

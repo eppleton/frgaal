@@ -26,6 +26,7 @@
 package com.sun.tools.javac.comp;
 
 import com.sun.source.tree.CaseTree;
+import com.sun.source.tree.CaseTree.CaseKind;
 import com.sun.tools.javac.code.BoundKind;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Kinds;
@@ -91,6 +92,7 @@ import com.sun.tools.javac.tree.JCTree.JCParenthesizedPattern;
 import com.sun.tools.javac.tree.JCTree.JCPattern;
 import com.sun.tools.javac.tree.JCTree.JCStatement;
 import com.sun.tools.javac.tree.JCTree.JCSwitchExpression;
+import com.sun.tools.javac.tree.JCTree.JCYield;
 import com.sun.tools.javac.tree.JCTree.LetExpr;
 import com.sun.tools.javac.tree.TreeInfo;
 import com.sun.tools.javac.util.Assert;
@@ -356,6 +358,7 @@ public class TransPatterns extends TreeTranslator {
                     currentMethodSym);
             statements.append(make.at(tree.pos).VarDef(index, makeLit(syms.intType, 0)));
 
+            if (false) {
             List<Type> staticArgTypes = List.of(syms.methodHandleLookupType,
                                                 syms.stringType,
                                                 syms.methodTypeType,
@@ -394,6 +397,64 @@ public class TransPatterns extends TreeTranslator {
                                   qualifier,
                                   List.of(make.Ident(temp), make.Ident(index)))
                            .setType(syms.intType);
+            } else {
+                int i = 0;
+                boolean hasDefault = false;
+                ListBuffer<JCCase> filterCases = new ListBuffer<>();
+                JCSwitchExpression newSelector = (JCSwitchExpression) make.SwitchExpression(make.Ident(index), List.nil()).setType(syms.intType);
+                for (JCCase c : cases) {
+                    for (JCCaseLabel p : c.labels) {
+                        if (p.hasTag(Tag.DEFAULTCASELABEL)) {
+                            hasDefault = true;
+                        } else if (hasTotalPattern && !hasDefault &&
+                                   c == lastCase && p.isPattern()) {
+                            //If the switch has total pattern, the last case will contain it.
+                            //Convert the total pattern to default:
+                        } else {
+                            int value;
+                            if (p.isNullPattern()) {
+                                value = -1;
+                            } else {
+                                JCExpression test;
+                                if (p.isPattern()) {
+                                    Type principalType = principalType((JCPattern) p);
+                                    if (types.isSubtype(seltype, principalType)) {
+                                        principalType = seltype;
+                                    }
+                                    test = make.TypeTest(make.Ident(temp), make.QualIdent(principalType.tsym)).setType(syms.booleanType);
+                                } else if (p.isExpression()) {
+                                    JCExpression constant;
+
+                                    if ((p.type.tsym.flags_field & Flags.ENUM) != 0) {
+                                        constant = make.QualIdent(TreeInfo.symbol(p));
+                                    } else {
+                                        Assert.checkNonNull(p.type.constValue());
+
+                                        constant = makeLit(p.type, p.type.constValue());
+                                    }
+
+                                    test = makeBinary(Tag.EQ, make.Ident(temp), constant);
+                                } else {
+                                    Assert.error();
+                                    throw new Error();
+                                }
+
+                                JCYield yield = make.Yield(makeLit(syms.intType, i));
+
+                                yield.target = newSelector;
+                                filterCases.add(make.Case(CaseKind.STATEMENT, List.of(makeLit(syms.intType, i)), List.of(make.If(test, yield, null)), null));
+
+                                i++;
+                            }
+                        }
+                    }
+                }
+                JCYield yield = make.Yield(makeLit(syms.intType, i));
+                yield.target = newSelector;
+                filterCases.add(make.Case(CaseKind.STATEMENT, List.of(make.DefaultCaseLabel()), List.of(yield), null));
+                newSelector.cases = filterCases.toList();
+                selector = make.Conditional(makeBinary(Tag.EQ, make.Ident(temp), makeLit(syms.botType, null)), makeLit(syms.intType, -1), newSelector).setType(syms.intType);
+            }
 
             int i = 0;
             boolean previousCompletesNormally = false;

@@ -64,11 +64,14 @@ import com.sun.source.util.DocTreePath;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.util.DefinedBy;
 import com.sun.tools.javac.util.DefinedBy.Api;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
 import jdk.javadoc.doclet.Doclet;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 import jdk.javadoc.doclet.StandardDoclet;
 import jdk.javadoc.doclet.Taglet;
+import jdk.javadoc.internal.Versions;
 import jdk.javadoc.internal.doclets.toolkit.builders.BuilderFactory;
 import jdk.javadoc.internal.doclets.toolkit.taglets.TagletManager;
 import jdk.javadoc.internal.doclets.toolkit.util.Comparators;
@@ -170,7 +173,7 @@ public abstract class BaseConfiguration {
      *
      * @return the version
      */
-    public abstract Runtime.Version getDocletVersion();
+    public abstract Versions.Version getDocletVersion();
 
     /**
      * This method should be defined in all those doclets (configurations),
@@ -388,8 +391,8 @@ public abstract class BaseConfiguration {
             if (fm instanceof StandardJavaFileManager) {
                 try {
                     List<Path> sp = Arrays.stream(snippetPath.split(File.pathSeparator))
-                            .map(Path::of)
-                            .toList();
+                            .map(Paths::get)
+                            .collect(Collectors.toList());
                     StandardJavaFileManager sfm = (StandardJavaFileManager) fm;
                     sfm.setLocationFromPaths(DocumentationTool.Location.SNIPPET_PATH, sp);
                 } catch (IOException | InvalidPathException e) {
@@ -413,8 +416,8 @@ public abstract class BaseConfiguration {
 
         PackageElement unnamedPackage;
         Elements elementUtils = utils.elementUtils;
-        if (docEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_9) >= 0) {
-            ModuleElement unnamedModule = elementUtils.getModuleElement("");
+        ModuleElement unnamedModule = elementUtils.getModuleElement("");
+        if (unnamedModule != null) {
             unnamedPackage = elementUtils.getPackageElement(unnamedModule, "");
         } else {
             unnamedPackage = elementUtils.getPackageElement("");

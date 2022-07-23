@@ -28,6 +28,8 @@ package com.sun.tools.javac.parser;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.frgaal.StringShims;
+
 /**
  * Methods used to support text blocks lint.
  *
@@ -66,7 +68,7 @@ class TextBlockSupport {
             outdent = indexOfNonWhitespace(lastLine);
             for (String line : lines) {
                 // Blanks lines have no influence (last line accounted for.)
-                if (!line.isBlank()) {
+                if (!StringShims.isBlank(line)) {
                     outdent = Integer.min(outdent, indexOfNonWhitespace(line));
                     if (outdent == 0) {
                         break;
@@ -78,7 +80,7 @@ class TextBlockSupport {
         String start = lastLine.substring(0, outdent);
         for (String line : lines) {
             // Fail if a line does not have the same indentation.
-            if (!line.isBlank() && !line.startsWith(start)) {
+            if (!StringShims.isBlank(line) && !line.startsWith(start)) {
                 // Mix of different white space
                 checks.add(WhitespaceChecks.INCONSISTENT);
             }
@@ -96,6 +98,6 @@ class TextBlockSupport {
     }
 
    private static int indexOfNonWhitespace(String string) {
-        return string.length() - string.stripLeading().length();
+        return string.length() - StringShims.stripLeading(string).length();
     }
 }

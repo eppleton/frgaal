@@ -39,6 +39,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.frgaal.StringShims;
 
 /**
  * Utilities.
@@ -93,7 +94,7 @@ public class Util {
     }
 
     public static String extractStringOptionLine(String opName, String s, String deflt) {
-        return extractStringOptionWithDelimiter(opName, s, deflt, '\n').strip();
+        return StringShims.strip(extractStringOptionWithDelimiter(opName, s, deflt, '\n'));
     }
 
     public static boolean extractBooleanOption(String opName, String s, boolean deflt) {

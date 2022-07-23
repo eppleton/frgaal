@@ -55,6 +55,7 @@ import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.ModuleSummaryWriter;
 import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
+import org.frgaal.CollectionShims;
 
 /**
  * Class to generate file for each module contents in the right-hand frame. This will list all the
@@ -197,7 +198,7 @@ public class ModuleWriterImpl extends HtmlDocletWriter implements ModuleSummaryW
     @Override
     protected Navigation getNavBar(PageMode pageMode, Element element) {
         return super.getNavBar(pageMode, element)
-                .setSubNavLinks(() -> List.of(
+                .setSubNavLinks(() -> CollectionShims.list(
                         links.createLink(HtmlIds.MODULE_DESCRIPTION, contents.navDescription,
                             !utils.getFullBody(mdle).isEmpty() && !options.noComment()),
                         links.createLink(HtmlIds.MODULES, contents.navModules,

@@ -44,6 +44,7 @@ import static com.sun.tools.javac.code.TypeTag.CLASS;
 import static com.sun.tools.javac.code.TypeTag.TYPEVAR;
 import static com.sun.tools.javac.code.TypeTag.VOID;
 import static com.sun.tools.javac.comp.CompileStates.CompileState;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.tree.JCTree.JCBreak;
 
 /** This pass translates Generic Java to conventional Java.
@@ -93,8 +94,9 @@ public class TransTypes extends TreeTranslator {
         make = TreeMaker.instance(context);
         resolve = Resolve.instance(context);
         Source source = Source.instance(context);
-        allowInterfaceBridges = Feature.DEFAULT_METHODS.allowedInSource(source);
-        allowGraphInference = Feature.GRAPH_INFERENCE.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowInterfaceBridges = Feature.DEFAULT_METHODS.allowedInSource(source, target);
+        allowGraphInference = Feature.GRAPH_INFERENCE.allowedInSource(source, target);
         annotate = Annotate.instance(context);
         attr = Attr.instance(context);
     }

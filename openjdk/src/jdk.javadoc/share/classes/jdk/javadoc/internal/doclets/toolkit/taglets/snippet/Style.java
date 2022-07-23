@@ -33,7 +33,7 @@ package jdk.javadoc.internal.doclets.toolkit.taglets.snippet;
  * This code and its internal interfaces are subject to change or
  * deletion without notice.</b>
  */
-public sealed interface Style {
+public interface Style { //XXX: sealed
 
     /**
      * A style that describes a link. Characters of this style are typically

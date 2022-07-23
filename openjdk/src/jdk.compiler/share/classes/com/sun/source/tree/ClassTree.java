@@ -96,7 +96,7 @@ public interface ClassTree extends StatementTree {
      * @since 17
      */
     default List<? extends Tree> getPermitsClause() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     /**

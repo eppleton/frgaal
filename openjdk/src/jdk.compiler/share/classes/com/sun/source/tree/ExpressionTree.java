@@ -25,7 +25,7 @@
 
 package com.sun.source.tree;
 
-import jdk.internal.javac.NoPreview;
+//import jdk.internal.javac.NoPreview;
 
 /**
  * A tree node used as the base class for the different types of
@@ -37,5 +37,5 @@ import jdk.internal.javac.NoPreview;
  * @author Jonathan Gibbons
  * @since 1.6
  */
-@NoPreview
+//@NoPreview
 public interface ExpressionTree extends Tree, CaseLabelTree {}

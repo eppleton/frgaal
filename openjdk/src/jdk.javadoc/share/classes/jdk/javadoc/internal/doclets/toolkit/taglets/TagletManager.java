@@ -80,6 +80,8 @@ import static com.sun.source.doctree.DocTree.Kind.THROWS;
 import static com.sun.source.doctree.DocTree.Kind.USES;
 import static com.sun.source.doctree.DocTree.Kind.VERSION;
 import static javax.tools.DocumentationTool.Location.TAGLET_PATH;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 /**
  * Manages the {@code Taglet}s used by doclets.
@@ -252,13 +254,13 @@ public class TagletManager {
     public void addCustomTag(String classname, JavaFileManager fileManager) {
         ClassLoader tagClassLoader = fileManager.getClassLoader(TAGLET_PATH);
         if (configuration.workArounds.accessInternalAPI()) {
-            Module thisModule = getClass().getModule();
-            Module tagletLoaderUnnamedModule = tagClassLoader.getUnnamedModule();
-            List<String> pkgs = List.of(
-                    "jdk.javadoc.doclet",
-                    "jdk.javadoc.internal.doclets.toolkit",
-                    "jdk.javadoc.internal.doclets.formats.html");
-            pkgs.forEach(p -> thisModule.addOpens(p, tagletLoaderUnnamedModule));
+//            Module thisModule = getClass().getModule();
+//            Module tagletLoaderUnnamedModule = tagClassLoader.getUnnamedModule();
+//            List<String> pkgs = List.of(
+//                    "jdk.javadoc.doclet",
+//                    "jdk.javadoc.internal.doclets.toolkit",
+//                    "jdk.javadoc.internal.doclets.formats.html");
+//            pkgs.forEach(p -> thisModule.addOpens(p, tagletLoaderUnnamedModule));
         }
         try {
             Class<? extends jdk.javadoc.doclet.Taglet> customTagClass =
@@ -767,6 +769,6 @@ public class TagletManager {
     }
 
     private String format(boolean b, String s) {
-        return b ? s : ".".repeat(s.length()); // "replace" all with "."
+        return b ? s : StringShims.repeat(".", s.length()); // "replace" all with "."
     }
 }

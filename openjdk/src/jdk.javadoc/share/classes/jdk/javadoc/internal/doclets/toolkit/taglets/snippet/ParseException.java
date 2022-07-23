@@ -41,7 +41,6 @@ import java.util.function.Supplier;
  */
 public class ParseException extends Exception {
 
-    @java.io.Serial
     private static final long serialVersionUID = 1;
 
     private final int index;
