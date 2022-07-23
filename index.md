@@ -1,7 +1,9 @@
 frgaal - a retrofit compiler for Java
 -------------------------------------
 
-The aim of frgaal is to make many of the latest features and enhancements to the Java language available on older runtimes. It enables you to compile code like this to run on a Java 8 JRE:
+The aim of frgaal is to make many of the latest features and enhancements to 
+the Java language available on older runtimes. It 
+enables you to compile code like this to run on a Java 8 JRE:
 
 ```java
 import java.util.List;
@@ -22,18 +24,18 @@ public class Main {
     }
 
 
-    private static String useInstanceOf(List<?> list) {
+    private static Result useInstanceOf(List<?> list) {
         final Object element = list.get(1);
         if (element instanceof Integer number) {
             return useSwitchExpr(number);
         }
-        return "not a number!";
+        return new Result(element, "not a number!");
     }
 
-    private static String useSwitchExpr(int number) {
+    private static Result  useSwitchExpr(int number) {
         return switch (number) {
-            case 3 -> "ok";
-            default -> "bad";
+            case 3 -> new Result(number, "ok");
+            default -> new Result(number, "bad");
         };
     }
 
@@ -41,13 +43,16 @@ public class Main {
         List<Integer> list = useVar();
         list.sort(null);
         System.err.println("after sorting: " + list);
-        String switchTest = useInstanceOf(list);
-        System.err.println(switchTest);
+        Result testResult = useInstanceOf(list);
+        System.err.println(testResult.value() + " is " + testResult.comment());
     }
+
+    public record Result(Object value, String comment) {}
 }
 ```
 
-The features implemented in frgaal are similar to the ones of the Java language.
+Frgaal gives you the syntax of modern Java language,
+but unlike `javac` in the JDK, it allows you to compile them to run on Java 8.
 
 Supported Features
 ------------------
@@ -58,14 +63,17 @@ In addition following features are supported:
  * `var` local variables, introduced in Java 10. Use `-source 10` or higher to enable.
  * switch expressions, introduced in Java 14. Use `-source 14` or higher to enable.
  * text blocks, permanent since Java 15. Use `-source 15` or higher to enable
- * pattern matching in `instanceof`, introduced as preview in Java 14. Use `-source 15 --enable-preview` to enable
+ * pattern matching in `instanceof`, introduced as preview in Java 14. Use `-source 16` to enable
+ * record classes, introduced as preview in Java 14. Use `-source 16` to enable
+ * pattern matching for `switch`, introduced as preview in JDK 17. Use `-source 19 --enable-preview` to enable
+ * `record` patterns, introduced as preview in JDK 19. Use `-source 19 --enable-preview` to enable
 
 See "Preview Features" section below for more details.
 
 Usage with Maven
 ----------------
 
-To use this compiler, specify following in your `pom.xml file build section:
+To use this compiler, specify following in your `pom.xml` file build section:
 
 ```xml
 <build>
@@ -78,17 +86,29 @@ To use this compiler, specify following in your `pom.xml file build section:
                 <dependency>
                     <groupId>org.frgaal</groupId>
                     <artifactId>compiler-maven-plugin</artifactId>
-                    <version>15.0.0</version>
+                    <version>19.0.0-RC1</version>
                 </dependency>
             </dependencies>
             <configuration>
                 <compilerId>frgaal</compilerId>
-                <source>15</source>
+                <source>19</source>
                 <target>1.8</target>
                 <compilerArgs>
                     <arg>-Xlint:deprecation</arg>
                     <arg>--enable-preview</arg> <!--only needed when using preview language features-->
                 </compilerArgs>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.2.0</version>
+            <configuration>
+                <archive>
+                    <manifestEntries>
+                        <Multi-Release>true</Multi-Release>
+                    </manifestEntries>
+                </archive>
             </configuration>
         </plugin>
     </plugins>
@@ -103,46 +123,49 @@ to some newer version. However, until you do that, no matter what
 breaking changes appear in the JDK, your project is still going to compile
 into exactly the same `.class` files.
 
-Usage with Gradle
+Usage with Gradle DSL style
 -----------------
 
+You need gradle 6.8.x to be able to use this compiler.
 To use this compiler, specify following in your `build.gradle` file:
 
 ```groovy
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.frgaal:compiler-gradle-plugin:15.0.0"
-    }
-}
-
-apply plugin: 'java'
-apply plugin: 'org.frgaal.compiler'
-
-repositories {
-    mavenCentral()
+plugins {
+    id 'java'
+    id 'org.frgaal.compiler'
 }
 
 targetCompatibility = '1.8'
-sourceCompatibility = '15'
+sourceCompatibility = '19'
 
 compileJava {
     options.compilerArgs << '-Xlint:deprecation' << '--enable-preview'
 }
+
 compileTestJava {
     options.compilerArgs << '-Xlint:deprecation' << '--enable-preview'
 }
 ```
 
-With such a change the compiler of your project no longer depends on the
-used JDK. All the compiler code is downloaded from Maven central and it can
-run on anything from JDK8 up. If you want to update your compiler to
-get a bugfix or to use latest language feature, you can change <version>
-to some newer version. However, until you do that, no matter what
-breaking changes appear in the JDK, your project is still going to compile
-into exactly the same `.class` files.
+To be able to resolve the frgaal compiler plugin you need to specifiy the following in your `settings.gradle` file, at the top:
+
+```groovy
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == 'org.frgaal') {
+                useModule('org.frgaal:compiler-gradle-plugin:<Version>')
+            }
+        }
+    }
+    repositories {
+        maven {
+            url 'https://mvnrepository.com/artifact/org.frgaal'
+        }
+        gradlePluginPortal()
+    }
+}
+```
 
 Usage on command line
 ---------------------
@@ -158,7 +181,7 @@ The main entrypoint is `org.frgaal.Main` class.
 Preview Features
 ----------------
 
-Frgaal compiler supports _preview features_ of the Java language. Certain
+Frgaal compiler supports _preview features_ of the Java language. Many of
 _preview features_ can be used with `--target 1.8`. Namely:
 
 * `instanceof Type variableName`
@@ -192,13 +215,13 @@ class Code {
   }
 }
 END
-$ jdk1.8.0/bin/java -jar compiler.jar -source 15 -target 11 Code.java
+$ jdk1.8.0/bin/java -jar compiler.jar -source 19 -target 11 Code.java
 ```
 
 To disable this behavior use `-bootclasspath`, `-Xbootclasspath` or `-system`
 and specify the desired target platform API. Or use `-XDignore.symbol.file`
 to disable this behavior and use runtime platform APIs.
-    
+
 Caveats
 -------
 
@@ -206,6 +229,10 @@ The current caveats include:
 
  * module-info.java cannot be compiled with `--target 8`
  * the sealed classes preview feature, introduced in Java 15, can only be used with `--target 16`
+ * the pattern matching feature does not use the `java.lang.MatchException`, introduced as a preview API in JDK 19.
+   `java.lang.IllegalStateException` is used to wrap exceptions from record accessors, and
+   `java.lang.IncompatibleClassChangeError` is used when the hierarchy changes so that there is not match for an exhaustive
+   switch.
 
 ### Record Classes
 
@@ -219,7 +246,8 @@ record classes with the following caveats:
    Some serialization libraries may not recognize the class as a record class.
  * the frgaal compiler will produce a separate class file of the record class under
    `META-INF/versions/16`, which will have the proper superclass and other runtime
-   support. If the classfiles are packed into a jar marked as a multi-release jar,
+   support. If the classfiles are packed into a jar marked as a 
+   [multi-release jar](https://openjdk.org/jeps/238),
    the runtime may be able to use the JDK 16 version with the better runtime support.
 
 Building
