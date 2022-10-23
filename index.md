@@ -1,8 +1,8 @@
 frgaal - a retrofit compiler for Java
 -------------------------------------
 
-The aim of frgaal is to make many of the latest features and enhancements to 
-the Java language available on older runtimes. It 
+The aim of frgaal is to make many of the latest features and enhancements to
+the Java language available on older runtimes. It
 enables you to compile code like this to run on a Java 8 JRE:
 
 ```java
@@ -63,9 +63,10 @@ In addition following features are supported:
  * `var` local variables, introduced in Java 10. Use `-source 10` or higher to enable.
  * switch expressions, introduced in Java 14. Use `-source 14` or higher to enable.
  * text blocks, permanent since Java 15. Use `-source 15` or higher to enable
- * pattern matching in `instanceof`, introduced as preview in Java 14. Use `-source 16` to enable
- * record classes, introduced as preview in Java 14. Use `-source 16` to enable
- * pattern matching for `switch`, introduced as preview in JDK 17. Use `-source 19 --enable-preview` to enable
+ * pattern matching in `instanceof`, permanent since Java 16. Use `-source 16` or higher to enable
+ * record classes, permanent since Java 16. Use `-source 16` or higher to enable
+ * sealed classes, permanent since Java 17. Use `-source 17` or higher to enable
+ * pattern matching for `switch`, introduced as preview in JDK 17, and updated in Java 18 and 19. Use `-source 19 --enable-preview` to enable
  * `record` patterns, introduced as preview in JDK 19. Use `-source 19 --enable-preview` to enable
 
 See "Preview Features" section below for more details.
@@ -86,7 +87,7 @@ To use this compiler, specify following in your `pom.xml` file build section:
                 <dependency>
                     <groupId>org.frgaal</groupId>
                     <artifactId>compiler-maven-plugin</artifactId>
-                    <version>19.0.0-RC1</version>
+                    <version>19.0.0</version>
                 </dependency>
             </dependencies>
             <configuration>
@@ -181,10 +182,11 @@ The main entrypoint is `org.frgaal.Main` class.
 Preview Features
 ----------------
 
-Frgaal compiler supports _preview features_ of the Java language. Many of
+Frgaal compiler supports _preview features_ of the Java language. Some of the
 _preview features_ can be used with `--target 1.8`. Namely:
 
-* `instanceof Type variableName`
+ * pattern matching for `switch`
+ * `record` patterns
 
 These features require additional standard command line parameters 
 
@@ -228,7 +230,7 @@ Caveats
 The current caveats include:
 
  * module-info.java cannot be compiled with `--target 8`
- * the sealed classes preview feature, introduced in Java 15, can only be used with `--target 16`
+ * sealed classes are only enforced at runtime when running on Java 17 or newer
  * the pattern matching feature does not use the `java.lang.MatchException`, introduced as a preview API in JDK 19.
    `java.lang.IllegalStateException` is used to wrap exceptions from record accessors, and
    `java.lang.IncompatibleClassChangeError` is used when the hierarchy changes so that there is not match for an exhaustive
@@ -246,9 +248,19 @@ record classes with the following caveats:
    Some serialization libraries may not recognize the class as a record class.
  * the frgaal compiler will produce a separate class file of the record class under
    `META-INF/versions/16`, which will have the proper superclass and other runtime
-   support. If the classfiles are packed into a jar marked as a 
+   support. If the classfiles are packed into a jar marked as a
    [multi-release jar](https://openjdk.org/jeps/238),
    the runtime may be able to use the JDK 16 version with the better runtime support.
+
+### Multi-Release JARs
+
+Several features (like the record classes, or sealed classes) require runtime support,
+which is not available on older platforms. frgaal will generate multiple versions
+of the classfiles, for use in older versions of the Java platform, which may lack
+some features, and fully featured for use in newer versions of the Java platform.
+The structure matches the [multi-release jar](https://openjdk.org/jeps/238)
+structure. When the classes are packed in a jar marked as a multi-release jar,
+the Java runtime will be able to use the appropriate version of the classfiles.
 
 Building
 --------
