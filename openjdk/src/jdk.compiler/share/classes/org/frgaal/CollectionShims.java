@@ -42,6 +42,10 @@ public class CollectionShims {
         return Collections.emptyMap();
     }
 
+    public static <K, V> Map<K, V> map(K key, V value) {
+        return Collections.singletonMap(key, value);
+    }
+
     public static <K, V> Map<K, V> mapCopyOf(Map<K, V> from) {
         return Collections.unmodifiableMap(new HashMap<>(from));
     }
