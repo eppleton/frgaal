@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ ! -d openjdk ] ; then
-    git clone https://github.com/openjdk/jdk openjdk
+    git clone https://github.com/openjdk/jdk19u openjdk
 fi
 cd openjdk
 git checkout master

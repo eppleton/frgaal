@@ -555,7 +555,12 @@ public class TransPatterns extends TreeTranslator {
                                         constant = makeLit(constantLabel.type, constantLabel.type.constValue());
                                     }
 
-                                    test = makeBinary(Tag.EQ, make.Ident(temp), constant);
+                                    if (constantLabel.type.tsym == syms.stringType.tsym) {
+                                        Symbol equals = syms.objectsType.tsym.members().getSymbolsByName(names.equals, s -> s.kind == Kind.MTH && ((MethodSymbol) s).params.size() == 2).iterator().next(); //XXX: more careful checks!
+                                        test = make.Apply(List.nil(), make.Select(make.QualIdent(syms.objectsType.tsym), equals), List.of(make.Ident(temp), constant)).setType(syms.booleanType);
+                                    } else {
+                                        test = makeBinary(Tag.EQ, make.Ident(temp), constant);
+                                    }
                                 } else {
                                     Assert.error();
                                     throw new Error();

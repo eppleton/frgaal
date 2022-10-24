@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.frgaal</groupId>
   <artifactId>javadoc</artifactId>
-  <version>19.0.0</version>
+  <version>19.0.1</version>
   <packaging>jar</packaging>
  
   <name>frgaal javadoc</name>
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>org.frgaal</groupId>
       <artifactId>compiler</artifactId>
-      <version>19.0.0</version>
+      <version>19.0.1</version>
     </dependency>
   </dependencies>
 

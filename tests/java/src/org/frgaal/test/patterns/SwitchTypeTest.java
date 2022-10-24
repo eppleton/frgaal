@@ -118,4 +118,31 @@ public class SwitchTypeTest extends TestBase {
         runCompareTest("-d", classDir.toString(), "--enable-preview", "-source", "19", "-target", "8", recordSource.toString());
     }
 
+    @Test
+    public void testCanCompileTypeTestSwitchWithConstantsToJDK8() throws Exception {
+        Path recordSource = writeFile("Test.java",
+                                      """
+                                      package p;
+                                      public class Test {
+                                          public static void main(String... args) {
+                                              System.out.println(categorize("a"));
+                                              System.out.println(categorize(new String("a")));
+                                              System.out.println(categorize("b"));
+                                              System.out.println(categorize("ab"));
+                                              System.out.println(categorize(null));
+                                              System.out.println(categorize("c"));
+                                          }
+                                          private static int categorize(String o) {
+                                              return switch (o) {
+                                                  case "a" -> 0;
+                                                  case "b" -> 1;
+                                                  case String s when s.length() == 2 -> 2;
+                                                  case null -> 3;
+                                                  case String s -> 4;
+                                              };
+                                          }
+                                      }
+                                      """);
+        runCompareTest("-d", classDir.toString(), "--enable-preview", "-source", "19", "-target", "8", recordSource.toString());
+    }
 }
