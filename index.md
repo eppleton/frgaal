@@ -87,7 +87,7 @@ To use this compiler, specify following in your `pom.xml` file build section:
                 <dependency>
                     <groupId>org.frgaal</groupId>
                     <artifactId>compiler-maven-plugin</artifactId>
-                    <version>19.0.0</version>
+                    <version>19.0.1</version>
                 </dependency>
             </dependencies>
             <configuration>
