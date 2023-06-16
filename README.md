@@ -128,6 +128,8 @@ Usage with Gradle DSL style
 -----------------
 
 You need gradle 6.8.x to be able to use this compiler.
+Gradle 6.8.x limits sourceCompatibility to 18; 
+to use 19, set it explicitly in _compilerArgs_ as shown below.
 To use this compiler, specify following in your `build.gradle` file:
 
 ```groovy
@@ -140,7 +142,7 @@ targetCompatibility = '1.8'
 sourceCompatibility = '19'
 
 compileJava {
-    options.compilerArgs << '-Xlint:deprecation' << '--enable-preview'
+    options.compilerArgs << '-Xlint:deprecation' << '--enable-preview' << '-source' << '19'
 }
 
 compileTestJava {
