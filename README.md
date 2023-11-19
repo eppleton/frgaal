@@ -66,8 +66,9 @@ In addition following features are supported:
  * pattern matching in `instanceof`, permanent since Java 16. Use `-source 16` or higher to enable
  * record classes, permanent since Java 16. Use `-source 16` or higher to enable
  * sealed classes, permanent since Java 17. Use `-source 17` or higher to enable
- * pattern matching for `switch`, introduced as preview in JDK 17, and updated in Java 18 and 19. Use `-source 19 --enable-preview` to enable
- * `record` patterns, introduced as preview in JDK 19. Use `-source 19 --enable-preview` to enable
+ * pattern matching for `switch`, introduced as preview in JDK 17, and updated in JDK 18, 19, 20 and 21. Use `-source 21` to enable
+ * `record` patterns, introduced as preview in JDK 19, and updated in JDK 20 and 21. Use `-source 21` to enable
+ * unnamed local variables and patterns, introduced as preview in JDK 21. Use `-source 21 --enable-preview` to enable
 
 See "Preview Features" section below for more details.
 
@@ -87,12 +88,12 @@ To use this compiler, specify following in your `pom.xml` file build section:
                 <dependency>
                     <groupId>org.frgaal</groupId>
                     <artifactId>compiler-maven-plugin</artifactId>
-                    <version>19.0.1</version>
+                    <version>21.0.0</version>
                 </dependency>
             </dependencies>
             <configuration>
                 <compilerId>frgaal</compilerId>
-                <source>19</source>
+                <source>21</source>
                 <target>1.8</target>
                 <compilerArgs>
                     <arg>-Xlint:deprecation</arg>
@@ -128,8 +129,8 @@ Usage with Gradle DSL style
 -----------------
 
 You need gradle 6.8.x to be able to use this compiler.
-Gradle 6.8.x limits sourceCompatibility to 18; 
-to use 19, set it explicitly in _compilerArgs_ as shown below.
+Gradle 6.8.x limits sourceCompatibility to 18;
+to use 21, set it explicitly in _compilerArgs_ as shown below.
 To use this compiler, specify following in your `build.gradle` file:
 
 ```groovy
@@ -139,10 +140,10 @@ plugins {
 }
 
 targetCompatibility = '1.8'
-sourceCompatibility = '19'
+sourceCompatibility = '21'
 
 compileJava {
-    options.compilerArgs << '-Xlint:deprecation' << '--enable-preview' << '-source' << '19'
+    options.compilerArgs << '-Xlint:deprecation' << '--enable-preview' << '-source' << '21'
 }
 
 compileTestJava {
@@ -219,7 +220,7 @@ class Code {
   }
 }
 END
-$ jdk1.8.0/bin/java -jar compiler.jar -source 19 -target 11 Code.java
+$ jdk1.8.0/bin/java -jar compiler.jar -source 21 -target 11 Code.java
 ```
 
 To disable this behavior use `-bootclasspath`, `-Xbootclasspath` or `-system`
