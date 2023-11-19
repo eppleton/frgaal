@@ -34,9 +34,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import jdk.javadoc.internal.Versions;
 import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
+
+import org.frgaal.CollectionShims;
 
 /**
  * An HTML {@code <head>} element.
@@ -44,7 +47,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
  * Many methods return the current object, to facilitate fluent builder-style usage.
  */
 public class Head extends Content {
-    private final Runtime.Version docletVersion;
+    private final Versions.Version docletVersion;
     private final ZonedDateTime generatedDate;
     private final DocPath pathToRoot;
     private String title;
@@ -54,12 +57,12 @@ public class Head extends Content {
     private String generator;
     private boolean showTimestamp;
     private DocPath mainStylesheet;
-    private List<DocPath> additionalStylesheets = List.of();
+    private List<DocPath> additionalStylesheets = CollectionShims.list();
     private boolean index;
     private Script mainBodyScript;
     private final List<Script> scripts;
     // Scripts added via --add-script option
-    private List<DocPath> additionalScripts = List.of();
+    private List<DocPath> additionalScripts = CollectionShims.list();
     private final List<Content> extraContent;
     private boolean addDefaultScript = true;
     private DocPath canonicalLink;
@@ -73,7 +76,7 @@ public class Head extends Content {
      * @param path the path for the file that will include this HEAD element
      * @param docletVersion the doclet version
      */
-    public Head(DocPath path, Runtime.Version docletVersion, ZonedDateTime generatedDate) {
+    public Head(DocPath path, Versions.Version docletVersion, ZonedDateTime generatedDate) {
         this.docletVersion = docletVersion;
         this.generatedDate = generatedDate;
         pathToRoot = path.parent().invert();

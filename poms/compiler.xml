@@ -1,0 +1,34 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.frgaal</groupId>
+  <artifactId>compiler</artifactId>
+  <version>20.0.1</version>
+  <packaging>jar</packaging>
+ 
+  <name>frgaal compiler</name>
+  <description>The frgaal compiler</description>
+  <url>http://frgaal.org</url>
+ 
+  <licenses>
+    <license>
+      <name>GPL v2 with CPE</name>
+      <url>https://openjdk.java.net/legal/gplv2+ce.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+ 
+
+  <developers>
+    <developer>
+      <name>frgaal Developer</name>
+      <email>frgaal@frgaal.org</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/eppleton/frgaal.git</connection>
+    <developerConnection>scm:git:ssh://github.com:eppleton/frgaal.git</developerConnection>
+    <url>http://github.com/eppleton/frgaal/tree/master</url>
+  </scm>
+
+</project>

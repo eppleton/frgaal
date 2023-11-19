@@ -35,6 +35,7 @@ import javax.lang.model.element.Name;
 import com.sun.tools.javac.util.StringUtils;
 
 import static jdk.javadoc.internal.doclint.HtmlTag.Attr.*;
+import org.frgaal.CollectionShims;
 
 /**
  * Enum representing HTML tags.
@@ -553,11 +554,11 @@ public enum HtmlTag {
     private final Map<Attr,AttrKind> attrs;
 
     HtmlTag(BlockType blockType, EndKind endKind, AttrMap... attrMaps) {
-        this(ElemKind.OK, blockType, endKind, Set.of(), attrMaps);
+        this(ElemKind.OK, blockType, endKind, CollectionShims.set(), attrMaps);
     }
 
     HtmlTag(ElemKind elemKind, BlockType blockType, EndKind endKind, AttrMap... attrMaps) {
-        this(elemKind, blockType, endKind, Set.of(), attrMaps);
+        this(elemKind, blockType, endKind, CollectionShims.set(), attrMaps);
     }
 
     HtmlTag(BlockType blockType, EndKind endKind, Set<Flag> flags, AttrMap... attrMaps) {

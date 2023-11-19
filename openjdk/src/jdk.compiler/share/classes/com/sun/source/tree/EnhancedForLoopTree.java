@@ -25,7 +25,7 @@
 
 package com.sun.source.tree;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 /**
  * A tree node for an "enhanced" {@code for} loop statement.
@@ -52,7 +52,7 @@ public interface EnhancedForLoopTree extends StatementTree {
      *
      * @since 20
      */
-    @PreviewFeature(feature=PreviewFeature.Feature.RECORD_PATTERNS, reflective=true)
+//    @PreviewFeature(feature=PreviewFeature.Feature.RECORD_PATTERNS, reflective=true)
     public enum DeclarationKind {
         /** enum constant for local variable declarations */
         VARIABLE,
@@ -71,7 +71,7 @@ public interface EnhancedForLoopTree extends StatementTree {
      * @return the control variable or pattern
      * @since 20
      */
-    @PreviewFeature(feature=PreviewFeature.Feature.RECORD_PATTERNS, reflective=true)
+//    @PreviewFeature(feature=PreviewFeature.Feature.RECORD_PATTERNS, reflective=true)
     Tree getVariableOrRecordPattern();
 
     /**
@@ -91,6 +91,6 @@ public interface EnhancedForLoopTree extends StatementTree {
      * @return the kind of the declaration
      * @since 20
      */
-    @PreviewFeature(feature=PreviewFeature.Feature.RECORD_PATTERNS, reflective=true)
+//    @PreviewFeature(feature=PreviewFeature.Feature.RECORD_PATTERNS, reflective=true)
     DeclarationKind getDeclarationKind();
 }

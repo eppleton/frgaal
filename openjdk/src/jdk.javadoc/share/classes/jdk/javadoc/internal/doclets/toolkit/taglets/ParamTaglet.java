@@ -42,6 +42,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder.Result;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.CollectionShims;
 
 /**
  * A taglet that represents the {@code @param} tag.
@@ -80,7 +81,7 @@ public class ParamTaglet extends BaseTaglet implements InheritableTaglet {
         CommentHelper ch = configuration.utils.getCommentHelper(owner);
         Integer position = stringIntegerMap.get(ch.getParameterName(param));
         if (position == null) {
-            return new Output(null, null, List.of(), true);
+            return new Output(null, null, CollectionShims.list(), true);
         }
         // try to inherit description of the respective parameter in an overridden method
         try {
@@ -89,9 +90,9 @@ public class ParamTaglet extends BaseTaglet implements InheritableTaglet {
                             m -> Result.fromOptional(extract(configuration.utils, m, position, param.isTypeParameter())))
                     .toOptional();
             return r.map(result -> new Output(result.paramTree, result.method, result.paramTree.getDescription(), true))
-                    .orElseGet(() -> new Output(null, null, List.of(), true));
+                    .orElseGet(() -> new Output(null, null, CollectionShims.list(), true));
         } catch (DocFinder.NoOverriddenMethodsFound e) {
-            return new Output(null, null, List.of(), false);
+            return new Output(null, null, CollectionShims.list(), false);
         }
     }
 

@@ -86,10 +86,13 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexItem;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.StringShims;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils.PreviewFlagProvider;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
 
 import static com.sun.source.doctree.DocTree.Kind.LINK_PLAIN;
+import org.frgaal.ObjectsShims;
+import org.frgaal.PredicateShims;
 
 /**
  * The taglet writer that writes HTML.
@@ -388,7 +391,7 @@ public class TagletWriterImpl extends TagletWriter {
         boolean hasLongLabels = links.stream().anyMatch(this::isLongOrHasComma);
         var seeList = HtmlTree.UL(hasLongLabels ? HtmlStyle.tagListLong : HtmlStyle.tagList);
         links.stream()
-                .filter(Predicate.not(Content::isEmpty))
+                .filter(PredicateShims.not(Content::isEmpty))
                 .forEach(item -> seeList.add(HtmlTree.LI(item)));
 
         return new ContentBuilder(
@@ -487,7 +490,7 @@ public class TagletWriterImpl extends TagletWriter {
 
         // The signature from the @see tag. We will output this text when a label is not specified.
         Content text = plainOrCode(isLinkPlain,
-                Text.of(Objects.requireNonNullElse(refSignature, "")));
+                Text.of(ObjectsShims.requireNonNullElse(refSignature, "")));
 
         CommentHelper ch = utils.getCommentHelper(holder);
         TypeElement refClass = ch.getReferencedClass(ref);
@@ -643,12 +646,12 @@ public class TagletWriterImpl extends TagletWriter {
     protected Content snippetTagOutput(Element element, SnippetTree tag, StyledText content,
                                        String id, String lang) {
         var pre = new HtmlTree(TagName.PRE).setStyle(HtmlStyle.snippet);
-        if (id != null && !id.isBlank()) {
+        if (id != null && !StringShims.isBlank(id)) {
             pre.put(HtmlAttr.ID, id);
         }
         var code = new HtmlTree(TagName.CODE)
                 .addUnchecked(Text.EMPTY); // Make sure the element is always rendered
-        if (lang != null && !lang.isBlank()) {
+        if (lang != null && !StringShims.isBlank(lang)) {
             code.addStyle("language-" + lang);
         }
 
@@ -756,7 +759,7 @@ public class TagletWriterImpl extends TagletWriter {
         boolean hasLongLabels = links.stream().anyMatch(this::isLongOrHasComma);
         var specList = HtmlTree.UL(hasLongLabels ? HtmlStyle.tagListLong : HtmlStyle.tagList);
         links.stream()
-                .filter(Predicate.not(Content::isEmpty))
+                .filter(PredicateShims.not(Content::isEmpty))
                 .forEach(item -> specList.add(HtmlTree.LI(item)));
 
         return new ContentBuilder(
@@ -809,7 +812,7 @@ public class TagletWriterImpl extends TagletWriter {
         return HtmlTree.DT(contents.throws_);
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     private Content throwsTagOutput(Element element, ThrowsTree throwsTag, TypeMirror substituteType) {
         ContentBuilder body = new ContentBuilder();
         CommentHelper ch = utils.getCommentHelper(element);
@@ -861,7 +864,7 @@ public class TagletWriterImpl extends TagletWriter {
     @Override
     protected Content invalidTagOutput(String summary, Optional<String> detail) {
         return htmlWriter.invalidTagOutput(summary,
-                detail.isEmpty() || detail.get().isEmpty()
+                !detail.isPresent() || detail.get().isEmpty()
                         ? Optional.empty()
                         : Optional.of(Text.of(Text.normalizeNewlines(detail.get()))));
     }

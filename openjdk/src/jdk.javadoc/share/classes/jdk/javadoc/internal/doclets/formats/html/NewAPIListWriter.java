@@ -42,6 +42,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.NewAPIBuilder;
 
 import java.util.List;
+import org.frgaal.CollectionShims;
 
 import static com.sun.source.doctree.DocTree.Kind.SINCE;
 
@@ -155,7 +156,7 @@ public class NewAPIListWriter extends SummaryListWriter<NewAPIBuilder> {
     }
 
     private List<? extends DocTree> getSinceTree(Element element) {
-        return utils.hasDocCommentTree(element) ? utils.getBlockTags(element, SINCE) : List.of();
+        return utils.hasDocCommentTree(element) ? utils.getBlockTags(element, SINCE) : CollectionShims.list();
     }
 
     private static String getHeading(HtmlConfiguration configuration) {

@@ -52,6 +52,8 @@ import jdk.javadoc.internal.doclets.toolkit.taglets.snippet.ParseException;
 import jdk.javadoc.internal.doclets.toolkit.taglets.snippet.Parser;
 import jdk.javadoc.internal.doclets.toolkit.taglets.snippet.StyledText;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 /**
  * A taglet that represents the {@code @snippet} tag.
@@ -72,7 +74,7 @@ public class SnippetTaglet extends BaseTaglet {
                 if (tmp.put(id, language) != null)
                     throw new IllegalStateException(); // 1-1 correspondence
             }
-            languages = Map.copyOf(tmp);
+            languages = CollectionShims.mapCopyOf(tmp);
         }
 
         Language(String id) {
@@ -121,7 +123,6 @@ public class SnippetTaglet extends BaseTaglet {
 
     private static final class BadSnippetException extends Exception {
 
-        @java.io.Serial
         private static final long serialVersionUID = 1;
 
         private final transient DocTree tag;
@@ -186,7 +187,7 @@ public class SnippetTaglet extends BaseTaglet {
         AttributeTree region = attributes.get("region");
         if (region != null) {
             regionName = stringValueOf(region);
-            if (regionName.isBlank()) {
+            if (StringShims.isBlank(regionName)) {
                 throw new BadSnippetException(region, "doclet.tag.attribute.value.illegal",
                         "region", region.getValue());
             }
@@ -206,7 +207,7 @@ public class SnippetTaglet extends BaseTaglet {
                     ? stringValueOf((a = attributes.get(FILE)))
                     : stringValueOf((a = attributes.get(CLASS))).replace(".", "/") + ".java";
 
-            if (v.isBlank()) {
+            if (StringShims.isBlank(v)) {
                 throw new BadSnippetException(a, "doclet.tag.attribute.value.illegal",
                         containsFile ? FILE : CLASS, v);
             }
@@ -358,12 +359,12 @@ public class SnippetTaglet extends BaseTaglet {
      * would not be trivial to code.
      */
     private static String diff(String inline, String external) {
-        return """
-               ----------------- inline -------------------
-               %s
-               ----------------- external -----------------
-               %s
-               """.formatted(inline, external);
+        return String.format("""
+                             ----------------- inline -------------------
+                             %s
+                             ----------------- external -----------------
+                             %s
+                             """, inline, external);
     }
 
     private StyledText parse(Resources resources, Diags diags, Optional<Language> language, String content) throws ParseException {
@@ -428,8 +429,8 @@ public class SnippetTaglet extends BaseTaglet {
     private static StyledText toDisplayForm(StyledText source) {
         var sourceString = source.asCharSequence().toString();
         var result = new StyledText();
-        var originalLines = sourceString.lines().iterator();
-        var unindentedLines = sourceString.stripIndent().lines().iterator();
+        var originalLines = StringShims.lines(sourceString).iterator();
+        var unindentedLines = StringShims.lines(StringShims.stripIndent(sourceString)).iterator();
         // done; the rest of the method translates the stripIndent
         // transformation performed on a character sequence to the styled
         // text that this sequence originates from, line by line

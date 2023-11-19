@@ -38,6 +38,8 @@ import com.sun.tools.javac.util.JCDiagnostic.Error;
 import com.sun.tools.javac.util.JCDiagnostic.Fragment;
 
 import static com.sun.tools.javac.main.Option.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /** The source language version accepted.
  *
@@ -207,28 +209,47 @@ public enum Source {
      */
     public enum Feature {
 
+        @MinimalTarget(Target.JDK1_9)
         MODULES(JDK9, Fragments.FeatureModules, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         EFFECTIVELY_FINAL_VARIABLES_IN_TRY_WITH_RESOURCES(JDK9, Fragments.FeatureVarInTryWithResources, DiagKind.PLURAL),
         DEPRECATION_ON_IMPORT(MIN, JDK8),
+        @MinimalTarget(Target.JDK1_8)
         PRIVATE_SAFE_VARARGS(JDK9),
+        @MinimalTarget(Target.JDK1_8)
         DIAMOND_WITH_ANONYMOUS_CLASS_CREATION(JDK9, Fragments.FeatureDiamondAndAnonClass, DiagKind.NORMAL),
         UNDERSCORE_IDENTIFIER(MIN, JDK8),
+        @MinimalTarget(Target.JDK1_8)
         PRIVATE_INTERFACE_METHODS(JDK9, Fragments.FeaturePrivateIntfMethods, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         LOCAL_VARIABLE_TYPE_INFERENCE(JDK10),
+        @MinimalTarget(Target.JDK1_8)
         VAR_SYNTAX_IMPLICIT_LAMBDAS(JDK11, Fragments.FeatureVarSyntaxInImplicitLambda, DiagKind.PLURAL),
         IMPORT_ON_DEMAND_OBSERVABLE_PACKAGES(JDK1_2, JDK8),
+        @MinimalTarget(Target.JDK1_8)
         SWITCH_MULTIPLE_CASE_LABELS(JDK14, Fragments.FeatureMultipleCaseLabels, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         SWITCH_RULE(JDK14, Fragments.FeatureSwitchRules, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         SWITCH_EXPRESSION(JDK14, Fragments.FeatureSwitchExpressions, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         TEXT_BLOCKS(JDK15, Fragments.FeatureTextBlocks, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         PATTERN_MATCHING_IN_INSTANCEOF(JDK16, Fragments.FeaturePatternMatchingInstanceof, DiagKind.NORMAL),
+        @MinimalTarget(Target.JDK1_8)
         REIFIABLE_TYPES_INSTANCEOF(JDK16, Fragments.FeatureReifiableTypesInstanceof, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         RECORDS(JDK16, Fragments.FeatureRecords, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         SEALED_CLASSES(JDK17, Fragments.FeatureSealedClasses, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         CASE_NULL(JDK17, Fragments.FeatureCaseNull, DiagKind.NORMAL),
+        @MinimalTarget(Target.JDK1_8)
         PATTERN_SWITCH(JDK17, Fragments.FeaturePatternSwitch, DiagKind.PLURAL),
         REDUNDANT_STRICTFP(JDK17),
+        @MinimalTarget(Target.JDK1_8)
         UNCONDITIONAL_PATTERN_IN_INSTANCEOF(JDK19, Fragments.FeatureUnconditionalPatternsInInstanceof, DiagKind.PLURAL),
+        @MinimalTarget(Target.JDK1_8)
         RECORD_PATTERNS(JDK19, Fragments.FeatureDeconstructionPatterns, DiagKind.PLURAL),
         ;
 
@@ -239,6 +260,7 @@ public enum Source {
 
         private final Source minLevel;
         private final Source maxLevel;
+        private final Target minTarget;
         private final Fragment optFragment;
         private final DiagKind optKind;
 
@@ -259,11 +281,22 @@ public enum Source {
             this.maxLevel = maxLevel;
             this.optFragment = optFragment;
             this.optKind = optKind;
+            Target requiredTarget = minLevel.requiredTarget();
+            try {
+                MinimalTarget minTarget = Feature.class.getDeclaredField(name()).getAnnotation(MinimalTarget.class);
+                if (minTarget != null) {
+                    requiredTarget = minTarget.value();
+                }
+            } catch (NoSuchFieldException | SecurityException ex) {
+                //ignore - should happen?
+            }
+            this.minTarget = requiredTarget;
         }
 
-        public boolean allowedInSource(Source source) {
+        public boolean allowedInSource(Source source, Target target) {
             return source.compareTo(minLevel) >= 0 &&
-                    source.compareTo(maxLevel) <= 0;
+                    source.compareTo(maxLevel) <= 0 &&
+                    target.compareTo(minTarget) >= 0;
         }
 
         public boolean isPlural() {
@@ -314,5 +347,10 @@ public enum Source {
         case JDK20  -> RELEASE_20;
         default     -> null;
         };
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface MinimalTarget {
+        public Target value();
     }
 }

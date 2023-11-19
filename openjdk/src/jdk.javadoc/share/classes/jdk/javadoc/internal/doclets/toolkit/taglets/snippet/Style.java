@@ -28,7 +28,7 @@ package jdk.javadoc.internal.doclets.toolkit.taglets.snippet;
 /**
  * A style of a snippet text character.
  */
-public sealed interface Style {
+public interface Style { //XXX: sealed
 
     /**
      * A style that describes a link. Characters of this style are typically

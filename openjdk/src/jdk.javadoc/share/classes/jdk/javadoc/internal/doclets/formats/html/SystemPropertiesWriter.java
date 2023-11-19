@@ -26,6 +26,7 @@
 package jdk.javadoc.internal.doclets.formats.html;
 
 import com.sun.source.doctree.DocTree;
+import java.io.File;
 import jdk.javadoc.internal.doclets.formats.html.markup.BodyContents;
 import jdk.javadoc.internal.doclets.formats.html.markup.ContentBuilder;
 import jdk.javadoc.internal.doclets.formats.html.markup.Text;
@@ -46,6 +47,8 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import org.frgaal.StringShims;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 
@@ -154,10 +157,10 @@ public class SystemPropertiesWriter extends HtmlDocletWriter {
             // hashCode; putting instances of DocletElement in a map is not
             // incorrect, but might well be inefficient
             String t = titles.computeIfAbsent(element, utils::getHTMLTitle);
-            if (t.isBlank()) {
+            if (StringShims.isBlank(t)) {
                 // The user should probably be notified (a warning?) that this
                 // file does not have a title
-                Path p = Path.of(e.getFileObject().toUri());
+                Path p = new File(e.getFileObject().toUri()).toPath();
                 t = p.getFileName().toString();
             }
             ContentBuilder b = new ContentBuilder();

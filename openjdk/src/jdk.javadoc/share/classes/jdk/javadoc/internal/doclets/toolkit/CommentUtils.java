@@ -64,6 +64,7 @@ import com.sun.tools.javac.util.DefinedBy;
 import com.sun.tools.javac.util.DefinedBy.Api;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
+import org.frgaal.CollectionShims;
 
 /**
  * A utility class for handling documentation comments.
@@ -97,7 +98,7 @@ public class CommentUtils {
 
     public List<? extends DocTree> makePropertyDescriptionTree(List<? extends DocTree> content) {
         Name name = elementUtils.getName("propertyDescription");
-        return List.of(treeFactory.newUnknownBlockTagTree(name, content));
+        return CollectionShims.list(treeFactory.newUnknownBlockTagTree(name, content));
     }
 
     public LiteralTree makeCodeTree(String text) {
@@ -105,7 +106,7 @@ public class CommentUtils {
     }
 
     public List<? extends DocTree> makeFirstSentenceTree(String content) {
-        return List.of(treeFactory.newTextTree(content));
+        return CollectionShims.list(treeFactory.newTextTree(content));
     }
 
     public ParamTree makeParamTree(Name name, List<? extends DocTree> description) {
@@ -117,7 +118,7 @@ public class CommentUtils {
     }
 
     public DocTree makeSeeTree(String sig, Element e) {
-        return treeFactory.newSeeTree(List.of(treeFactory.newReferenceTree(sig)));
+        return treeFactory.newSeeTree(CollectionShims.list(treeFactory.newReferenceTree(sig)));
     }
 
     public TextTree makeTextTree(String content) {
@@ -148,12 +149,12 @@ public class CommentUtils {
             }
             Name name = elementUtils.getName(m.group(2));
             list.add(m.group(1) == null
-                    ? treeFactory.newStartElementTree(name, List.of(), m.group(3) != null)
+                    ? treeFactory.newStartElementTree(name, CollectionShims.list(), m.group(3) != null)
                     : treeFactory.newEndElementTree(name));
             start = m.end();
         }
         if (list == null) {
-            return List.of(treeFactory.newTextTree(s));
+            return CollectionShims.list(treeFactory.newTextTree(s));
         } else {
             if (start < s.length()) {
                 list.add(treeFactory.newTextTree(s.substring(start, s.length())));
@@ -261,7 +262,7 @@ public class CommentUtils {
                 makeDescriptionWithName("doclet.record_equals_doc.return", paramName));
 
         TreePath treePath = utils.getTreePath(ee.getEnclosingElement());
-        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, List.of(paramTree, returnTree));
+        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, CollectionShims.list(paramTree, returnTree));
         dcInfoMap.put(ee, new DocCommentInfo(treePath, docTree));
     }
 
@@ -292,12 +293,11 @@ public class CommentUtils {
      * @param ee the {@code hashCode} method
      */
     public void setRecordHashCodeTree(ExecutableElement ee) {
-        List<DocTree> fullBody = List.of(makeTextTreeForResource("doclet.record_hashCode_doc.fullbody"));
+        List<DocTree> fullBody = CollectionShims.list(makeTextTreeForResource("doclet.record_hashCode_doc.fullbody"));
 
-        DocTree returnTree = treeFactory.newReturnTree(
-                List.of(makeTextTreeForResource("doclet.record_hashCode_doc.return")));
+        DocTree returnTree = treeFactory.newReturnTree(CollectionShims.list(makeTextTreeForResource("doclet.record_hashCode_doc.return")));
 
-        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, List.of(returnTree));
+        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, CollectionShims.list(returnTree));
         dcInfoMap.put(ee, new DocCommentInfo(null, docTree));
     }
 
@@ -306,13 +306,13 @@ public class CommentUtils {
      * @param ee the {@code toString} method
      */
     public void setRecordToStringTree(ExecutableElement ee) {
-        List<DocTree> fullBody = List.of(
+        List<DocTree> fullBody = CollectionShims.list(
                 treeFactory.newTextTree(resources.getText("doclet.record_toString_doc.fullbody")));
 
-        DocTree returnTree = treeFactory.newReturnTree(List.of(
+        DocTree returnTree = treeFactory.newReturnTree(CollectionShims.list(
                 treeFactory.newTextTree(resources.getText("doclet.record_toString_doc.return"))));
 
-        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, List.of(returnTree));
+        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, CollectionShims.list(returnTree));
         dcInfoMap.put(ee, new DocCommentInfo(null, docTree));
     }
 
@@ -329,7 +329,7 @@ public class CommentUtils {
         DocTree returnTree = treeFactory.newReturnTree(
                     makeDescriptionWithComponent("doclet.record_accessor_doc.return", te, ee.getSimpleName()));
 
-        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, List.of(returnTree));
+        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, CollectionShims.list(returnTree));
         dcInfoMap.put(ee, new DocCommentInfo(null, docTree));
     }
 
@@ -343,7 +343,7 @@ public class CommentUtils {
         List<DocTree> fullBody =
             makeDescriptionWithComponent("doclet.record_field_doc.fullbody", te, ve.getSimpleName());
 
-        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, List.of());
+        DocCommentTree docTree = treeFactory.newDocCommentTree(fullBody, CollectionShims.list());
         dcInfoMap.put(ve, new DocCommentInfo(null, docTree));
     }
 
@@ -466,15 +466,14 @@ public class CommentUtils {
         Name A = elementUtils.getName("a");
         Name CODE = elementUtils.getName("code");
         Name HREF = elementUtils.getName("href");
-        List<DocTree> code = List.of(
-                treeFactory.newStartElementTree(CODE, List.of(), false),
+        List<DocTree> code = CollectionShims.list(treeFactory.newStartElementTree(CODE, CollectionShims.list(), false),
                 treeFactory.newTextTree(component.toString()),
                 treeFactory.newEndElementTree(CODE));
         if (hasParamForComponent(elem, component)) {
             DocTree href = treeFactory.newAttributeTree(HREF,
                     AttributeTree.ValueKind.DOUBLE,
-                    List.of(treeFactory.newTextTree("#param-" + component)));
-            result.add(treeFactory.newStartElementTree(A, List.of(href), false));
+                    CollectionShims.list(treeFactory.newTextTree("#param-" + component)));
+            result.add(treeFactory.newStartElementTree(A, CollectionShims.list(href), false));
             result.addAll(code);
             result.add(treeFactory.newEndElementTree(A));
         } else {
@@ -523,7 +522,7 @@ public class CommentUtils {
             Name CODE = elementUtils.getName("code");
             var list = new ArrayList<DocTree>();
             list.addAll(parse(text.substring(0, index)));
-            list.add(treeFactory.newStartElementTree(CODE, List.of(), false));
+            list.add(treeFactory.newStartElementTree(CODE, CollectionShims.list(), false));
             list.add(treeFactory.newTextTree(name.toString()))   ;
             list.add(treeFactory.newEndElementTree(CODE));
             list.addAll(parse(text.substring(index + 3)));

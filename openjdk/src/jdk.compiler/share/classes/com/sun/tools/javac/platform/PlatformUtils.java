@@ -27,6 +27,7 @@ package com.sun.tools.javac.platform;
 
 import com.sun.tools.javac.main.Arguments;
 import com.sun.tools.javac.platform.PlatformProvider.PlatformNotSupported;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
@@ -46,8 +47,7 @@ public class PlatformUtils {
                 separator != (-1) ? platformString.substring(0, separator) : platformString;
         String platformOptions =
                 separator != (-1) ? platformString.substring(separator + 1) : "";
-        Iterable<PlatformProvider> providers =
-                ServiceLoader.load(PlatformProvider.class, Arguments.class.getClassLoader());
+        Iterable<PlatformProvider> providers = Arrays.asList(new JDKPlatformProvider());
 
         return StreamSupport.stream(providers.spliterator(), false)
                             .filter(provider -> StreamSupport.stream(provider.getSupportedPlatformNames()
