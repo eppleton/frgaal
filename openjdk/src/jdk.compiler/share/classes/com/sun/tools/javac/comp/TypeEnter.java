@@ -56,9 +56,11 @@ import static com.sun.tools.javac.code.Scope.LookupKind.NON_RECURSIVE;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.CLASS;
 import static com.sun.tools.javac.code.TypeTag.ERROR;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.resources.CompilerProperties.Fragments;
 
 import static com.sun.tools.javac.code.TypeTag.*;
+import com.sun.tools.javac.main.JavaCompiler;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 
 import com.sun.tools.javac.util.Dependencies.CompletionCause;
@@ -113,6 +115,7 @@ public class TypeEnter implements Completer {
     private final Lint lint;
     private final TypeEnvs typeEnvs;
     private final Dependencies dependencies;
+    private final JavaCompiler javaCompiler;
     private final Preview preview;
 
     public static TypeEnter instance(Context context) {
@@ -140,15 +143,20 @@ public class TypeEnter implements Completer {
         lint = Lint.instance(context);
         typeEnvs = TypeEnvs.instance(context);
         dependencies = Dependencies.instance(context);
+        javaCompiler = JavaCompiler.instance(context);
         preview = Preview.instance(context);
         Source source = Source.instance(context);
-        allowDeprecationOnImport = Feature.DEPRECATION_ON_IMPORT.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowDeprecationOnImport = Feature.DEPRECATION_ON_IMPORT.allowedInSource(source, target);
+        hasRecordRuntime = target.hasRecordRuntime();
     }
 
     /**
      * Switch: should deprecation warnings be issued on import
      */
     boolean allowDeprecationOnImport;
+
+    boolean hasRecordRuntime;
 
     /** A flag to disable completion from time to time during member
      *  enter, as we only need to look up types.  This avoids
@@ -705,8 +713,10 @@ public class TypeEnter implements Completer {
                 : (sym.fullname == names.java_lang_Object)
                 ? Type.noType
                 : sym.isRecord()
+                ? hasRecordRuntime
                 ? attr.attribBase(extending = recordBase(tree.pos, sym), baseEnv,
                                   true, false, false)
+                : switch (0) { default: javaCompiler.recompileForVersion(env.toplevel.sourcefile, Target.JDK1_16); yield syms.objectType;}
                 : syms.objectType;
             }
             ct.supertype_field = modelMissingTypes(baseEnv, supertype, extending, false);

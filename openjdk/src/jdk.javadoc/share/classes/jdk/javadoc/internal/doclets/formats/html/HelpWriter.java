@@ -41,6 +41,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
 import jdk.javadoc.internal.doclets.toolkit.util.DocLink;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
+import org.frgaal.CollectionShims;
 
 
 /**
@@ -140,7 +141,7 @@ public class HelpWriter extends HtmlDocletWriter {
     @Override
     protected Navigation getNavBar(PageMode pageMode, Element element) {
         return super.getNavBar(pageMode, element)
-                .setSubNavLinks(() -> List.of(
+                .setSubNavLinks(() -> CollectionShims.list(
                         links.createLink(HtmlIds.HELP_NAVIGATION, contents.navHelpNavigation),
                         links.createLink(HtmlIds.HELP_PAGES, contents.navHelpPages))
                 );
@@ -456,7 +457,7 @@ public class HelpWriter extends HtmlDocletWriter {
 
     private HtmlTree newHelpSectionList(Content first, Content... rest) {
         var list = HtmlTree.UL(HtmlStyle.helpSectionList, HtmlTree.LI(first));
-        List.of(rest).forEach(i -> list.add(HtmlTree.LI(i)));
+        CollectionShims.list(rest).forEach(i -> list.add(HtmlTree.LI(i)));
         return list;
     }
 }

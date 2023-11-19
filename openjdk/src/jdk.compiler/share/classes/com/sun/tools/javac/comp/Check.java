@@ -79,6 +79,8 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.ElementKindVisitor14;
+import org.frgaal.CollectionShims;
+import org.frgaal.ObjectsShims;
 
 /** Type checking helper class for the attribution phase.
  *
@@ -166,9 +168,9 @@ public class Check {
 
         deferredLintHandler = DeferredLintHandler.instance(context);
 
-        allowModules = Feature.MODULES.allowedInSource(source);
-        allowRecords = Feature.RECORDS.allowedInSource(source);
-        allowSealed = Feature.SEALED_CLASSES.allowedInSource(source);
+        allowModules = Feature.MODULES.allowedInSource(source, target);
+        allowRecords = Feature.RECORDS.allowedInSource(source, target);
+        allowSealed = Feature.SEALED_CLASSES.allowedInSource(source, target);
     }
 
     /** Character for synthetic names
@@ -247,6 +249,18 @@ public class Check {
             } else {
                 deprecationHandler.report(pos, Warnings.HasBeenDeprecated(sym, sym.location()));
             }
+        }
+    }
+
+    public void reportWarningToRemovalHandler(DiagnosticPosition pos, Warning warning) {
+        if (!lint.isSuppressed(LintCategory.REMOVAL)) {
+            removalHandler.report(pos, warning);
+        }
+    }
+
+    public void reportWarningToDeprecationHandler(DiagnosticPosition pos, Warning warning) {
+        if (!lint.isSuppressed(LintCategory.DEPRECATION)) {
+            deprecationHandler.report(pos, warning);
         }
     }
 
@@ -853,7 +867,7 @@ public class Check {
                 t.isErroneous()) {
             return checkClassType(tree.clazz.pos(), t, true);
         } else {
-            if (tree.def != null && !Feature.DIAMOND_WITH_ANONYMOUS_CLASS_CREATION.allowedInSource(source)) {
+            if (tree.def != null && !Feature.DIAMOND_WITH_ANONYMOUS_CLASS_CREATION.allowedInSource(source, target)) {
                 log.error(DiagnosticFlag.SOURCE_LEVEL, tree.clazz.pos(),
                         Errors.CantApplyDiamond1(t, Feature.DIAMOND_WITH_ANONYMOUS_CLASS_CREATION.fragment(source.name)));
             }
@@ -952,7 +966,7 @@ public class Check {
         }
         if (hasTrustMeAnno && !isTrustMeAllowedOnMethod(m)) {
             if (varargElemType != null) {
-                JCDiagnostic msg = Feature.PRIVATE_SAFE_VARARGS.allowedInSource(source) ?
+                JCDiagnostic msg = Feature.PRIVATE_SAFE_VARARGS.allowedInSource(source, target) ?
                         diags.fragment(Fragments.VarargsTrustmeOnVirtualVarargs(m)) :
                         diags.fragment(Fragments.VarargsTrustmeOnVirtualVarargsFinalOnly(m));
                 log.error(tree,
@@ -979,7 +993,7 @@ public class Check {
             return (s.flags() & VARARGS) != 0 &&
                 (s.isConstructor() ||
                     (s.flags() & (STATIC | FINAL |
-                                  (Feature.PRIVATE_SAFE_VARARGS.allowedInSource(source) ? PRIVATE : 0) )) != 0);
+                                  (Feature.PRIVATE_SAFE_VARARGS.allowedInSource(source, target) ? PRIVATE : 0) )) != 0);
         }
 
     Type checkLocalVarType(DiagnosticPosition pos, Type t, Name name) {
@@ -3076,7 +3090,7 @@ public class Check {
 
         if (a.type.tsym.isAnnotationType()) {
             Optional<Set<Name>> applicableTargetsOp = getApplicableTargets(a, s);
-            if (!applicableTargetsOp.isEmpty()) {
+            if (applicableTargetsOp.isPresent()) {
                 Set<Name> applicableTargets = applicableTargetsOp.get();
                 boolean notApplicableOrIsTypeUseOnly = applicableTargets.isEmpty() ||
                         applicableTargets.size() == 1 && applicableTargets.contains(names.TYPE_USE);
@@ -3271,7 +3285,7 @@ public class Check {
     /* get a set of names for the default target */
     private Set<Name> getDefaultTargetSet() {
         if (defaultTargets == null) {
-            defaultTargets = Set.of(defaultTargetMetaInfo());
+            defaultTargets = CollectionShims.set(defaultTargetMetaInfo());
         }
 
         return defaultTargets;
@@ -3385,7 +3399,7 @@ public class Check {
          * we return that it is applicable and if it is erroneous that should imply
          * an error at the declaration site
          */
-        return targets.isEmpty() || targets.isPresent() && !targets.get().isEmpty();
+        return !targets.isPresent() || targets.isPresent() && !targets.get().isEmpty();
     }
 
     Optional<Set<Name>> getApplicableTargets(JCAnnotation a, Symbol s) {
@@ -3955,7 +3969,7 @@ public class Check {
             ((c.flags() & (ENUM | RECORD)) == 0) &&
             !c.isAnonymous() &&
             ((c.flags() & (PUBLIC | PROTECTED)) != 0) &&
-            Feature.MODULES.allowedInSource(source)) {
+            Feature.MODULES.allowedInSource(source, target)) {
             NestingKind nestingKind = c.getNestingKind();
             switch (nestingKind) {
                 case ANONYMOUS,
@@ -4090,7 +4104,7 @@ public class Check {
             if (!imp.staticImport && TreeInfo.name(imp.qualid) == names.asterisk) {
                 TypeSymbol tsym = ((JCFieldAccess)imp.qualid).selected.type.tsym;
                 if (tsym.kind == PCK && tsym.members().isEmpty() &&
-                    !(Feature.IMPORT_ON_DEMAND_OBSERVABLE_PACKAGES.allowedInSource(source) && tsym.exists())) {
+                    !(Feature.IMPORT_ON_DEMAND_OBSERVABLE_PACKAGES.allowedInSource(source, target) && tsym.exists())) {
                     log.error(DiagnosticFlag.RESOLVE_ERROR, imp.pos, Errors.DoesntExist(tsym));
                 }
             }
@@ -4587,12 +4601,12 @@ public class Check {
         }
 
         private static final Set<String> serialMethodNames =
-            Set.of("writeObject", "writeReplace",
+            CollectionShims.set("writeObject", "writeReplace",
                    "readObject",  "readObjectNoData",
                    "readResolve");
 
         private static final Set<String> serialFieldNames =
-            Set.of("serialVersionUID", "serialPersistentFields");
+            CollectionShims.set("serialVersionUID", "serialPersistentFields");
 
         // Type of serialPersistentFields
         private final Type OSF_TYPE = new Type.ArrayType(syms.objectStreamFieldType, syms.arrayClass);
@@ -4601,7 +4615,7 @@ public class Check {
 
         @Override
         public Void defaultAction(Element e, JCClassDecl p) {
-            throw new IllegalArgumentException(Objects.requireNonNullElse(e.toString(), ""));
+            throw new IllegalArgumentException(ObjectsShims.requireNonNullElse(e.toString(), ""));
         }
 
         @Override

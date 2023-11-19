@@ -394,10 +394,20 @@ public enum SourceVersion {
      * need to be updated accordingly.
      */
     private static SourceVersion getLatestSupported() {
-        int intVersion = Runtime.version().feature();
-        return (intVersion >= 11) ?
-            valueOf("RELEASE_" + Math.min(20, intVersion)):
-            RELEASE_10;
+        String runtimeSpecVersion = System.getProperty("java.specification.version");
+        if ("1.8".equals(runtimeSpecVersion)) {
+            runtimeSpecVersion = "8";
+        }
+//        int intVersion = Runtime.version().feature();
+//        return (intVersion >= 11) ?
+//            valueOf("RELEASE_" + Math.min(20, intVersion)):
+//            RELEASE_10;
+        try {
+            return valueOf("RELEASE_" + runtimeSpecVersion);
+        } catch (IllegalArgumentException ex) {
+            //presumably too new runtime:
+            return latest();
+        }
     }
 
     /**
@@ -620,6 +630,7 @@ public enum SourceVersion {
         }
     }
 
+    //JDK8-skip-start
     /**
      * {@return the latest source version that is usable under the
      * runtime version argument} If the runtime version's {@linkplain
@@ -648,10 +659,11 @@ public enum SourceVersion {
      * argument is greater than the feature of the platform version.
      * @since 18
      */
+    @SuppressWarnings("deprecation")
     public static SourceVersion valueOf(Runtime.Version rv) {
         // Could also implement this as a switch where a case was
         // added with each new release.
-        return valueOf("RELEASE_" + rv.feature());
+        return valueOf("RELEASE_" + rv.major());
     }
 
     /**
@@ -674,4 +686,5 @@ public enum SourceVersion {
             return null;
         }
     }
+    //JDK8-skip-end
 }

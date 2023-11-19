@@ -58,6 +58,8 @@ import com.sun.source.util.TreePath;
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder.Result;
 
+import static com.sun.source.doctree.DocTree.Kind.*;
+import org.frgaal.CollectionShims;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -402,7 +404,7 @@ public class CommentHelper {
         return new SimpleDocTreeVisitor<List<? extends DocTree>, Void>() {
 
             private List<DocTree> asList(String content) {
-                return List.of(configuration.cmtUtils.makeTextTree(content));
+                return CollectionShims.list(configuration.cmtUtils.makeTextTree(content));
             }
 
             @Override
@@ -502,7 +504,7 @@ public class CommentHelper {
 
             @Override
             protected List<? extends DocTree> defaultAction(DocTree node, Void p) {
-                return List.of();
+                return CollectionShims.list();
             }
         }.visit(dtree, null);
     }
@@ -542,7 +544,7 @@ public class CommentHelper {
                     Optional<ExecutableElement> optional = utils.getFullBody(m).isEmpty() ? Optional.empty() : Optional.of(m);
                     return Result.fromOptional(optional);
                 })).toOptional();
-        return inheritedDoc.isEmpty() || inheritedDoc.get().equals(ee)
+        return !inheritedDoc.isPresent() || inheritedDoc.get().equals(ee)
                 ? null
                 : utils.getCommentHelper(inheritedDoc.get()).getDocTreePath(dtree);
     }

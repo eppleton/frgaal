@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jdk.javadoc.internal.doclets.toolkit.Resources;
+import org.frgaal.CollectionShims;
 
 //
 // markup-comment = { markup-tag } [":"] ;
@@ -75,7 +76,7 @@ public final class MarkupParser {
         }
         skipWhitespace();
         if (ch != EOI) {
-            return List.of();
+            return CollectionShims.list();
         }
         return tags;
     }

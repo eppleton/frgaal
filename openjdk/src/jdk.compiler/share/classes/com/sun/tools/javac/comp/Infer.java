@@ -68,7 +68,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static com.sun.tools.javac.code.TypeTag.*;
-import java.util.Comparator;
 
 /** Helper class for type parameter inference, used by the attribution phase.
  *

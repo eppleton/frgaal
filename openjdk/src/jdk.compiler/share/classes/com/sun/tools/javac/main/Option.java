@@ -27,7 +27,7 @@ package com.sun.tools.javac.main;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.lang.module.ModuleDescriptor;
+//import java.lang.module.ModuleDescriptor;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -50,7 +50,7 @@ import java.util.stream.StreamSupport;
 
 import javax.lang.model.SourceVersion;
 
-import jdk.internal.misc.VM;
+//import jdk.internal.misc.VM;
 
 import com.sun.tools.doclint.DocLint;
 import com.sun.tools.javac.code.Lint;
@@ -370,7 +370,7 @@ public enum Option {
         }
     },
 
-    PREVIEW("--enable-preview", "opt.preview", STANDARD, BASIC),
+    PREVIEW("--enable-preview --enable-safe-preview", "opt.preview", STANDARD, BASIC),
 
     PROFILE("-profile", "opt.arg.profile", "opt.profile", STANDARD, BASIC) {
         @Override
@@ -725,7 +725,8 @@ public enum Option {
             } else {
                 // use official parser if available
                 try {
-                    ModuleDescriptor.Version.parse(arg);
+                    //XXX:
+//                    ModuleDescriptor.Version.parse(arg);
                 } catch (IllegalArgumentException e) {
                     throw helper.newInvalidValueException(Errors.BadValueForOption(option, arg));
                 }
@@ -780,55 +781,56 @@ public enum Option {
 
     MULTIRELEASE("--multi-release", "opt.arg.multi-release", "opt.multi-release", HIDDEN, FILEMANAGER),
 
-    INHERIT_RUNTIME_ENVIRONMENT("--inherit-runtime-environment", "opt.inherit_runtime_environment",
-            HIDDEN, BASIC) {
-        @Override
-        public void process(OptionHelper helper, String option) throws InvalidValueException {
-            String[] runtimeArgs = VM.getRuntimeArguments();
-            for (String arg : runtimeArgs) {
-                // Handle any supported runtime options; ignore all others.
-                // The runtime arguments always use the single token form, e.g. "--name=value".
-                for (Option o : getSupportedRuntimeOptions()) {
-                    if (o.matches(arg)) {
-                        switch (o) {
-                            case ADD_MODULES:
-                                int eq = arg.indexOf('=');
-                                Assert.check(eq > 0, () -> ("invalid runtime option:" + arg));
-                                // --add-modules=ALL-DEFAULT is not supported at compile-time
-                                // so remove it from list, and only process the rest
-                                // if the set is non-empty.
-                                // Note that --add-modules=ALL-DEFAULT is automatically added
-                                // by the standard javac launcher.
-                                String mods = Arrays.stream(arg.substring(eq + 1).split(","))
-                                        .filter(s -> !s.isEmpty() && !s.equals("ALL-DEFAULT"))
-                                        .collect(Collectors.joining(","));
-                                if (!mods.isEmpty()) {
-                                    String updatedArg = arg.substring(0, eq + 1) + mods;
-                                    o.handleOption(helper, updatedArg, Collections.emptyIterator());
-                                }
-                                break;
-                            default:
-                                o.handleOption(helper, arg, Collections.emptyIterator());
-                                break;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
-        private Option[] getSupportedRuntimeOptions() {
-            Option[] supportedRuntimeOptions = {
-                ADD_EXPORTS,
-                ADD_MODULES,
-                LIMIT_MODULES,
-                MODULE_PATH,
-                UPGRADE_MODULE_PATH,
-                PATCH_MODULE
-            };
-            return supportedRuntimeOptions;
-        }
-    };
+//    INHERIT_RUNTIME_ENVIRONMENT("--inherit-runtime-environment", "opt.inherit_runtime_environment",
+//            HIDDEN, BASIC) {
+//        @Override
+//        public void process(OptionHelper helper, String option) throws InvalidValueException {
+//            String[] runtimeArgs = VM.getRuntimeArguments();
+//            for (String arg : runtimeArgs) {
+//                // Handle any supported runtime options; ignore all others.
+//                // The runtime arguments always use the single token form, e.g. "--name=value".
+//                for (Option o : getSupportedRuntimeOptions()) {
+//                    if (o.matches(arg)) {
+//                        switch (o) {
+//                            case ADD_MODULES:
+//                                int eq = arg.indexOf('=');
+//                                Assert.check(eq > 0, () -> ("invalid runtime option:" + arg));
+//                                // --add-modules=ALL-DEFAULT is not supported at compile-time
+//                                // so remove it from list, and only process the rest
+//                                // if the set is non-empty.
+//                                // Note that --add-modules=ALL-DEFAULT is automatically added
+//                                // by the standard javac launcher.
+//                                String mods = Arrays.stream(arg.substring(eq + 1).split(","))
+//                                        .filter(s -> !s.isEmpty() && !s.equals("ALL-DEFAULT"))
+//                                        .collect(Collectors.joining(","));
+//                                if (!mods.isEmpty()) {
+//                                    String updatedArg = arg.substring(0, eq + 1) + mods;
+//                                    o.handleOption(helper, updatedArg, Collections.emptyIterator());
+//                                }
+//                                break;
+//                            default:
+//                                o.handleOption(helper, arg, Collections.emptyIterator());
+//                                break;
+//                        }
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//
+//        private Option[] getSupportedRuntimeOptions() {
+//            Option[] supportedRuntimeOptions = {
+//                ADD_EXPORTS,
+//                ADD_MODULES,
+//                LIMIT_MODULES,
+//                MODULE_PATH,
+//                UPGRADE_MODULE_PATH,
+//                PATCH_MODULE
+//            };
+//            return supportedRuntimeOptions;
+//        }
+//    }
+    ;
 
     /**
      * This exception is thrown when an invalid value is given for an option.

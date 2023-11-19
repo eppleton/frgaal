@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.frgaal.CollectionShims;
 
 /**
  * An action that replaces characters in text.
@@ -60,7 +61,7 @@ public final class Replace implements Action {
         String textString = text.asCharSequence().toString();
         Matcher matcher = pattern.matcher(textString);
         var replacements = new ArrayList<Replacement>();
-        StringBuilder b = new StringBuilder();
+        StringBuffer b = new StringBuffer();
         int off = 0; // cumulative offset caused by replacements (can become negative)
         while (matcher.find()) {
             int start = matcher.start();
@@ -74,7 +75,7 @@ public final class Replace implements Action {
         // there's no need to call matcher.appendTail(b)
         for (int i = replacements.size() - 1; i >= 0; i--) {
             Replacement r = replacements.get(i);
-            text.subText(r.start(), r.end()).replace(Set.of(), r.value());
+            text.subText(r.start(), r.end()).replace(CollectionShims.set(), r.value());
         }
     }
 }

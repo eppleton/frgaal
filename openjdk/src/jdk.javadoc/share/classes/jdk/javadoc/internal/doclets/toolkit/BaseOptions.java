@@ -51,6 +51,7 @@ import java.util.MissingResourceException;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jdk.javadoc.doclet.Doclet;
 import jdk.javadoc.doclet.Reporter;
@@ -58,6 +59,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocletConstants;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
+import org.frgaal.CollectionShims;
 
 /**
  * Storage for the format-independent options supported by the toolkit.
@@ -284,7 +286,7 @@ public abstract class BaseOptions {
      * Argument for command line option {@code --since}.
      * Specifies a list of release names for which to document API changes.
      */
-    private List<String> since = List.of();
+    private List<String> since = CollectionShims.list();
 
     /**
      * Argument for command line option {@code --since-label}.
@@ -348,7 +350,7 @@ public abstract class BaseOptions {
         Messages messages = config.getMessages();
         Reporter reporter = config.getReporter();
 
-        List<Option> options = List.of(
+        List<Option> options = CollectionShims.list(
                 new Option(resources, "-author") {
                     @Override
                     public boolean process(String opt, List<String> args) {
@@ -419,7 +421,7 @@ public abstract class BaseOptions {
                 new Option(resources, "-excludedocfilessubdir", 1) {
                     @Override
                     public boolean process(String opt, List<String> args) {
-                        excludedDocFileDirs.addAll(List.of(args.get(0).split("[,:]")));
+                        excludedDocFileDirs.addAll(CollectionShims.list(args.get(0).split("[,:]")));
                         return true;
                     }
                 },
@@ -536,7 +538,7 @@ public abstract class BaseOptions {
                 new Option(resources, "-noqualifier", 1) {
                     @Override
                     public boolean process(String opt, List<String> args) {
-                        excludedQualifiers.addAll(List.of(args.get(0).split("[,:]")));
+                        excludedQualifiers.addAll(CollectionShims.list(args.get(0).split("[,:]")));
                         return true;
                     }
                 },
@@ -585,7 +587,7 @@ public abstract class BaseOptions {
                 new Option(resources, "--since", 1) {
                     @Override
                     public boolean process(String opt, List<String> args) {
-                        since = Arrays.stream(args.get(0).split(",")).map(String::trim).toList();
+                        since = Arrays.stream(args.get(0).split(",")).map(String::trim).collect(Collectors.toList());
                         return true;
                     }
                 },
@@ -1052,7 +1054,7 @@ public abstract class BaseOptions {
      * Arguments for command line option {@code --since}.
      */
     public List<String> since() {
-        return List.copyOf(since);
+        return CollectionShims.listCopyOf(since);
     }
 
     /**

@@ -25,13 +25,13 @@
 
 package com.sun.source.tree;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 /**
  * A case label element that refers to an expression
  * @since 19
  */
-@PreviewFeature(feature=PreviewFeature.Feature.SWITCH_PATTERN_MATCHING, reflective=true)
+//@PreviewFeature(feature=PreviewFeature.Feature.SWITCH_PATTERN_MATCHING, reflective=true)
 public interface PatternCaseLabelTree extends CaseLabelTree {
 
     /**

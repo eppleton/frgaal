@@ -95,6 +95,14 @@ import static com.sun.tools.javac.util.JCDiagnostic.DiagnosticFlag.*;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 import com.sun.tools.javac.tree.JCTree.JCModuleDecl;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import javax.tools.Diagnostic;
+import javax.tools.FileObject;
+import javax.tools.ForwardingJavaFileManager;
 import com.sun.tools.javac.tree.JCTree.JCRecordPattern;
 import com.sun.tools.javac.tree.JCTree.JCSwitch;
 import com.sun.tools.javac.tree.JCTree.JCSwitchExpression;
@@ -264,6 +272,7 @@ public class JavaCompiler {
     /** The language version.
      */
     protected Source source;
+    protected Target target;
 
     /** The preview language version.
      */
@@ -399,6 +408,7 @@ public class JavaCompiler {
             log.error(Errors.CantAccess(ex.sym, ex.getDetailValue()));
         }
         source = Source.instance(context);
+        target = Target.instance(context);
         preview = Preview.instance(context);
         attr = Attr.instance(context);
         analyzer = Analyzer.instance(context);
@@ -688,7 +698,7 @@ public class JavaCompiler {
         if (sep == -1) {
             msym = modules.getDefaultModule();
             typeName = name;
-        } else if (Feature.MODULES.allowedInSource(source)) {
+        } else if (Feature.MODULES.allowedInSource(source, target)) {
             Name modName = names.fromString(name.substring(0, sep));
 
             msym = moduleFinder.findModule(modName);
@@ -873,8 +883,7 @@ public class JavaCompiler {
     private long start_msec = 0;
     public long elapsed_msec = 0;
 
-    public void compile(List<JavaFileObject> sourceFileObject)
-        throws Throwable {
+    public void compile(List<JavaFileObject> sourceFileObject) {
         compile(sourceFileObject, List.nil(), null, List.nil());
     }
 
@@ -963,6 +972,9 @@ public class JavaCompiler {
                 default:
                     Assert.error("unknown compile policy");
                 }
+            }
+            if (!shouldStop(CompileState.GENERATE)) {
+                compileSecondary();
             }
         } catch (Abort ex) {
             if (devVerbose)
@@ -1656,7 +1668,7 @@ public class JavaCompiler {
         for (Pair<Env<AttrContext>, JCClassDecl> x: queue) {
             Env<AttrContext> env = x.fst;
             JCClassDecl cdef = x.snd;
-
+            
             if (verboseCompilePolicy) {
                 printNote("[generate " + (sourceOutput ? " source" : "code") + " " + cdef.sym + "]");
             }
@@ -1765,6 +1777,68 @@ public class JavaCompiler {
             return r.translate(cdef);
         }
 
+        private boolean isSecondaryCompilation;
+        private final Map<Target, Set<JavaFileObject>> recompileTarget2Files = new HashMap<>();
+
+        public void recompileForVersion(JavaFileObject toRecompile, Target target) {
+            recompileTarget2Files.computeIfAbsent(target, x -> Collections.newSetFromMap(new IdentityHashMap<>())).add(toRecompile);
+        }
+
+        private void compileSecondary() {
+            if (isSecondaryCompilation) return ;
+            for (Entry<Target, Set<JavaFileObject>> e : recompileTarget2Files.entrySet()) {
+                try {
+                    JavacFileManager fm = (JavacFileManager)fileManager;
+                    Collection<? extends Path> outputPaths = fm.getLocationAsPaths(CLASS_OUTPUT);
+                    if (outputPaths == null || !outputPaths.iterator().hasNext()) {
+                        log.warning(Warnings.NoTargetNoMultirelease);
+                        return ;
+                    }
+                    Path output = outputPaths.iterator().next();
+                    if (modules.getDefaultModule().isUnnamed()) {
+                        Collection<Path> locations = new ArrayList<>();
+                        locations.add(output);
+                        locations.addAll(fm.getLocationAsPaths(StandardLocation.CLASS_PATH));
+                        fm.setLocationFromPaths(StandardLocation.CLASS_PATH, locations);
+                    }
+                    Context secondaryContext = new Context();
+                    Options newOptions = Options.instance(secondaryContext);
+                    newOptions.putAll(options);
+                    newOptions.put(TARGET, e.getKey().name);
+                    newOptions.put(PROC, "none");
+                    secondaryContext.put(Target.class, e.getKey());
+                    secondaryContext.put(Source.class, context.get(Source.class));
+                    Arguments.setCtSymPaths(secondaryContext, fm, source, e.getKey(), output);
+                    secondaryContext.put(JavaFileManager.class, new MultiReleaseJFM(fileManager, e.getKey().multiReleaseValue()));
+                    secondaryContext.put(DiagnosticListener.class, d -> {
+                        if (d.getKind() == Diagnostic.Kind.ERROR) {
+                            throw new InternalError("No errors expected: " + d);
+                        }
+                    });
+                    JavaCompiler secondaryCompiler = JavaCompiler.instance(secondaryContext);
+                    secondaryCompiler.isSecondaryCompilation = true;
+                    secondaryCompiler.compile(List.from(e.getValue()));
+                } catch (IOException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+        }
+
+        private static final class MultiReleaseJFM extends ForwardingJavaFileManager<JavaFileManager> {
+
+            private final String version;
+
+            public MultiReleaseJFM(JavaFileManager fileManager, String version) {
+                super(fileManager);
+                this.version = version;
+            }
+
+            @Override
+            public JavaFileObject getJavaFileForOutput(Location location, String className, Kind kind, FileObject sibling) throws IOException {
+                return super.getJavaFileForOutput(location, "META-INF.versions." + version + "." + className, kind, sibling);
+        }
+
+        }
     public void reportDeferredDiagnostics() {
         if (errorCount() == 0
                 && annotationProcessingOccurred
@@ -1870,6 +1944,20 @@ public class JavaCompiler {
                 throw fatalError;
             }
             closeables = List.nil();
+            Closeables closeablesServices = Closeables.instance(context);
+            for (Closeable c: closeablesServices.closeables) {
+                try {
+                    c.close();
+                } catch (IOException e) {
+                    // When javac uses JDK 7 as a baseline, this code would be
+                    // better written to set any/all exceptions from all the
+                    // Closeables as suppressed exceptions on the FatalError
+                    // that is thrown.
+                    JCDiagnostic msg = diagFactory.fragment(Fragments.FatalErrCantClose);
+                    throw new FatalError(msg, e);
+                }
+            }
+            closeablesServices.closeables = List.nil();
         }
     }
 

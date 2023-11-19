@@ -277,7 +277,11 @@ public class JavacFiler implements Filer, Closeable {
 
         @Override
         public void write(byte b[], int off, int len) throws IOException {
-            Objects.checkFromIndexSize(off, len, b.length);
+            int fromIndex = off;
+            int size = len;
+            int length = b.length;
+            if ((length | fromIndex | size) < 0 || size > length - fromIndex)
+                throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + ", size: " + size + ", length: " + length);
             out.write(b, off, len);
         }
 

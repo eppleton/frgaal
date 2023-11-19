@@ -95,6 +95,8 @@ import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Pair;
 import com.sun.tools.javac.util.Position;
 import com.sun.tools.javac.util.StringUtils;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 
 /**
@@ -137,7 +139,7 @@ public class DocTreeMaker implements DocTreeFactory {
         this.pos = Position.NOPOS;
         trees = JavacTrees.instance(context);
         referenceParser = new ReferenceParser(ParserFactory.instance(context));
-        sentenceBreakTags = Set.of("H1", "H2", "H3", "H4", "H5", "H6", "PRE", "P");
+        sentenceBreakTags = CollectionShims.set("H1", "H2", "H3", "H4", "H5", "H6", "PRE", "P");
     }
 
     /** Reassign current position.
@@ -550,7 +552,7 @@ public class DocTreeMaker implements DocTreeFactory {
                                 : null;
                         int sbreak = getSentenceBreak(s, peekedNext);
                         if (sbreak > 0) {
-                            s = s.substring(0, sbreak).stripTrailing();
+                            s = StringShims.stripTrailing(s.substring(0, sbreak));
                             DCText text = this.at(spos).newTextTree(s);
                             fs.add(text);
                             foundFirstSentence = true;
@@ -566,7 +568,7 @@ public class DocTreeMaker implements DocTreeFactory {
                             boolean sbrk = isSentenceBreak(peekedNext, false);
                             if (sbrk) {
                                 DocTree next = itr.next();
-                                s = s.stripTrailing();
+                                s = StringShims.stripTrailing(s);
                                 DCText text = this.at(spos).newTextTree(s);
                                 fs.add(text);
                                 body.add((DCTree) next);

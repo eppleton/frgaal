@@ -203,13 +203,13 @@ public class HtmlConfiguration extends BaseConfiguration {
         messages = new Messages(this, msgResources);
         options = new HtmlOptions(this);
 
-        Runtime.Version v;
-        try {
+        Versions.Version v;
+//        try {
             v = Versions.javadocVersion();
-        } catch (RuntimeException e) {
-            assert false : e;
-            v = Runtime.version(); // arguably, the only sensible default
-        }
+//        } catch (RuntimeException e) {
+//            assert false : e;
+//            v = Runtime.version(); // arguably, the only sensible default
+//        }
         docletVersion = v;
 
         conditionalPages = EnumSet.noneOf(ConditionalPage.class);
@@ -222,10 +222,10 @@ public class HtmlConfiguration extends BaseConfiguration {
         htmlIds = new HtmlIds(this);
     }
 
-    private final Runtime.Version docletVersion;
+    private final Versions.Version docletVersion;
 
     @Override
-    public Runtime.Version getDocletVersion() {
+    public Versions.Version getDocletVersion() {
         return docletVersion;
     }
 

@@ -236,6 +236,8 @@ public class CreateSymbols {
         stripNonExistentAnnotations(data);
         splitHeaders(data.classes);
 
+        injectEnhancedAnnotations(data);
+
         Map<String, Map<Character, String>> package2Version2Module = new HashMap<>();
         Map<String, Set<FileData>> directory2FileData = new TreeMap<>();
 
@@ -792,6 +794,48 @@ public class CreateSymbols {
             throws IOException {
         for (String ver : versions) {
             writeModule(directory2FileData, moduleDescription, header, ver);
+        }
+    }
+
+    private void injectEnhancedAnnotations(LoadDescriptions data) {
+        String versions = data.versions.stream().sorted((p1, p2) -> p1.version.compareTo(p2.version)).map(p -> p.version).collect(Collectors.joining());
+        for (ClassDescription clazz : data.classes.classes) {
+            injectEnhancedAnnotations(clazz.header, h -> clazz.name, versions);
+            injectEnhancedAnnotations(clazz.fields, f -> f.name + ":" + f.descriptor, versions);
+            injectEnhancedAnnotations(clazz.methods, m -> m.name + ":" + m.descriptor, versions);
+        }
+    }
+
+    private <T extends FeatureDescription> void injectEnhancedAnnotations(List<T> features, Function<T, String> computeDescription, String versions) {
+        Map<String, List<T>> description2Feature = features.stream().collect(Collectors.groupingBy(computeDescription));
+        for (int i = 0; i < versions.length() - 1; i++) {
+            char version = versions.charAt(i);
+            char next = versions.charAt(i + 1);
+            for (T feature : features) {
+                String featureDesc = computeDescription.apply(feature);
+                if (feature.versions.indexOf(version) >= 0) {
+                    if (description2Feature.get(featureDesc).stream().noneMatch(f -> f.versions.indexOf(next) >= 0)) {
+                        doInjectAnnotation(description2Feature, featureDesc, versions.substring(0, i + 1), new AnnotationDescription("Lfrgaal/internal/Future+Removed+Annotation;", Collections.singletonMap("value", Integer.parseInt("" + next, Character.MAX_RADIX))));
+                    }
+                    if (!feature.deprecated && description2Feature.get(featureDesc).stream().anyMatch(f -> f.versions.indexOf(next) >= 0 && f.deprecated)) {
+                        doInjectAnnotation(description2Feature, featureDesc, versions.substring(0, i + 1), new AnnotationDescription("Lfrgaal/internal/Future+Deprecated+Annotation;", Collections.singletonMap("value", Integer.parseInt("" + next, Character.MAX_RADIX))));
+                    }
+                }
+            }
+        }
+    }
+
+    private <T extends FeatureDescription> void doInjectAnnotation(Map<String, List<T>> description2Feature, String featureDesc, String oldVersions, AnnotationDescription annotation) {
+        for (char prev : oldVersions.toCharArray()) {
+            description2Feature.get(featureDesc)
+                    .stream()
+                    .filter(f -> f.versions.indexOf(prev) >= 0)
+                    .forEach(f -> {
+                        if (f.classAnnotations == null) {
+                            f.classAnnotations = new ArrayList<>();
+                        }
+                        f.classAnnotations.add(annotation);
+                    });
         }
     }
 

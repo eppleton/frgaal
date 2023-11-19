@@ -40,6 +40,8 @@ import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Options;
 import jdk.javadoc.internal.tool.Start;
 
+import org.frgaal.CollectionShims;
+
 /**
  * Provides access to functionality specific to the JDK documentation tool,
  * javadoc.
@@ -62,9 +64,9 @@ public class JavadocTaskImpl implements DocumentationTask {
         this.context = context;
         this.docletClass = docletClass;
 
-        this.options = (options == null) ? Set.of()
+        this.options = (options == null) ? CollectionShims.set()
                 : nullCheck(options);
-        this.fileObjects = (fileObjects == null) ? Set.of()
+        this.fileObjects = (fileObjects == null) ? CollectionShims.set()
                 : nullCheck(fileObjects);
         setLocale(Locale.getDefault());
     }

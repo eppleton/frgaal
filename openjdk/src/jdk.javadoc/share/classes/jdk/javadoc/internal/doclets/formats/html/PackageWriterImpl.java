@@ -54,6 +54,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
+import org.frgaal.CollectionShims;
 
 /**
  * Class to generate file for each package contents in the right-hand
@@ -188,7 +189,7 @@ public class PackageWriterImpl extends HtmlDocletWriter
                 contents.moduleLabel);
         return super.getNavBar(pageMode, element)
                 .setNavLinkModule(linkContent)
-                .setSubNavLinks(() -> List.of(
+                .setSubNavLinks(() -> CollectionShims.list(
                         links.createLink(HtmlIds.PACKAGE_DESCRIPTION, contents.navDescription,
                                 !utils.getFullBody(packageElement).isEmpty() && !options.noComment()),
                         links.createLink(HtmlIds.RELATED_PACKAGE_SUMMARY, contents.relatedPackages,
