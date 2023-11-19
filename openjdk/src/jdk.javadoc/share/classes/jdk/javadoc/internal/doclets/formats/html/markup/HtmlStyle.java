@@ -26,6 +26,7 @@
 package jdk.javadoc.internal.doclets.formats.html.markup;
 
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -1060,9 +1061,14 @@ public enum HtmlStyle {
     private final String cssName;
 
     HtmlStyle() {
-        cssName = Pattern.compile("\\p{Upper}")
-                .matcher(toString())
-                .replaceAll(mr -> "-" + mr.group().toLowerCase(Locale.US));
+        Matcher m = Pattern.compile("\\p{Upper}")
+                .matcher(toString());
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            m.appendReplacement(sb, "-" + m.group().toLowerCase(Locale.US));
+        }
+        m.appendTail(sb);
+        cssName = sb.toString();
     }
 
     HtmlStyle(String cssName) {

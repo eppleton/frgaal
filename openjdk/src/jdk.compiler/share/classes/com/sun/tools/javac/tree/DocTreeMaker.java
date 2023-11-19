@@ -94,6 +94,8 @@ import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Pair;
 import com.sun.tools.javac.util.Position;
 import com.sun.tools.javac.util.StringUtils;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 
 /**
@@ -527,7 +529,7 @@ public class DocTreeMaker implements DocTreeFactory {
 
         // A subset of block tags, which acts as sentence breakers, appearing
         // anywhere but the zero'th position in the first sentence.
-        static final Set<String> sentenceBreakTags = Set.of(
+        static final Set<String> sentenceBreakTags = CollectionShims.set(
                 "H1", "H2", "H3", "H4", "H5", "H6",
                 "PRE", "P");
 
@@ -543,7 +545,7 @@ public class DocTreeMaker implements DocTreeFactory {
          */
         Pair<List<DCTree>, List<DCTree>> splitBody(List<? extends DocTree> list) {
             if (list.isEmpty()) {
-                return new Pair<>(List.of(), List.of());
+                return new Pair<>(CollectionShims.list(), CollectionShims.list());
             }
             // pos is modified as we create trees, therefore
             // we save the pos and restore it later.
@@ -572,7 +574,7 @@ public class DocTreeMaker implements DocTreeFactory {
                                     : null;
                             int sbreak = getSentenceBreak(s, peekedNext);
                             if (sbreak > 0) {
-                                var fsPart = m.at(dtPos).newTextTree(s.substring(0, sbreak).stripTrailing());
+                                var fsPart = m.at(dtPos).newTextTree(StringShims.stripTrailing(s.substring(0, sbreak)));
                                 fs.add(fsPart);
                                 int offsetPos = skipWhiteSpace(s, sbreak);
                                 if (offsetPos > 0) {
@@ -584,7 +586,7 @@ public class DocTreeMaker implements DocTreeFactory {
                                 // if the next doctree is a break, remove trailing spaces
                                 if (isSentenceBreak(peekedNext, false)) {
                                     DCTree next = iter.next();
-                                    DCText fsPart = m.at(dtPos).newTextTree(s.stripTrailing());
+                                    DCText fsPart = m.at(dtPos).newTextTree(StringShims.stripTrailing(s));
                                     fs.add(fsPart);
                                     body.add(next);
                                     foundFirstSentence = true;

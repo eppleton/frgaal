@@ -26,7 +26,7 @@
 package com.sun.source.util;
 
 import com.sun.source.tree.*;
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 /**
  * A simple visitor for tree nodes.
@@ -636,7 +636,7 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
      * @return  the result of {@code defaultAction}
      */
     @Override
-    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES, reflective=true)
+//    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES, reflective=true)
     public R visitStringTemplate(StringTemplateTree node, P p) {
         return defaultAction(node, p);
     }
@@ -652,7 +652,7 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
      * @since 21
      */
     @Override
-    @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED)
+//    @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED)
     public R visitAnyPattern(AnyPatternTree node, P p) {
         return defaultAction(node, p);
     }

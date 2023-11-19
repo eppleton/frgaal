@@ -42,6 +42,7 @@ import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder.Result;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.CollectionShims;
 
 /**
  * A custom single-argument block tag.
@@ -171,9 +172,9 @@ public class SimpleTaglet extends BaseTaglet implements InheritableTaglet {
             var r = docFinder.trySearch((ExecutableElement) owner,
                     m -> Result.fromOptional(extractFirst(m, configuration.utils))).toOptional();
             return r.map(result -> new Output(result.tag, result.method, result.description, true))
-                    .orElseGet(()->new Output(null, null, List.of(), true));
+                    .orElseGet(()->new Output(null, null, CollectionShims.list(), true));
         } catch (DocFinder.NoOverriddenMethodsFound e) {
-            return new Output(null, null, List.of(), false);
+            return new Output(null, null, CollectionShims.list(), false);
         }
     }
 

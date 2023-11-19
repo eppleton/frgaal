@@ -62,6 +62,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.NewAPIBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.PreviewAPIListBuilder;
+import org.frgaal.PathShims;
 
 /**
  * The class with "start" method, calls individual Writers.
@@ -337,8 +338,8 @@ public class HtmlDoclet extends AbstractDoclet {
         String legalNotices = configuration.getOptions().legalNotices();
         switch (legalNotices) {
             case "", "default" -> {
-                Path javaHome = Path.of(System.getProperty("java.home"));
-                legalNoticesDir = javaHome.resolve("legal").resolve(getClass().getModule().getName());
+                Path javaHome = PathShims.of(System.getProperty("java.home"));
+                legalNoticesDir = javaHome.resolve("legal").resolve("jdk.javadoc"/*getClass().getModule().getName()*/);
             }
 
             case "none" -> {
@@ -347,7 +348,7 @@ public class HtmlDoclet extends AbstractDoclet {
 
             default -> {
                 try {
-                    legalNoticesDir = Path.of(legalNotices);
+                    legalNoticesDir = PathShims.of(legalNotices);
                 } catch (InvalidPathException e) {
                     messages.error("doclet.Error_invalid_path_for_legal_notices",
                             legalNotices, e.getMessage());

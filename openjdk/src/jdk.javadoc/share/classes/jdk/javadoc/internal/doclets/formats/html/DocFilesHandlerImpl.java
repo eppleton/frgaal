@@ -54,6 +54,8 @@ import java.util.List;
 
 import jdk.javadoc.internal.doclets.formats.html.Navigation.PageMode;
 
+import org.frgaal.CollectionShims;
+
 public class DocFilesHandlerImpl implements DocFilesHandler {
 
     public final Element element;
@@ -205,7 +207,7 @@ public class DocFilesHandlerImpl implements DocFilesHandler {
                 .setHeader(docletWriter.getHeader(PageMode.DOC_FILE, element))
                 .addMainContent(pageContent)
                 .setFooter(docletWriter.getFooter()));
-        docletWriter.printHtmlDocument(List.of(), null, localTagsContent, List.of(), htmlContent);
+        docletWriter.printHtmlDocument(CollectionShims.list(), null, localTagsContent, CollectionShims.list(), htmlContent);
     }
 
 

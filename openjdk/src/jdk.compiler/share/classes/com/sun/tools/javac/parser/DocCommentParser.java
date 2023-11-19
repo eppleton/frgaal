@@ -25,7 +25,7 @@
 
 package com.sun.tools.javac.parser;
 
-import java.io.Serial;
+//import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +63,7 @@ import static com.sun.tools.javac.util.LayoutCharacters.EOI;
  */
 public class DocCommentParser {
     static class ParseException extends Exception {
-        @Serial
+//        @Serial
         private static final long serialVersionUID = 0;
         final int pos;
 

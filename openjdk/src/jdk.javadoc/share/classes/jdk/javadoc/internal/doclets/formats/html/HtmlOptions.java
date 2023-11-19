@@ -38,6 +38,7 @@ import jdk.javadoc.internal.doclets.toolkit.Resources;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFile;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 import jdk.javadoc.internal.doclint.DocLint;
+import org.frgaal.CollectionShims;
 
 /**
  * Storage for all options supported by the
@@ -210,7 +211,7 @@ public class HtmlOptions extends BaseOptions {
         Messages messages = config.getMessages();
         Resources resources = messages.getResources();
 
-        List<Option> options = List.of(
+        List<Option> options = CollectionShims.list(
                 new Option(resources, "--add-script", 1) {
                     @Override
                     public boolean process(String opt, List<String> args) {

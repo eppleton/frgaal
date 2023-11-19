@@ -107,7 +107,7 @@ public enum Target {
             Options options = Options.instance(context);
             String targetString = options.get(TARGET);
             if (targetString != null) instance = lookup(targetString);
-            if (instance == null) instance = DEFAULT;
+            if (instance == null) instance = FRGAAL_DEFAULT;
             context.put(targetKey, instance);
         }
         return instance;
@@ -140,6 +140,8 @@ public enum Target {
         this.majorVersion = majorVersion;
         this.minorVersion = minorVersion;
     }
+
+    public static final Target FRGAAL_DEFAULT = JDK1_8;
 
     public static Target lookup(String name) {
         return tab.get(name);
@@ -204,7 +206,15 @@ public enum Target {
     /** Does the target VM support sealed types
      */
     public boolean hasSealedClasses() {
-        return compareTo(JDK1_15) >= 0;
+        return compareTo(JDK1_17) >= 0;
+    }
+
+    public boolean hasRecordRuntime() {
+        return compareTo(JDK1_16) >= 0;
+    }
+
+    public boolean supportsSerializableRecords() {
+        return compareTo(JDK1_16) >= 0;
     }
 
     /** Is the ACC_STRICT bit redundant and obsolete

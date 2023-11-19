@@ -25,7 +25,7 @@
 
 package com.sun.source.tree;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 /**
  * A visitor of trees, in the style of the visitor design pattern.
@@ -265,7 +265,7 @@ public interface TreeVisitor<R,P> {
      * @param p a parameter value
      * @return a result value
      */
-    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES, reflective=true)
+//    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES, reflective=true)
     R visitStringTemplate(StringTemplateTree node, P p);
 
     /**
@@ -275,7 +275,7 @@ public interface TreeVisitor<R,P> {
      * @return a result value
      * @since 21
      */
-    @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED)
+//    @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED)
     R visitAnyPattern(AnyPatternTree node, P p);
 
     /**

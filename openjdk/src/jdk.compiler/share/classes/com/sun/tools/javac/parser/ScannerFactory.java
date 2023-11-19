@@ -30,6 +30,7 @@ import java.nio.CharBuffer;
 import com.sun.tools.javac.code.Lint;
 import com.sun.tools.javac.code.Preview;
 import com.sun.tools.javac.code.Source;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Names;
@@ -58,6 +59,7 @@ public class ScannerFactory {
     final Log log;
     final Names names;
     final Source source;
+    final Target target;
     final Preview preview;
     final Tokens tokens;
     final Lint lint;
@@ -69,6 +71,7 @@ public class ScannerFactory {
         this.log = Log.instance(context);
         this.names = Names.instance(context);
         this.source = Source.instance(context);
+        this.target = Target.instance(context);
         this.preview = Preview.instance(context);
         this.tokens = Tokens.instance(context);
         this.lint = Lint.instance(context);

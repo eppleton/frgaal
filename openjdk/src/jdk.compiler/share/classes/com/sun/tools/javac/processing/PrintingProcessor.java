@@ -297,7 +297,7 @@ public class PrintingProcessor extends AbstractProcessor {
                          e.getEnclosedElements()
                          .stream()
                          .filter(elt -> elementUtils.getOrigin(elt) == Elements.Origin.EXPLICIT )
-                         .toList() ) )
+                         .collect(Collectors.toList()) ) )
                     this.visit(element);
             }
 
@@ -315,7 +315,7 @@ public class PrintingProcessor extends AbstractProcessor {
             if (kind == ENUM_CONSTANT)
                 writer.print(e.getSimpleName());
             else {
-                writer.print(e.asType().toString() + " " + (e.getSimpleName().isEmpty() ? "_" : e.getSimpleName()));
+                writer.print(e.asType().toString() + " " + (e.getSimpleName().length() == 0 ? "_" : e.getSimpleName()));
                 Object constantValue  = e.getConstantValue();
                 if (constantValue != null) {
                     writer.print(" = ");

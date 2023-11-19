@@ -28,6 +28,7 @@ package jdk.javadoc.internal.doclets.formats.html;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ModuleElement;
@@ -362,7 +363,7 @@ public class Navigation {
         switch (documentedPage) {
             case MODULE, PACKAGE, CLASS, HELP -> {
                 List<? extends Content> listContents = subNavLinks.getSubNavLinks()
-                        .stream().map(HtmlTree::LI).toList();
+                        .stream().map(HtmlTree::LI).collect(Collectors.toList());
                 if (!listContents.isEmpty()) {
                 Content label = switch (documentedPage) {
                         case MODULE -> contents.moduleSubNavLabel;

@@ -59,6 +59,7 @@ import static com.sun.tools.javac.code.TypeTag.*;
 import static com.sun.tools.javac.main.Option.*;
 
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
+import org.frgaal.CollectionShims;
 
 /** This class provides operations to map an internal symbol table graph
  *  rooted in a ClassSymbol into a classfile.
@@ -923,7 +924,8 @@ public class ClassWriter extends ClassFile {
      */
     int writePermittedSubclassesIfNeeded(ClassSymbol csym) {
         if (csym.permitted.nonEmpty()) {
-            int alenIdx = writeAttr(names.PermittedSubclasses);
+            int alenIdx = writeAttr(target.hasSealedClasses() ? names.PermittedSubclasses
+                                                              : names.FrgaalPermittedSubclasses);
             databuf.appendChar(csym.permitted.size());
             for (Symbol c : csym.permitted) {
                 databuf.appendChar(poolWriter.putClass((ClassSymbol) c));
@@ -941,7 +943,7 @@ public class ClassWriter extends ClassFile {
         int lastBootstrapMethods;
         do {
             lastBootstrapMethods = poolWriter.bootstrapMethods.size();
-            for (BsmKey bsmKey : java.util.List.copyOf(poolWriter.bootstrapMethods.keySet())) {
+            for (BsmKey bsmKey : CollectionShims.listCopyOf(poolWriter.bootstrapMethods.keySet())) {
                 for (LoadableConstant arg : bsmKey.staticArgs) {
                     poolWriter.putConstant(arg);
                 }
@@ -1673,7 +1675,7 @@ public class ClassWriter extends ClassFile {
         acount += writeExtraAttributes(c);
 
         poolbuf.appendInt(JAVA_MAGIC);
-        if (preview.isEnabled() && preview.usesPreview(c.sourcefile)) {
+        if (preview.isEnabled() && target == Target.DEFAULT && preview.usesPreview(c.sourcefile)) {
             poolbuf.appendChar(ClassFile.PREVIEW_MINOR_VERSION);
         } else {
             poolbuf.appendChar(target.minorVersion);
@@ -1691,9 +1693,7 @@ public class ClassWriter extends ClassFile {
             acount += writeRecordAttribute(c);
         }
 
-        if (target.hasSealedClasses()) {
-            acount += writePermittedSubclassesIfNeeded(c);
-        }
+        acount += writePermittedSubclassesIfNeeded(c);
 
         if (!poolWriter.bootstrapMethods.isEmpty()) {
             writeBootstrapMethods();

@@ -40,6 +40,7 @@ import com.sun.tools.javac.util.Options;
 
 import static jdk.javadoc.internal.tool.Main.Result.OK;
 import static jdk.javadoc.internal.tool.ToolOptions.ToolOption.Kind.*;
+import org.frgaal.CollectionShims;
 
 /**
  * Storage and support for javadoc tool options, as distinct from
@@ -251,8 +252,7 @@ public class ToolOptions {
         return null;
     }
 
-    private List<ToolOption> supportedOptions = List.of(
-            // ----- options for underlying compiler -----
+    private List<ToolOption> supportedOptions = CollectionShims.list(// ----- options for underlying compiler -----
 
             new ToolOption("-bootclasspath", STANDARD, true) {
                 @Override
@@ -327,7 +327,7 @@ public class ToolOptions {
             new ToolOption("--module", STANDARD, true) {
                 @Override
                 public void process(String arg) {
-                    modules.addAll(List.of(arg.split(",")));
+                    modules.addAll(CollectionShims.list(arg.split(",")));
                 }
             },
 
@@ -417,14 +417,14 @@ public class ToolOptions {
             new ToolOption("-subpackages", STANDARD, true) {
                 @Override
                 public void process(String arg) {
-                    subpackages.addAll(List.of(arg.split(":")));
+                    subpackages.addAll(CollectionShims.list(arg.split(":")));
                 }
             },
 
             new ToolOption("-exclude", STANDARD, true) {
                 @Override
                 public void process(String arg) {
-                    excludes.addAll(List.of(arg.split(":")));
+                    excludes.addAll(CollectionShims.list(arg.split(":")));
                 }
             },
 

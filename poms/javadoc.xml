@@ -1,0 +1,42 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.frgaal</groupId>
+  <artifactId>javadoc</artifactId>
+  <version>21.0.0</version>
+  <packaging>jar</packaging>
+ 
+  <name>frgaal javadoc</name>
+  <description>The frgaal javadoc</description>
+  <url>http://frgaal.org</url>
+ 
+  <licenses>
+    <license>
+      <name>GPL v2 with CPE</name>
+      <url>https://openjdk.java.net/legal/gplv2+ce.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+ 
+
+  <developers>
+    <developer>
+      <name>frgaal Developer</name>
+      <email>frgaal@frgaal.org</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/eppleton/frgaal.git</connection>
+    <developerConnection>scm:git:ssh://github.com:eppleton/frgaal.git</developerConnection>
+    <url>http://github.com/eppleton/frgaal/tree/master</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.frgaal</groupId>
+      <artifactId>compiler</artifactId>
+      <version>21.0.0</version>
+    </dependency>
+  </dependencies>
+
+</project>

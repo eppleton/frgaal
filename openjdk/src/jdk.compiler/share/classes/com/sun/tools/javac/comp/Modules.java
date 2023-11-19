@@ -196,7 +196,7 @@ public class Modules extends JCTree.Visitor {
         fileManager = context.get(JavaFileManager.class);
         source = Source.instance(context);
         target = Target.instance(context);
-        allowModules = Feature.MODULES.allowedInSource(source);
+        allowModules = Feature.MODULES.allowedInSource(source, target);
         Options options = Options.instance(context);
 
         allowAccessIntoSystem = options.isUnset(Option.RELEASE);
@@ -1370,13 +1370,7 @@ public class Modules extends JCTree.Visitor {
     }
     //where:
         private Stream<String> filterAlreadyWarnedIncubatorModules(Stream<String> incubatingModules) {
-            if (!sourceLauncher) return incubatingModules;
-            Set<String> bootModules = ModuleLayer.boot()
-                                                 .modules()
-                                                 .stream()
-                                                 .map(Module::getName)
-                                                 .collect(Collectors.toSet());
-            return incubatingModules.filter(module -> !bootModules.contains(module));
+            return incubatingModules;
         }
         private static final Predicate<ModuleSymbol> IS_AUTOMATIC =
                 m -> (m.flags_field & Flags.AUTOMATIC_MODULE) != 0;

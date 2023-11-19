@@ -36,6 +36,7 @@ import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 
 import static jdk.javadoc.doclet.Taglet.Location.*;
+import org.frgaal.CollectionShims;
 
 /**
  * A taglet wrapper, allows the public taglet {@link jdk.javadoc.doclet.Taglet}
@@ -107,7 +108,7 @@ public final class UserTaglet implements Taglet {
     @Override
     public Content getInlineTagOutput(Element element, DocTree tag, TagletWriter writer) {
         Content output = writer.getOutputInstance();
-        output.add(RawHtml.of(userTaglet.toString(List.of(tag), element)));
+        output.add(RawHtml.of(userTaglet.toString(CollectionShims.list(tag), element)));
         return output;
     }
 

@@ -68,6 +68,8 @@ import jdk.javadoc.internal.tool.ToolOptions.ToolOption;
 import static javax.tools.DocumentationTool.Location.*;
 
 import static jdk.javadoc.internal.tool.Main.Result.*;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 /**
  * Main program of Javadoc.
@@ -182,7 +184,7 @@ public class Start {
         return new ToolOptions(context, log, helper);
     }
 
-    private Runtime.Version toolVersion() {
+    private Versions.Version toolVersion() {
         return Versions.javadocVersion();
     }
 
@@ -285,9 +287,9 @@ public class Start {
     // be similar to that of the java launcher: i.e. "java -help".
 
     /** The indent for the option synopsis. */
-    private static final String SMALL_INDENT = " ".repeat(4);
+    private static final String SMALL_INDENT = StringShims.repeat(" ", 4);
     /** The automatic indent for the description. */
-    private static final String LARGE_INDENT = " ".repeat(18);
+    private static final String LARGE_INDENT = StringShims.repeat(" ", 18);
     /** The space allowed for the synopsis, if the description is to be shown on the same line. */
     private static final int DEFAULT_SYNOPSIS_WIDTH = 13;
     /** The nominal maximum line length, when seeing if text will fit on a line. */
@@ -339,12 +341,12 @@ public class Start {
         // Preprocess @file arguments
         List<String> allArgs;
         try {
-            allArgs = CommandLine.parse(List.of(argv));
+            allArgs = CommandLine.parse(CollectionShims.list(argv));
         } catch (IOException e) {
             error("main.cant.read", e.getMessage());
             return ERROR;
         }
-        return begin(allArgs, Set.of());
+        return begin(allArgs, CollectionShims.set());
     }
 
     // Called by the JSR 199 API
@@ -533,7 +535,7 @@ public class Start {
                 String optName = e.getKey().getPrimaryName();
                 String optValue = e.getValue();
                 try {
-                    if (!fileManager.handleOption(optName, List.of(optValue).iterator())) {
+                    if (!fileManager.handleOption(optName, CollectionShims.list(optValue).iterator())) {
                         log.error("main.unknown.option.for.filemanager", optName);
                     }
                 } catch (IllegalArgumentException ex) {
@@ -545,7 +547,7 @@ public class Start {
         String mr = com.sun.tools.javac.main.Option.MULTIRELEASE.primaryName;
         if (fileManager.isSupportedOption(mr) == 1) {
             Target target = Target.instance(context);
-            List<String> list = List.of(target.multiReleaseValue());
+            List<String> list = CollectionShims.list(target.multiReleaseValue());
             fileManager.handleOption(mr, list.iterator());
         }
         options.compilerOptions().notifyListeners();
@@ -633,7 +635,7 @@ public class Start {
                             text = log.getText("main.unnecessary_arg_provided", argBase);
                             throw new OptionException(ERROR, this::showUsage, text);
                         case 1:
-                            if (!opt.process(arg, List.of(argVal))) {
+                            if (!opt.process(arg, CollectionShims.list(argVal))) {
                                 m = -1;
                             }
                             break;
@@ -664,7 +666,7 @@ public class Start {
 
     private static Set<? extends Option> getSupportedOptionsOf(Doclet doclet) {
         Set<? extends Option> options = doclet.getSupportedOptions();
-        return options == null ? Set.of() : options;
+        return options == null ? CollectionShims.set() : options;
     }
 
     /**

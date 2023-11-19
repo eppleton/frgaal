@@ -62,11 +62,14 @@ import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.util.DefinedBy;
 import com.sun.tools.javac.util.DefinedBy.Api;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
 import jdk.javadoc.doclet.Doclet;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 import jdk.javadoc.doclet.StandardDoclet;
 import jdk.javadoc.doclet.Taglet;
+import jdk.javadoc.internal.Versions;
 import jdk.javadoc.internal.doclets.toolkit.builders.BuilderFactory;
 import jdk.javadoc.internal.doclets.toolkit.taglets.TagletManager;
 import jdk.javadoc.internal.doclets.toolkit.util.Comparators;
@@ -83,6 +86,8 @@ import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberCache;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
 import jdk.javadoc.internal.doclint.DocLint;
 import jdk.javadoc.internal.doclint.Env;
+
+import org.frgaal.CollectionShims;
 
 /**
  * Configure the output based on the options. Doclets should subclass
@@ -163,7 +168,7 @@ public abstract class BaseConfiguration {
      *
      * @return the version
      */
-    public abstract Runtime.Version getDocletVersion();
+    public abstract Versions.Version getDocletVersion();
 
     /**
      * This method should be defined in all those doclets (configurations),
@@ -340,7 +345,7 @@ public abstract class BaseConfiguration {
         }
 
         // add entries for modules which may not have exported packages
-        modules.forEach(mdle -> modulePackages.computeIfAbsent(mdle, m -> Set.of()));
+        modules.forEach(mdle -> modulePackages.computeIfAbsent(mdle, m -> CollectionShims.set()));
 
         modules.addAll(modulePackages.keySet());
         showModules = !modules.isEmpty();
@@ -381,8 +386,8 @@ public abstract class BaseConfiguration {
             if (fm instanceof StandardJavaFileManager) {
                 try {
                     List<Path> sp = Arrays.stream(snippetPath.split(File.pathSeparator))
-                            .map(Path::of)
-                            .toList();
+                            .map(Paths::get)
+                            .collect(Collectors.toList());
                     StandardJavaFileManager sfm = (StandardJavaFileManager) fm;
                     sfm.setLocationFromPaths(DocumentationTool.Location.SNIPPET_PATH, sp);
                 } catch (IOException | InvalidPathException e) {
@@ -406,8 +411,8 @@ public abstract class BaseConfiguration {
 
         PackageElement unnamedPackage;
         Elements elementUtils = utils.elementUtils;
-        if (docEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_9) >= 0) {
-            ModuleElement unnamedModule = elementUtils.getModuleElement("");
+        ModuleElement unnamedModule = elementUtils.getModuleElement("");
+        if (unnamedModule != null) {
             unnamedPackage = elementUtils.getPackageElement(unnamedModule, "");
         } else {
             unnamedPackage = elementUtils.getPackageElement("");

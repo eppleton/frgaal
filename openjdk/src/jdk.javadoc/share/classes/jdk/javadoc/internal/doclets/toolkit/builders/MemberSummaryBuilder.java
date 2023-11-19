@@ -45,6 +45,7 @@ import javax.tools.Diagnostic;
 
 import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.doctree.DocTree;
+import java.util.stream.Collectors;
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.ClassWriter;
 import jdk.javadoc.internal.doclets.toolkit.Content;
@@ -56,6 +57,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
 
 import static jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable.Kind.*;
+import org.frgaal.CollectionShims;
 
 /**
  * Builds the member summary.
@@ -270,7 +272,7 @@ public abstract class MemberSummaryBuilder extends AbstractMemberBuilder {
                         return Result.fromOptional(optional);
                     })).toOptional();
                     // The fact that we use `member` for possibly unrelated tags is suspicious
-                    writer.addMemberSummary(typeElement, member, r.orElse(List.of()));
+                    writer.addMemberSummary(typeElement, member, r.orElse(CollectionShims.list()));
                 } else {
                     writer.addMemberSummary(typeElement, member, utils.getFirstSentenceTrees(member));
                 }
@@ -304,7 +306,7 @@ public abstract class MemberSummaryBuilder extends AbstractMemberBuilder {
 
             List<? extends Element> members = inheritedMembersFromMap.stream()
                     .filter(e -> Objects.equals(utils.getEnclosingTypeElement(e), inheritedClass))
-                    .toList();
+                    .collect(Collectors.toList());
 
             if (!members.isEmpty()) {
                 SortedSet<Element> inheritedMembers = new TreeSet<>(comparator);

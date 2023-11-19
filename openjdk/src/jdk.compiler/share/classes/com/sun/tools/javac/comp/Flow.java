@@ -55,6 +55,8 @@ import static com.sun.tools.javac.code.Kinds.Kind.*;
 import com.sun.tools.javac.code.Type.TypeVar;
 import static com.sun.tools.javac.code.TypeTag.BOOLEAN;
 import static com.sun.tools.javac.code.TypeTag.VOID;
+import com.sun.tools.javac.jvm.Target;
+import com.sun.tools.javac.code.Types.UniqueType;
 import com.sun.tools.javac.resources.CompilerProperties.Fragments;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 import com.sun.tools.javac.util.JCDiagnostic.Fragment;
@@ -977,7 +979,7 @@ public class Flow {
                              .filter(pd -> pd.nested.length == nestedPatternsCount)
                              .collect(groupingBy(pd -> pd.hashCode(mismatchingCandidateFin)));
                     for (var candidates : groupByHashes.values()) {
-                        var candidatesArr = candidates.toArray(RecordPattern[]::new);
+                        var candidatesArr = candidates.toArray(new RecordPattern[0]);
 
                         for (int firstCandidate = 0;
                              firstCandidate < candidatesArr.length;
@@ -3468,10 +3470,10 @@ public class Flow {
             if (!record.type.isErroneous()) {
                 componentTypes = ((ClassSymbol) record.type.tsym).getRecordComponents()
                         .map(r -> types.memberType(record.type, r))
-                        .toArray(s -> new Type[s]);
+                        .toArray(new Type[0]);
             }
             else {
-                componentTypes = record.nested.map(t -> types.createErrorType(t.type)).toArray(s -> new Type[s]);;
+                componentTypes = record.nested.map(t -> types.createErrorType(t.type)).toArray(new Type[0]);;
             }
 
             PatternDescription[] nestedDescriptions =

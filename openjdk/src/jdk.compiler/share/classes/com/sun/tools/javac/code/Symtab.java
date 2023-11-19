@@ -69,6 +69,7 @@ import com.sun.tools.javac.util.Names;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.*;
+import com.sun.tools.javac.jvm.Target;
 
 /** A class that defines all predefined constants and operators
  *  as well as special classes such as java.lang.Object, which need
@@ -191,6 +192,7 @@ public class Symtab {
     public final Type incompatibleClassChangeErrorType;
     public final Type cloneNotSupportedExceptionType;
     public final Type matchExceptionType;
+    public final Type illegalStateExceptionType;
     public final Type annotationType;
     public final TypeSymbol enumSym;
     public final Type listType;
@@ -222,6 +224,8 @@ public class Symtab {
     public final Type previewFeatureInternalType;
     public final Type typeDescriptorType;
     public final Type recordType;
+    public final Type frgaalFutureRemoveAnnotationType;
+    public final Type frgaalFutureDeprecatedAnnotationType;
     public final Type switchBootstrapsType;
     public final Type constantBootstrapsType;
     public final Type valueBasedType;
@@ -526,7 +530,7 @@ public class Symtab {
         scope.enter(errSymbol);
 
         Source source = Source.instance(context);
-        if (Feature.MODULES.allowedInSource(source)) {
+        if (Feature.MODULES.allowedInSource(source, target)) {
             java_base = enterModule(names.java_base);
             //avoid completing java.base during the Symtab initialization
             java_base.completer = Completer.NULL_COMPLETER;
@@ -567,6 +571,7 @@ public class Symtab {
         incompatibleClassChangeErrorType = enterClass("java.lang.IncompatibleClassChangeError");
         cloneNotSupportedExceptionType = enterClass("java.lang.CloneNotSupportedException");
         matchExceptionType = enterClass("java.lang.MatchException");
+        illegalStateExceptionType = enterClass("java.lang.IllegalStateException");
         annotationType = enterClass("java.lang.annotation.Annotation");
         classLoaderType = enterClass("java.lang.ClassLoader");
         enumSym = enterClass(java_base, names.java_lang_Enum);
@@ -609,6 +614,8 @@ public class Symtab {
         previewFeatureInternalType = enterSyntheticAnnotation("jdk.internal.PreviewFeature+Annotation");
         typeDescriptorType = enterClass("java.lang.invoke.TypeDescriptor");
         recordType = enterClass("java.lang.Record");
+        frgaalFutureRemoveAnnotationType = enterClass("frgaal.internal.Future+Removed+Annotation");
+        frgaalFutureDeprecatedAnnotationType = enterClass("frgaal.internal.Future+Deprecated+Annotation");
         switchBootstrapsType = enterClass("java.lang.runtime.SwitchBootstraps");
         constantBootstrapsType = enterClass("java.lang.invoke.ConstantBootstraps");
         valueBasedType = enterClass("jdk.internal.ValueBased");

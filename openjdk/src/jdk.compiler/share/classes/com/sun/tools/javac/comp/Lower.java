@@ -51,6 +51,7 @@ import com.sun.tools.javac.tree.EndPosTable;
 
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Flags.BLOCK;
+import com.sun.tools.javac.code.Kinds.Kind;
 import static com.sun.tools.javac.code.Scope.LookupKind.NON_RECURSIVE;
 import static com.sun.tools.javac.code.TypeTag.*;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
@@ -129,9 +130,10 @@ public class Lower extends TreeTranslator {
             target.optimizeOuterThis() ||
             options.getBoolean("optimizeOuterThis", false);
         disableProtectedAccessors = options.isSet("disableProtectedAccessors");
+        hasRecordRuntime = target.hasRecordRuntime();
         Source source = Source.instance(context);
         Preview preview = Preview.instance(context);
-        useMatchException = Feature.PATTERN_SWITCH.allowedInSource(source) &&
+        useMatchException = Feature.PATTERN_SWITCH.allowedInSource(source, target) &&
                             (preview.isEnabled() || !preview.isPreview(Feature.PATTERN_SWITCH));
     }
 
@@ -189,6 +191,8 @@ public class Lower extends TreeTranslator {
      * case the captured symbols should be replaced with the translated lambda symbols).
      */
     Map<Symbol, Symbol> lambdaTranslationMap = null;
+
+    final boolean hasRecordRuntime;
 
     /** A navigator class for assembling a mapping from local class symbols
      *  to class definition trees.
@@ -2608,6 +2612,17 @@ public class Lower extends TreeTranslator {
                 isEquals ? List.of(syms.objectType) : List.nil());
         // compiler generated methods have the record flag set, user defined ones dont
         if ((msym.flags() & RECORD) != 0) {
+            if (!hasRecordRuntime) {
+                if (name == names.equals) {
+                    return generateRecordEquals(tree, msym, vars);
+                } else if (name == names.hashCode) {
+                    return generateRecordHashCode(tree, msym, vars);
+                } else if (name == names.toString) {
+                    return generateRecordToString(tree, msym, vars);
+                } else {
+                    throw new IllegalStateException("Unknown record method: " + name);
+                }
+            }
             /* class java.lang.runtime.ObjectMethods provides a common bootstrap that provides a customized implementation
              * for methods: toString, hashCode and equals. Here we just need to generate and indy call to:
              * java.lang.runtime.ObjectMethods::bootstrap and provide: the record class, the record component names and
@@ -2651,6 +2666,67 @@ public class Lower extends TreeTranslator {
         } else {
             return make.Block(SYNTHETIC, List.nil());
         }
+    }
+
+    JCTree generateRecordEquals(JCClassDecl tree, MethodSymbol msym, List<VarSymbol> vars) {
+        VarSymbol o = msym.params.head;
+        o.adr = 0;
+        Type currentType = types.erasure(tree.type);
+        VarSymbol other = new VarSymbol(Flags.SYNTHETIC | Flags.FINAL,
+                names.fromString("other"),
+                currentType,
+                msym);
+        JCExpression test = makeLit(syms.booleanType, 1);
+        for (VarSymbol var : vars) {
+            JCExpression comparison;
+
+            if (var.type.isPrimitive()) {
+                if (var.type.hasTag(FLOAT) || var.type.hasTag(DOUBLE)) {
+                    Type wrapper = wrapperFor(var.type);
+                    Symbol compareTo = wrapper.tsym.members().getSymbolsByName(names.fromString("compare"), s -> s.kind == Kind.MTH && ((MethodSymbol) s).params.size() == 2).iterator().next(); //XXX: more careful checks!
+                    comparison = makeBinary(EQ, make.Apply(List.nil(), make.Select(make.QualIdent(wrapper.tsym), compareTo), List.of(make.Ident(var), make.Select(make.Ident(other), var))).setType(syms.intType), makeLit(syms.intType, 0));
+                } else {
+                    comparison = makeBinary(EQ, make.Ident(var), make.Select(make.Ident(other), var));
+                }
+            } else {
+                Symbol equals = syms.objectsType.tsym.members().getSymbolsByName(names.equals, s -> s.kind == Kind.MTH && ((MethodSymbol) s).params.size() == 2).iterator().next(); //XXX: more careful checks!
+                comparison = make.Apply(List.nil(), make.Select(make.QualIdent(syms.objectsType.tsym), equals), List.of(make.Ident(var), make.Select(make.Ident(other), var))).setType(syms.booleanType);
+            }
+            test = makeBinary(AND, comparison, test);
+        }
+        test = makeBinary(AND, make.TypeTest(make.Ident(o), make.Type(currentType)).setType(syms.booleanType),
+                make.LetExpr(make.VarDef(other, make.TypeCast(make.Type(currentType), make.Ident(o)).setType(currentType)), test).setType(syms.booleanType));
+        
+        return make.MethodDef(msym, make.Block(0, List.of(make.Return(test))));
+    }
+
+    JCTree generateRecordHashCode(JCClassDecl tree, MethodSymbol msym, List<VarSymbol> vars) {
+        JCExpression result = makeLit(syms.intType, 0);
+        for (VarSymbol var : vars) {
+            Type wrapper = wrapperFor(var.type);
+            Symbol hashCode = wrapper.tsym.members().getSymbolsByName(names.hashCode, s -> s.kind == Kind.MTH && ((MethodSymbol) s).params.size() == 1).iterator().next(); //XXX: more careful checks!
+            result = makeBinary(PLUS, makeBinary(MUL, makeLit(syms.intType, 31), result), make.Apply(List.nil(), make.Select(make.QualIdent(wrapper.tsym), hashCode), List.of(make.Ident(var))).setType(syms.intType));
+        }
+        
+        return make.MethodDef(msym, make.Block(0, List.of(make.Return(result))));
+    }
+
+    JCTree generateRecordToString(JCClassDecl tree, MethodSymbol msym, List<VarSymbol> vars) {
+        JCExpression result = makeLit(syms.stringType, msym.owner.name + "[");
+        String sep = "";
+        for (VarSymbol var : vars) {
+            Type wrapper = wrapperFor(var.type);
+            Symbol toString = wrapper.tsym.members().getSymbolsByName(names.toString, s -> s.kind == Kind.MTH && ((MethodSymbol) s).params.size() == 1).iterator().next(); //XXX: more careful checks!
+            result = makeBinary(PLUS, result, makeBinary(PLUS, makeLit(syms.stringType, sep + var.name + "="), make.Apply(List.nil(), make.Select(make.QualIdent(wrapper.tsym), toString), List.of(make.Ident(var))).setType(syms.stringType)));
+            sep = ", ";
+        }
+        result = makeBinary(PLUS, result, makeLit(syms.stringType, "]"));
+
+        return make.MethodDef(msym, make.Block(0, List.of(make.Return(result))));
+    }
+
+    private Type wrapperFor(Type t) {
+        return t.isPrimitive() ? types.boxedTypeOrType(t) : syms.objectsType;
     }
 
     private String argsTypeSig(List<Type> typeList) {
@@ -3738,7 +3814,7 @@ public class Lower extends TreeTranslator {
         if (cases.stream().flatMap(c -> c.labels.stream()).noneMatch(p -> p.hasTag(Tag.DEFAULTCASELABEL))) {
             boolean matchException = useMatchException;
             matchException |= patternSwitch && !wasEnumSelector;
-            Type exception = matchException ? syms.matchExceptionType
+            Type exception = matchException ? inferUsableMatchExceptionType()
                                             : syms.incompatibleClassChangeErrorType;
             List<JCExpression> params = matchException ? List.of(makeNull(), makeNull())
                                                        : List.nil();
@@ -3748,6 +3824,10 @@ public class Lower extends TreeTranslator {
         }
 
         return cases;
+    }
+    private Type inferUsableMatchExceptionType() {
+        //when MatchException is final/non-preview, we should opt to use it:
+        return syms.illegalStateExceptionType;
     }
 
     private void handleSwitch(JCTree tree, JCExpression selector, List<JCCase> cases) {

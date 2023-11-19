@@ -63,6 +63,8 @@ import jdk.javadoc.internal.doclets.toolkit.util.IndexItem;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import org.frgaal.PathShims;
+import org.frgaal.StringShims;
 
 /**
  * Generates the file with the summary of all the references to external specifications.
@@ -298,10 +300,10 @@ public class ExternalSpecsWriter extends HtmlDocletWriter {
             // hashCode; putting instances of DocletElement in a map is not
             // incorrect, but might well be inefficient
             String t = titles.computeIfAbsent(element, utils::getHTMLTitle);
-            if (t.isBlank()) {
+            if (StringShims.isBlank(t)) {
                 // The user should probably be notified (a warning?) that this
                 // file does not have a title
-                Path p = Path.of(e.getFileObject().toUri());
+                Path p = PathShims.of(e.getFileObject().toUri());
                 t = p.getFileName().toString();
             }
             ContentBuilder b = new ContentBuilder();

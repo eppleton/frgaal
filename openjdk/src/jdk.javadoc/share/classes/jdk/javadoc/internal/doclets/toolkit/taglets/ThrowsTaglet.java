@@ -36,6 +36,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -57,6 +58,7 @@ import jdk.javadoc.internal.doclets.formats.html.markup.ContentBuilder;
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.Content;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder.Result;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 
@@ -578,7 +580,7 @@ public class ThrowsTaglet extends BaseTaglet implements InheritableTaglet {
         if (result instanceof Result.Conclude<Map<ThrowsTree, ExecutableElement>> c) {
             return c.value();
         }
-        return Map.of(); // an empty map is effectively ordered
+        return CollectionShims.map(); // an empty map is effectively ordered
     }
 
     private static Result<Map<ThrowsTree, ExecutableElement>> toResult(Element target,
@@ -632,7 +634,7 @@ public class ThrowsTaglet extends BaseTaglet implements InheritableTaglet {
                 result.add(t);
             }
         }
-        return List.copyOf(result);
+        return CollectionShims.listCopyOf(result);
     }
 
     /*
@@ -724,7 +726,7 @@ public class ThrowsTaglet extends BaseTaglet implements InheritableTaglet {
         assert !i1.hasNext() && !i2.hasNext();
         // copyOf is unordered and this is fine: this map is for queries;
         // it doesn't control rendering order
-        return Map.copyOf(map);
+        return CollectionShims.mapCopyOf(map);
     }
 
     private static AssertionError newAssertionError(Object... objects) {

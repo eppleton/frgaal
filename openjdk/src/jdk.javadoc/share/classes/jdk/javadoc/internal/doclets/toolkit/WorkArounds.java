@@ -72,6 +72,7 @@ import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.Scope.LookupKind.NON_RECURSIVE;
 
 import static javax.lang.model.element.ElementKind.*;
+import org.frgaal.CollectionShims;
 
 /**
  * A quarantine class to isolate all the workarounds and bridges to
@@ -481,7 +482,7 @@ public class WorkArounds {
                 }
             }
         }
-        return Map.of();
+        return CollectionShims.map();
     }
 
 }

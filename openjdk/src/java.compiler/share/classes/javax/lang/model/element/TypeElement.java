@@ -25,8 +25,8 @@
 
 package javax.lang.model.element;
 
-import jdk.internal.javac.PreviewFeature;
-
+//import jdk.internal.javac.PreviewFeature;
+import java.util.Collections;
 import java.util.List;
 import javax.lang.model.type.*;
 import javax.lang.model.util.*;
@@ -196,8 +196,8 @@ public interface TypeElement extends Element, Parameterizable, QualifiedNameable
      * @jls 7.3 Compilation Units
      * @since 21
      */
-    @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED_CLASSES,
-                    reflective=true)
+//    @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED_CLASSES,
+//                    reflective=true)
     default boolean isUnnamed() {
         return false;
     }
@@ -243,7 +243,7 @@ public interface TypeElement extends Element, Parameterizable, QualifiedNameable
      * @since 16
      */
     default List<? extends RecordComponentElement> getRecordComponents() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     /**
@@ -258,7 +258,7 @@ public interface TypeElement extends Element, Parameterizable, QualifiedNameable
      * @since 17
      */
     default List<? extends TypeMirror> getPermittedSubclasses() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     /**

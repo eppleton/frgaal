@@ -56,6 +56,8 @@ import jdk.javadoc.internal.doclets.toolkit.util.ClassTree;
 import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
+import jdk.javadoc.internal.doclets.toolkit.util.DocletConstants;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
 
 /**
@@ -66,11 +68,11 @@ import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
 public class ClassWriterImpl extends SubWriterHolderWriter implements ClassWriter {
 
     private static final Set<String> suppressSubtypesSet
-            = Set.of("java.lang.Object",
+            = CollectionShims.set("java.lang.Object",
                      "org.omg.CORBA.Object");
 
     private static final Set<String> suppressImplementingSet
-            = Set.of("java.lang.Cloneable",
+            = CollectionShims.set("java.lang.Cloneable",
                      "java.lang.constant.Constable",
                      "java.lang.constant.ConstantDesc",
                      "java.io.Serializable");
@@ -364,7 +366,7 @@ public class ClassWriterImpl extends SubWriterHolderWriter implements ClassWrite
                 dl.add(HtmlTree.DT(utils.isPlainInterface(e)
                         ? contents.enclosingInterfaceLabel
                         : contents.enclosingClassLabel));
-                dl.add(HtmlTree.DD(getClassLinks(HtmlLinkInfo.Kind.LINK_TYPE_PARAMS_AND_BOUNDS, List.of(e))));
+                dl.add(HtmlTree.DD(getClassLinks(HtmlLinkInfo.Kind.LINK_TYPE_PARAMS_AND_BOUNDS, CollectionShims.list(e))));
                 target.add(dl);
                 return null;
             }

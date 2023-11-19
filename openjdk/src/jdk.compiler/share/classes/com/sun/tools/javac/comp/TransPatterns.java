@@ -43,6 +43,7 @@ import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.code.Type.ClassType;
 import com.sun.tools.javac.code.Type.MethodType;
 import com.sun.tools.javac.code.Type.WildcardType;
+import com.sun.tools.javac.code.TypeMetadata.ConstantValue;
 import com.sun.tools.javac.code.Types;
 import com.sun.tools.javac.tree.JCTree.JCAssign;
 import com.sun.tools.javac.tree.JCTree.JCAnyPattern;
@@ -101,6 +102,7 @@ import com.sun.tools.javac.tree.JCTree.JCPatternCaseLabel;
 import com.sun.tools.javac.tree.JCTree.JCRecordPattern;
 import com.sun.tools.javac.tree.JCTree.JCStatement;
 import com.sun.tools.javac.tree.JCTree.JCSwitchExpression;
+import com.sun.tools.javac.tree.JCTree.JCYield;
 import com.sun.tools.javac.tree.JCTree.JCTry;
 import com.sun.tools.javac.tree.JCTree.LetExpr;
 import com.sun.tools.javac.tree.TreeInfo;
@@ -109,6 +111,7 @@ import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.JCDiagnostic;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 import com.sun.tools.javac.util.List;
+import org.frgaal.CollectionShims;
 
 /**
  * This pass translates pattern-matching constructs, such as instanceof <pattern>.
@@ -375,6 +378,11 @@ public class TransPatterns extends TreeTranslator {
 
     record UnrolledRecordPattern(JCBindingPattern primaryPattern, JCExpression newGuard) {}
 
+    private Type inferUsableMatchExceptionType() {
+        //when MatchException is final/non-preview, we should opt to use it:
+        return syms.illegalStateExceptionType;
+    }
+
     @Override
     public void visitSwitch(JCSwitch tree) {
         handleSwitch(tree, tree.selector, tree.cases,
@@ -481,6 +489,9 @@ public class TransPatterns extends TreeTranslator {
                     currentMethodSym);
             statements.append(make.at(tree.pos).VarDef(index, makeLit(syms.intType, 0)));
 
+            boolean enumSelector = seltype.tsym.isEnum();
+
+            if (false) {
             List<Type> staticArgTypes = List.of(syms.methodHandleLookupType,
                                                 syms.stringType,
                                                 syms.methodTypeType,
@@ -495,7 +506,6 @@ public class TransPatterns extends TreeTranslator {
                          .filter(c -> c != null)
                          .toArray(s -> new LoadableConstant[s]);
 
-            boolean enumSelector = seltype.tsym.isEnum();
             Name bootstrapName = enumSelector ? names.enumSwitch : names.typeSwitch;
             MethodSymbol bsm = rs.resolveInternalMethod(tree.pos(), env, syms.switchBootstrapsType,
                     bootstrapName, staticArgTypes, List.nil());
@@ -519,6 +529,70 @@ public class TransPatterns extends TreeTranslator {
                                   qualifier,
                                   List.of(make.Ident(temp), make.Ident(index)))
                            .setType(syms.intType);
+            } else {
+                int i = 0;
+                boolean hasDefault = false;
+                ListBuffer<JCCase> filterCases = new ListBuffer<>();
+                JCSwitchExpression newSelector = (JCSwitchExpression) make.SwitchExpression(make.Ident(index), List.nil()).setType(syms.intType);
+                for (JCCase c : cases) {
+                    for (JCCaseLabel l : c.labels) {
+                        if (l.hasTag(Tag.DEFAULTCASELABEL)) {
+                            hasDefault = true;
+                        } else if (hasUnconditionalPattern && !hasDefault &&
+                                   c == lastCase && l instanceof JCPatternCaseLabel) {
+                            //If the switch has total pattern, the last case will contain it.
+                            //Convert the total pattern to default:
+                        } else {
+                            int value;
+                            if (TreeInfo.isNullCaseLabel(l)) {
+                                value = -1;
+                            } else {
+                                JCExpression test;
+                                if (l instanceof JCPatternCaseLabel pcl) {
+                                    Type principalType = principalType(pcl.pat);
+                                    if (types.isSubtype(seltype, principalType)) {
+                                        principalType = seltype;
+                                    }
+                                    test = make.TypeTest(make.Ident(temp), make.Type(principalType)).setType(syms.booleanType);
+                                } else if (l instanceof JCConstantCaseLabel ccl) {
+                                    JCExpression constantLabel = ccl.expr;
+                                    JCExpression constant;
+
+                                    if ((constantLabel.type.tsym.flags_field & Flags.ENUM) != 0) {
+                                        constant = make.QualIdent(TreeInfo.symbol(constantLabel));
+                                    } else {
+                                        Assert.checkNonNull(constantLabel.type.constValue());
+
+                                        constant = makeLit(constantLabel.type.dropMetadata(ConstantValue.class), constantLabel.type.constValue());
+                                    }
+
+                                    if (constantLabel.type.tsym == syms.stringType.tsym) {
+                                        Symbol equals = syms.objectsType.tsym.members().getSymbolsByName(names.equals, s -> s.kind == Kind.MTH && ((MethodSymbol) s).params.size() == 2).iterator().next(); //XXX: more careful checks!
+                                        test = make.Apply(List.nil(), make.Select(make.QualIdent(syms.objectsType.tsym), equals), List.of(make.Ident(temp), constant)).setType(syms.booleanType);
+                                    } else {
+                                        test = makeBinary(Tag.EQ, make.Ident(temp), constant);
+                                    }
+                                } else {
+                                    Assert.error();
+                                    throw new Error();
+                                }
+
+                                JCYield yield = make.Yield(makeLit(syms.intType, i));
+
+                                yield.target = newSelector;
+                                filterCases.add(make.Case(CaseKind.STATEMENT, List.of(make.ConstantCaseLabel(makeLit(syms.intType, i))), null, List.of(make.If(test, yield, null)), null));
+
+                                i++;
+                            }
+                        }
+                    }
+                }
+                JCYield yield = make.Yield(makeLit(syms.intType, i));
+                yield.target = newSelector;
+                filterCases.add(make.Case(CaseKind.STATEMENT, List.of(make.DefaultCaseLabel()), null, List.of(yield), null));
+                newSelector.cases = filterCases.toList();
+                selector = make.Conditional(makeBinary(Tag.EQ, make.Ident(temp), makeLit(syms.botType, null)), makeLit(syms.intType, -1), newSelector).setType(syms.intType);
+            }
 
             int i = 0;
             boolean previousCompletesNormally = false;
@@ -732,6 +806,7 @@ public class TransPatterns extends TreeTranslator {
      * }
      */
     private List<JCCase> processCases(JCTree currentSwitch, List<JCCase> inputCases) {
+        if (true) return inputCases;
         interface AccummulatorResolver {
             public void resolve(VarSymbol commonBinding,
                                 JCExpression commonNestedExpression,
@@ -759,7 +834,7 @@ public class TransPatterns extends TreeTranslator {
                                 (JCBindingPattern) accummulatedFirstLabel.pat;
                         VarSymbol accummulatedBinding = accummulatedPattern.var.sym;
                         TreeScanner replaceNested =
-                                new ReplaceVar(Map.of(accummulatedBinding, commonBinding));
+                                new ReplaceVar(CollectionShims.map(accummulatedBinding, commonBinding));
 
                         replaceNested.scan(accummulated);
                         JCExpression newGuard;
@@ -1209,7 +1284,7 @@ public class TransPatterns extends TreeTranslator {
             JCCatch patternMatchingCatch =
                     make.Catch(make.VarDef(ctch, null),
                                make.Block(0,
-                                          List.of(make.Throw(makeNewClass(syms.matchExceptionType,
+                                          List.of(make.Throw(makeNewClass(inferUsableMatchExceptionType(),
                                                                           List.of(makeApply(make.Ident(ctch),
                                                                                             names.toString,
                                                                                             List.nil()),

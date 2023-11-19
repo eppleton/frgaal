@@ -25,7 +25,7 @@
 
 package com.sun.source.tree;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 /**
  * Common interface for all nodes in an abstract syntax tree.
@@ -178,7 +178,7 @@ public interface Tree {
         /**
          * Used for instances of {@link StringTemplateTree}.
          */
-        @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES, reflective=true)
+//        @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES, reflective=true)
         TEMPLATE(StringTemplateTree.class),
 
         /**
@@ -232,7 +232,7 @@ public interface Tree {
          *
          * @since 21
          */
-        @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED)
+//        @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED)
         ANY_PATTERN(AnyPatternTree.class),
 
         /**

@@ -44,6 +44,8 @@ import jdk.javadoc.internal.doclets.toolkit.Messages;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder.Result;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.CollectionShims;
+import org.frgaal.StreamShims;
 
 /**
  * A taglet that represents the {@code @return} and {@code {@return }} tags.
@@ -65,9 +67,9 @@ public class ReturnTaglet extends BaseTaglet implements InheritableTaglet {
             var docFinder = configuration.utils.docFinder();
             var r = docFinder.trySearch((ExecutableElement) owner, m -> Result.fromOptional(extract(configuration.utils, m))).toOptional();
             return r.map(result -> new Output(result.returnTree, result.method, result.returnTree.getDescription(), true))
-                    .orElseGet(() -> new Output(null, null, List.of(), true));
+                    .orElseGet(() -> new Output(null, null, CollectionShims.list(), true));
         } catch (DocFinder.NoOverriddenMethodsFound e) {
-            return new Output(null, null, List.of(), false);
+            return new Output(null, null, CollectionShims.list(), false);
         }
     }
 
@@ -111,8 +113,8 @@ public class ReturnTaglet extends BaseTaglet implements InheritableTaglet {
         //  Utils.getReturnTrees is now a misnomer: it returns only block returns, not all returns.
         //  We could revisit this later.
         Stream<? extends ReturnTree> blockTags = utils.getBlockTags(method, DocTree.Kind.RETURN, ReturnTree.class).stream();
-        Stream<? extends ReturnTree> mainDescriptionTags = utils.getFirstSentenceTrees(method).stream()
-                .mapMulti((t, c) -> {
+        Stream<? extends ReturnTree> mainDescriptionTags = StreamShims
+                .mapMulti(utils.getFirstSentenceTrees(method).stream(), (t, c) -> {
                     if (t.getKind() == DocTree.Kind.RETURN) c.accept((ReturnTree) t);
                 });
         // this method should not check validity of @return tags, hence findAny and not findFirst or what have you

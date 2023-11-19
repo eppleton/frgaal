@@ -33,11 +33,13 @@ import java.util.Objects;
 
 import jdk.javadoc.internal.doclets.toolkit.Content;
 
+import org.frgaal.CollectionShims;
+
 /**
  * A sequence of Content nodes.
  */
 public class ContentBuilder extends Content {
-    protected List<Content> contents = List.of();
+    protected List<Content> contents = CollectionShims.list();
 
     public ContentBuilder() { }
 

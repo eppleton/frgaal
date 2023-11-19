@@ -126,7 +126,7 @@ public class JavacTypes implements javax.lang.model.util.Types {
         Type ty = (Type)t;
         return types.directSupertypes(ty).stream()
                 .map(Type::stripMetadataIfNeeded)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @DefinedBy(Api.LANGUAGE_MODEL)

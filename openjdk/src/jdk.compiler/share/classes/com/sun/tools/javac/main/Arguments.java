@@ -52,8 +52,10 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 
 import com.sun.tools.doclint.DocLint;
+import com.sun.tools.javac.code.Closeables;
 import com.sun.tools.javac.code.Lint.LintCategory;
 import com.sun.tools.javac.code.Source;
+import com.sun.tools.javac.code.Source.Feature;
 import com.sun.tools.javac.file.BaseFileManager;
 import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.jvm.Profile;
@@ -73,6 +75,16 @@ import com.sun.tools.javac.util.Log.PrefixKind;
 import com.sun.tools.javac.util.Log.WriterKind;
 import com.sun.tools.javac.util.Options;
 import com.sun.tools.javac.util.PropagatedException;
+import com.sun.tools.javac.util.StringUtils;
+import java.io.Closeable;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.security.CodeSource;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Shared option and argument handling for command line and API usage of javac.
@@ -304,6 +316,13 @@ public class Arguments {
                 Option.SOURCE, Option.TARGET,
                 Option.SYSTEM, Option.UPGRADE_MODULE_PATH);
 
+        if (platformString == null && !options.isSet(Option.BOOT_CLASS_PATH) &&
+            !options.isSet(Option.XBOOTCLASSPATH) && !options.isSet(Option.SYSTEM) &&
+            !options.isSet("ignore.symbol.file")) {
+            Source source = Source.instance(context);
+            Target target = Target.instance(context);
+            setCtSymPaths(source, target);
+        }
         if (platformString != null) {
             PlatformDescription platformDescription =
                     PlatformUtils.lookupPlatformDescription(platformString);
@@ -328,6 +347,111 @@ public class Arguments {
         }
 
         return true;
+    }
+
+        private void setCtSymPaths(Source s, Target t) {
+            setCtSymPaths(context, (StandardJavaFileManager) getFileManager(), s, t);
+        }
+
+        public static void setCtSymPaths(Context context, StandardJavaFileManager fm, Source s, Target t, Path... prepend) {
+            String ctSymVersion = targetNumericVersion(t);
+            try {
+                CtSymRoot ctSymRoot = ctSymRoot();
+                Closeables closeablesService = Closeables.instance(context);
+                closeablesService.closeables = closeablesService.closeables.prepend(ctSymRoot);
+                Path root = ctSymRoot.root;
+                if (!Feature.MODULES.allowedInSource(s, t)) {
+                    java.util.List<Path> paths = new ArrayList<>();
+
+                    paths.addAll(Arrays.asList(prepend));
+
+                    try (DirectoryStream<Path> dir = Files.newDirectoryStream(root)) {
+                        for (Path section : dir) {
+                            if (section.getFileName().toString().contains(ctSymVersion) &&
+                                !section.getFileName().toString().contains("-")) {
+                                try (DirectoryStream<Path> modules = Files.newDirectoryStream(section)) {
+                                    for (Path module : modules) {
+                                        paths.add(module);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    fm.setLocationFromPaths(StandardLocation.PLATFORM_CLASS_PATH, paths);
+                } else {
+                    Map<String, java.util.List<Path>> module2Paths = new HashMap<>();
+
+                    try (DirectoryStream<Path> dir = Files.newDirectoryStream(root)) {
+                        for (Path section : dir) {
+                            if (section.getFileName().toString().contains(ctSymVersion) &&
+                                !section.getFileName().toString().contains("-")) {
+                                try (DirectoryStream<Path> modules = Files.newDirectoryStream(section)) {
+                                    for (Path module : modules) {
+                                        String moduleName = module.getFileName().toString();
+                                        if (moduleName.endsWith("/"))
+                                            moduleName = moduleName.substring(0, moduleName.length() - 1);
+                                        module2Paths.computeIfAbsent(moduleName, dummy -> new ArrayList<>(Arrays.asList(prepend))).add(module);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    fm.handleOption("--system", Arrays.asList("none").iterator());
+
+                    for (Map.Entry<String, java.util.List<Path>> e : module2Paths.entrySet()) {
+                        fm.setLocationForModule(StandardLocation.SYSTEM_MODULES,
+                                                e.getKey(),
+                                                e.getValue());
+                    }
+                }
+            } catch (IOException | URISyntaxException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+
+        private static String targetNumericVersion(Target target) {
+            return StringUtils.toUpperCase(Integer.toString(target.ordinal() - Target.JDK1_1.ordinal() + 1, Character.MAX_RADIX));
+        }
+
+    public static CtSymRoot ctSymRoot() throws IOException, URISyntaxException {
+        CodeSource cs = Arguments.class.getProtectionDomain().getCodeSource();
+        URL location = cs != null ? cs.getLocation() : null;
+        if (location == null) {
+            throw new IllegalStateException("Cannot find ct.sym data!");
+        }
+        Path locationPath = Paths.get(location.toURI());
+        boolean isJar = Files.isRegularFile(locationPath);
+        Path root;
+        Closeable closeable;
+        if (isJar) {
+            FileSystem jar = FileSystems.newFileSystem(locationPath, (ClassLoader) null);
+            root = jar.getPath("META-INF", "ct.sym");
+            closeable = jar;
+        } else {
+            root = locationPath.resolve("META-INF").resolve("ct.sym");
+            closeable = null;
+        }
+        return new CtSymRoot(root, closeable);
+    }
+
+    public static final class CtSymRoot implements Closeable {
+        public final Path root;
+        private final Closeable delegateCloseable;
+
+        public CtSymRoot(Path root, Closeable delegateCloseable) {
+            this.root = root;
+            this.delegateCloseable = delegateCloseable;
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (delegateCloseable != null) {
+                delegateCloseable.close();
+            }
+        }
+
     }
 
     /**
@@ -510,7 +634,7 @@ public class Arguments {
         String targetString = options.get(Option.TARGET);
         Target target = (targetString != null)
                 ? Target.lookup(targetString)
-                : Target.DEFAULT;
+                : Target.FRGAAL_DEFAULT;
 
         // We don't check source/target consistency for CLDC, as J2ME
         // profiles are not aligned with J2SE targets; moreover, a
@@ -520,14 +644,14 @@ public class Arguments {
         if (Character.isDigit(target.name.charAt(0))) {
             if (target.compareTo(source.requiredTarget()) < 0) {
                 if (targetString != null) {
-                    if (sourceString == null) {
-                        reportDiag(Warnings.TargetDefaultSourceConflict(targetString, source.requiredTarget()));
-                    } else {
-                        reportDiag(Warnings.SourceTargetConflict(sourceString, source.requiredTarget()));
-                    }
-                    return false;
+//                    if (sourceString == null) {
+//                        reportDiag(Warnings.TargetDefaultSourceConflict(targetString, source.requiredTarget()));
+//                    } else {
+//                        reportDiag(Warnings.SourceTargetConflict(sourceString, source.requiredTarget()));
+//                    }
+//                    return false;
                 } else {
-                    target = source.requiredTarget();
+//                    target = source.requiredTarget();
                     options.put("-target", target.name);
                 }
             }
@@ -589,8 +713,8 @@ public class Arguments {
         if (target.compareTo(Target.MIN) < 0) {
             log.error(Errors.OptionRemovedTarget(target, Target.MIN));
         } else if (target == Target.MIN && lintOptions) {
-            log.warning(LintCategory.OPTIONS, Warnings.OptionObsoleteTarget(target));
-            obsoleteOptionFound = true;
+//            log.warning(LintCategory.OPTIONS, Warnings.OptionObsoleteTarget(target));
+//            obsoleteOptionFound = true;
         }
 
         final Target t = target;
@@ -606,9 +730,9 @@ public class Arguments {
                 option -> reportDiag(Errors.OptionNotAllowedWithTarget(option, t)),
                 Option.MODULE_SOURCE_PATH, Option.UPGRADE_MODULE_PATH,
                 Option.SYSTEM, Option.MODULE_PATH, Option.ADD_MODULES,
-                Option.ADD_EXPORTS, Option.ADD_OPENS, Option.ADD_READS,
+                Option.ADD_EXPORTS, Option.ADD_OPENS, Option.ADD_READS/*,
                 Option.LIMIT_MODULES,
-                Option.PATCH_MODULE);
+                Option.PATCH_MODULE*/);
 
         if (fm.hasLocation(StandardLocation.MODULE_SOURCE_PATH)) {
             if (!options.isSet(Option.PROC, "only")

@@ -25,7 +25,7 @@
 
 package javax.lang.model.element;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 import javax.lang.model.util.Elements;
 import javax.lang.model.type.TypeMirror;
@@ -113,6 +113,6 @@ public interface VariableElement extends Element {
      *
      * @since 21
      */
-    @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED, reflective = true)
-    default boolean isUnnamed() { return getSimpleName().isEmpty(); }
+//    @PreviewFeature(feature=PreviewFeature.Feature.UNNAMED, reflective = true)
+    default boolean isUnnamed() { return getSimpleName().length() == 0; }
 }

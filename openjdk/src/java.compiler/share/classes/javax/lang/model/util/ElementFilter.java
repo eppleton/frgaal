@@ -83,7 +83,7 @@ public class ElementFilter {
                                                ElementKind.ANNOTATION_TYPE));
 
     private static final Set<ElementKind> RECORD_COMPONENT_KIND =
-        Set.of(ElementKind.RECORD_COMPONENT);
+        Collections.singleton(ElementKind.RECORD_COMPONENT);
 
     /**
      * {@return a list of fields in {@code elements}}

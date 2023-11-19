@@ -42,6 +42,8 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 
+import org.frgaal.CollectionShims;
+
 /**
  * Writes a file that tries to redirect to an alternate page.
  * The redirect uses JavaScript, if enabled, falling back on
@@ -78,7 +80,7 @@ public class IndexRedirectWriter extends HtmlDocletWriter {
                 .setTimestamp(!options.noTimestamp())
                 .setDescription("index redirect")
                 .setGenerator(getGenerator(getClass()))
-                .setStylesheets(configuration.getMainStylesheet(), List.of()) // avoid reference to default stylesheet
+                .setStylesheets(configuration.getMainStylesheet(), CollectionShims.list()) // avoid reference to default stylesheet
                 .addDefaultScript(false);
 
         String title = (options.windowTitle().length() > 0)
