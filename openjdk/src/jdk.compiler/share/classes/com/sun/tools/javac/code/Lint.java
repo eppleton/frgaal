@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sun.tools.javac.code.Symbol.*;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.main.Option;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.List;
@@ -116,10 +117,11 @@ public class Lint
             values = EnumSet.noneOf(LintCategory.class);
 
             Source source = Source.instance(context);
+            Target target = Target.instance(context);
             if (source.compareTo(Source.JDK9) >= 0) {
                 values.add(LintCategory.DEP_ANN);
             }
-            if (Source.Feature.REDUNDANT_STRICTFP.allowedInSource(source)) {
+            if (Source.Feature.REDUNDANT_STRICTFP.allowedInSource(source, target)) {
                 values.add(LintCategory.STRICTFP);
             }
             values.add(LintCategory.REQUIRES_TRANSITIVE_AUTOMATIC);

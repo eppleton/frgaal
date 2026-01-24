@@ -62,6 +62,8 @@ import jdk.javadoc.internal.html.Text;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import org.frgaal.PathShims;
+import org.frgaal.StringShims;
 
 /**
  * Generates the file with the summary of all the references to external specifications.
@@ -282,10 +284,10 @@ public class ExternalSpecsWriter extends HtmlDocletWriter {
         } else if (element instanceof DocFileElement e) {
             var fo = e.getFileObject();
             var t = titles.computeIfAbsent(e, this::getFileTitle);
-            if (t.isBlank()) {
+            if (StringShims.isBlank(t)) {
                 // The user should probably be notified (a warning?) that this
                 // file does not have a title
-                Path p = Path.of(fo.toUri());
+                Path p = PathShims.of(fo.toUri());
                 t = p.getFileName().toString();
             }
             var b = new ContentBuilder()

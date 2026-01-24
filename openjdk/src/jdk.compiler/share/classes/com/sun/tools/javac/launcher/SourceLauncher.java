@@ -42,6 +42,7 @@ import java.util.Arrays;
 
 import jdk.internal.misc.MethodFinder;
 import jdk.internal.misc.VM;
+import org.frgaal.CollectionShims;
 
 /**
  * Compiles a source file, and executes the main method it contains.
@@ -182,7 +183,7 @@ public final class SourceLauncher {
 
         // 1. Find a main method in the first class and if there is one - invoke it
         Class<?> firstClass;
-        String firstClassName = program.qualifiedTypeNames().getFirst();
+        String firstClassName = CollectionShims.getFirst(program.qualifiedTypeNames());
         ClassLoader loader = context.newClassLoaderFor(parentLoader, firstClassName);
         Thread.currentThread().setContextClassLoader(loader);
         try {

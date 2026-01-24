@@ -25,7 +25,7 @@
 
 package com.sun.source.tree;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 /**
  * A tree node for an import declaration.
@@ -53,7 +53,7 @@ public interface ImportTree extends Tree {
      * {@return true if this is an module import declaration.}
      * @since 23
      */
-    @PreviewFeature(feature=PreviewFeature.Feature.MODULE_IMPORTS, reflective=true)
+//    @PreviewFeature(feature=PreviewFeature.Feature.MODULE_IMPORTS, reflective=true)
     boolean isModule();
 
     /**

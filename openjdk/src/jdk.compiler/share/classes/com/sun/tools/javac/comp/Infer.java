@@ -69,6 +69,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static com.sun.tools.javac.code.TypeTag.*;
+import com.sun.tools.javac.jvm.Target;
 import static com.sun.tools.javac.main.Option.DOE;
 
 /** Helper class for type parameter inference, used by the attribution phase.
@@ -126,7 +127,8 @@ public class Infer {
         emptyContext = new InferenceContext(this, List.nil());
         dumpStacktraceOnError = options.isSet("dev") || options.isSet(DOE);
         Source source = Source.instance(context);
-        erasePolySigReturnType = Source.Feature.ERASE_POLY_SIG_RETURN_TYPE.allowedInSource(source);
+        Target target = Target.instance(context);
+        erasePolySigReturnType = Source.Feature.ERASE_POLY_SIG_RETURN_TYPE.allowedInSource(source, target);
     }
 
     /** A value for prototypes that admit any type, including polymorphic ones. */

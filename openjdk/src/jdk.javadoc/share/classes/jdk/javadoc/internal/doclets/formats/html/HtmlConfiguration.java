@@ -75,6 +75,8 @@ import jdk.javadoc.internal.doclets.toolkit.util.NewAPIBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.PreviewAPIListBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.RestrictedAPIListBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.SimpleDocletException;
+import org.frgaal.PathShims;
+import org.frgaal.StreamShims;
 
 /**
  * Configure the output based on the command-line options.
@@ -254,13 +256,13 @@ public class HtmlConfiguration extends BaseConfiguration {
         options = new HtmlOptions(this);
         containingPackagesSeen = new HashSet<>();
 
-        Runtime.Version v;
-        try {
+        Versions.Version v;
+//        try {
             v = Versions.javadocVersion();
-        } catch (RuntimeException e) {
-            assert false : e;
-            v = Runtime.version(); // arguably, the only sensible default
-        }
+//        } catch (RuntimeException e) {
+//            assert false : e;
+//            v = Runtime.version(); // arguably, the only sensible default
+//        }
         docletVersion = v;
 
         conditionalPages = EnumSet.noneOf(ConditionalPage.class);
@@ -274,10 +276,10 @@ public class HtmlConfiguration extends BaseConfiguration {
         htmlIds = new HtmlIds(this);
     }
 
-    private final Runtime.Version docletVersion;
+    private final Versions.Version docletVersion;
 
     @Override
-    public Runtime.Version getDocletVersion() {
+    public Versions.Version getDocletVersion() {
         return docletVersion;
     }
 
@@ -495,9 +497,9 @@ public class HtmlConfiguration extends BaseConfiguration {
             JavaFileManager fm = getFileManager();
             if (fm instanceof StandardJavaFileManager) {
                 try {
-                    List<Path> sp = Arrays.stream(snippetPath.split(File.pathSeparator))
-                            .map(Path::of)
-                            .toList();
+                    List<Path> sp = StreamShims
+                            .toList(Arrays.stream(snippetPath.split(File.pathSeparator))
+                                    .map(PathShims::of));
                     StandardJavaFileManager sfm = (StandardJavaFileManager) fm;
                     sfm.setLocationFromPaths(DocumentationTool.Location.SNIPPET_PATH, sp);
                 } catch (IOException | InvalidPathException e) {

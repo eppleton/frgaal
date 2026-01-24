@@ -64,6 +64,8 @@ import static jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable.Kind.
 import static jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable.Kind.METHODS;
 import static jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable.Kind.NESTED_CLASSES;
 import static jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable.Kind.PROPERTIES;
+import org.frgaal.CollectionShims;
+import org.frgaal.StreamShims;
 
 /**
  * The base class for member writers.
@@ -98,7 +100,7 @@ public abstract class AbstractMemberWriter {
      *
      * @see VisibleMemberTable.Kind#forSummariesOf(ElementKind)
      */
-    static final List<VisibleMemberTable.Kind> summaryKinds = List.of(
+    static final List<VisibleMemberTable.Kind> summaryKinds = CollectionShims.list(
             NESTED_CLASSES,
             ENUM_CONSTANTS, PROPERTIES, FIELDS,
             CONSTRUCTORS,
@@ -118,7 +120,7 @@ public abstract class AbstractMemberWriter {
      *
      * @see VisibleMemberTable.Kind#forDetailsOf(ElementKind)
      */
-    static final List<VisibleMemberTable.Kind> detailKinds = List.of(
+    static final List<VisibleMemberTable.Kind> detailKinds = CollectionShims.list(
             ENUM_CONSTANTS, PROPERTIES, FIELDS,
             CONSTRUCTORS,
             ANNOTATION_TYPE_MEMBER, METHODS
@@ -247,7 +249,7 @@ public abstract class AbstractMemberWriter {
                         return DocFinder.Result.fromOptional(optional);
                     })).toOptional();
                     // The fact that we use `member` for possibly unrelated tags is suspicious
-                    addMemberSummary(typeElement, member, r.orElse(List.of()));
+                    addMemberSummary(typeElement, member, r.orElse(CollectionShims.list()));
                 } else {
                     addMemberSummary(typeElement, member, utils.getFirstSentenceTrees(member));
                 }
@@ -275,9 +277,9 @@ public abstract class AbstractMemberWriter {
                 continue;
             }
 
-            List<? extends Element> members = inheritedMembersFromMap.stream()
-                    .filter(e -> Objects.equals(utils.getEnclosingTypeElement(e), inheritedClass))
-                    .toList();
+            List<? extends Element> members = StreamShims
+                    .toList(inheritedMembersFromMap.stream()
+                            .filter(e -> Objects.equals(utils.getEnclosingTypeElement(e), inheritedClass)));
 
             if (!members.isEmpty()) {
                 SortedSet<Element> inheritedMembers = new TreeSet<>(summariesComparator);

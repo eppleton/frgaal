@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.SourceVersion;
+import org.frgaal.CollectionShims;
 
 /**
  * Describes a launch-able Java compilation unit.
@@ -66,7 +67,7 @@ public record ProgramDescriptor(
         try {
             var compiler = JavacTool.create();
             var standardFileManager = compiler.getStandardFileManager(null, null, null);
-            var units = List.of(fileObject);
+            var units = CollectionShims.list(fileObject);
             var task = compiler.getTask(null, standardFileManager, diagnostic -> {}, null, null, units);
             var tree = task.parse().iterator().next(); // single compilation unit
             var packageTree = tree.getPackage();
@@ -88,7 +89,7 @@ public record ProgramDescriptor(
         return new ProgramDescriptor(
                 fileObject,
                 packageName.isEmpty() ? Optional.empty() : Optional.of(packageName),
-                List.copyOf(qualifiedTypeNames),
+                CollectionShims.listCopyOf(qualifiedTypeNames),
                 computeSourceRootPath(file, packageName));
     }
 

@@ -100,6 +100,7 @@ public class Resolve {
     AttrRecover attrRecover;
     DeferredAttr deferredAttr;
     Check chk;
+    ExtraSymbolInfo esi;
     Infer infer;
     Preview preview;
     ClassFinder finder;
@@ -134,6 +135,7 @@ public class Resolve {
         attrRecover = AttrRecover.instance(context);
         deferredAttr = DeferredAttr.instance(context);
         chk = Check.instance(context);
+        esi = ExtraSymbolInfo.instance(context);
         infer = Infer.instance(context);
         finder = ClassFinder.instance(context);
         moduleFinder = ModuleFinder.instance(context);
@@ -146,12 +148,12 @@ public class Resolve {
                 options.isUnset(Option.XDIAGS) && options.isUnset("rawDiagnostics");
         verboseResolutionMode = VerboseResolutionMode.getVerboseResolutionMode(options);
         Target target = Target.instance(context);
-        allowLocalVariableTypeInference = Feature.LOCAL_VARIABLE_TYPE_INFERENCE.allowedInSource(source);
-        allowYieldStatement = Feature.SWITCH_EXPRESSION.allowedInSource(source);
-        allowPrivateMembersInPermitsClause = Feature.PRIVATE_MEMBERS_IN_PERMITS_CLAUSE.allowedInSource(source);
+        allowLocalVariableTypeInference = Feature.LOCAL_VARIABLE_TYPE_INFERENCE.allowedInSource(source, target);
+        allowYieldStatement = Feature.SWITCH_EXPRESSION.allowedInSource(source, target);
+        allowPrivateMembersInPermitsClause = Feature.PRIVATE_MEMBERS_IN_PERMITS_CLAUSE.allowedInSource(source, target);
         polymorphicSignatureScope = WriteableScope.create(syms.noSymbol);
-        allowModules = Feature.MODULES.allowedInSource(source);
-        allowRecords = Feature.RECORDS.allowedInSource(source);
+        allowModules = Feature.MODULES.allowedInSource(source, target);
+        allowRecords = Feature.RECORDS.allowedInSource(source, target);
         dumpMethodReferenceSearchResults = options.isSet("debug.dumpMethodReferenceSearchResults");
         dumpStacktraceOnError = options.isSet("dev") || options.isSet(DOE);
     }
@@ -2980,6 +2982,7 @@ public class Resolve {
                                     useVarargs);
         chk.checkDeprecated(pos, env.info.scope.owner, sym);
         chk.checkPreview(pos, env.info.scope.owner, sym);
+        esi.checkSymbolRemovedDeprecatedInFutureRelease(pos, sym);
         return sym;
     }
 

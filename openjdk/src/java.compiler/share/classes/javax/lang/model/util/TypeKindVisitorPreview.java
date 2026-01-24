@@ -25,7 +25,7 @@
 
 package javax.lang.model.util;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -67,7 +67,7 @@ import static javax.lang.model.SourceVersion.*;
  * @since 23
  */
 @SupportedSourceVersion(RELEASE_24)
-@PreviewFeature(feature=PreviewFeature.Feature.LANGUAGE_MODEL, reflective=true)
+//@PreviewFeature(feature=PreviewFeature.Feature.LANGUAGE_MODEL, reflective=true)
 public class TypeKindVisitorPreview<R, P> extends TypeKindVisitor14<R, P> {
     /**
      * Constructor for concrete subclasses to call; uses {@code null}

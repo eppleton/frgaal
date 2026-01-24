@@ -37,6 +37,7 @@ import jdk.internal.org.commonmark.parser.delimiter.DelimiterRun;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
+import org.frgaal.CollectionShims;
 
 /**
  * An implementation of DelimiterProcessor that dispatches all calls to two or more other DelimiterProcessors
@@ -98,7 +99,7 @@ class StaggeredDelimiterProcessor implements DelimiterProcessor {
                 return p;
             }
         }
-        return processors.getFirst();
+        return CollectionShims.getFirst(processors);
     }
 
     @Override

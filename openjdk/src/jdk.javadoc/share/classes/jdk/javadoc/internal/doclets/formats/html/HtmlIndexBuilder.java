@@ -42,6 +42,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexItem;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.HtmlTree;
 
 /**
@@ -129,7 +130,7 @@ public class HtmlIndexBuilder extends IndexBuilder {
                     item.setContainingModule(utils.getFullyQualifiedName(utils.containingModule(element)));
                 }
                 if (utils.isExecutableElement(element)) {
-                    String url = HtmlTree.encodeURL(htmlIds.forMember((ExecutableElement) element).getFirst().name());
+                    String url = HtmlTree.encodeURL(CollectionShims.getFirst(htmlIds.forMember((ExecutableElement) element)).name());
                     if (!url.equals(item.getLabel())) {
                         item.setUrl(url);
                     }

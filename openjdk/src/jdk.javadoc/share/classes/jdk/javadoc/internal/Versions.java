@@ -25,6 +25,7 @@
 
 package jdk.javadoc.internal;
 
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -51,28 +52,29 @@ public final class Versions {
      *
      * @return the version
      */
-    public static Runtime.Version javadocVersion() throws RuntimeException {
-        /*
-         * The "jdk.javadoc.internal.tool.resources.version" resource bundle is
-         * non-localized and represented by a class compiled from a source like this:
-         *
-         * $ cat build/.../support/gensrc/jdk.javadoc/jdk/javadoc/internal/tool/resources/version.java
-         * package jdk.javadoc.internal.tool.resources;
-         *
-         * public final class version extends java.util.ListResourceBundle {
-         *     protected final Object[][] getContents() {
-         *         return new Object[][] {
-         *             { "full", "15-internal+0-2020-06-02-1426246.duke..." },
-         *             { "jdk", "15" },
-         *             { "release", "15-internal" },
-         *         };
-         *     }
-         * }
-         *
-         * The string keyed by "full" should be parseable by Runtime.Version.parse()
-         */
-        ResourceBundle bundle = getBundle("jdk.javadoc.internal.tool.resources.version");
-        return Runtime.Version.parse(bundle.getString("full"));
+    public static Version javadocVersion() throws RuntimeException {
+//        /*
+//         * The "jdk.javadoc.internal.tool.resources.version" resource bundle is
+//         * non-localized and represented by a class compiled from a source like this:
+//         *
+//         * $ cat build/.../support/gensrc/jdk.javadoc/jdk/javadoc/internal/tool/resources/version.java
+//         * package jdk.javadoc.internal.tool.resources;
+//         *
+//         * public final class version extends java.util.ListResourceBundle {
+//         *     protected final Object[][] getContents() {
+//         *         return new Object[][] {
+//         *             { "full", "15-internal+0-2020-06-02-1426246.duke..." },
+//         *             { "jdk", "15" },
+//         *             { "release", "15-internal" },
+//         *         };
+//         *     }
+//         * }
+//         *
+//         * The string keyed by "full" should be parseable by Runtime.Version.parse()
+//         */
+//        ResourceBundle bundle = getBundle("jdk.javadoc.internal.tool.resources.version");
+//        return Runtime.Version.parse(bundle.getString("full"));
+        return Version.INSTANCE;
     }
 
     /**
@@ -86,14 +88,15 @@ public final class Versions {
      *
      * @throws NullPointerException if {@code v == null}
      */
-    public static String shortVersionStringOf(Runtime.Version v) {
-        String svstr = v.version().stream()
-                .map(Object::toString)
-                .collect(Collectors.joining("."));
-        if (v.pre().isPresent()) {
-            svstr += "-" + v.pre().get();
-        }
-        return svstr;
+    public static String shortVersionStringOf(Version v) {
+//        String svstr = v.version().stream()
+//                .map(Object::toString)
+//                .collect(Collectors.joining("."));
+//        if (v.pre().isPresent()) {
+//            svstr += "-" + v.pre().get();
+//        }
+//        return svstr;
+        return v.toString();
     }
 
     /**
@@ -106,7 +109,24 @@ public final class Versions {
      *
      * @throws NullPointerException if {@code v == null}
      */
-    public static String fullVersionStringOf(Runtime.Version v) {
+    public static String fullVersionStringOf(Version v) {
         return v.toString();
+    }
+
+    public static class Version {
+        public static final Version INSTANCE = new Version();
+        private final int version = 16;
+        @Override
+        public String toString() {
+            return "" + version;
+        }
+
+        public int feature() {
+            return version;
+        }
+
+        public Optional<String> pre() {
+            return Optional.empty();
+        }
     }
 }

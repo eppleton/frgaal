@@ -60,6 +60,9 @@ import jdk.internal.org.commonmark.parser.Parser;
 import jdk.internal.org.commonmark.parser.delimiter.DelimiterProcessor;
 
 import static com.sun.tools.javac.util.Position.NOPOS;
+import org.frgaal.CollectionShims;
+import org.frgaal.MatcherShims;
+import org.frgaal.StreamShims;
 
 /**
  * A class to transform a {@code DocTree} node into a similar one with
@@ -243,7 +246,7 @@ public class MarkdownTransformer implements JavacTrees.DocCommentTreeTransformer
                  */
                 String source = sourceBuilder.toString();
                 Parser parser = Parser.builder()
-                        .extensions(List.of(TablesExtension.create()))
+                        .extensions(CollectionShims.list(TablesExtension.create()))
                         .inlineParserFactory(new AutoRefInlineParserFactory(refParser, autorefScheme))
                         .includeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
                         .build();
@@ -255,16 +258,16 @@ public class MarkdownTransformer implements JavacTrees.DocCommentTreeTransformer
                  *         DocTree nodes, as well as any new nodes created by converting
                  *         parts of the Markdown tree into nodes for old-style javadoc tags.
                  */
-                var firstTreePos = trees.getFirst().getStartPosition();
+                var firstTreePos = CollectionShims.getFirst(trees).getStartPosition();
                 Lower v = new Lower(m, document, source, firstTreePos, replacements, autorefScheme);
                 document.accept(v);
 
                 return v.getTrees();
 
             } else {
-                var list2 = trees.stream()
-                        .map(this::transform)
-                        .toList();
+                var list2 = StreamShims
+                        .toList(trees.stream()
+                                .map(this::transform));
                 return equal(list2, trees) ? trees : list2;
             }
         }
@@ -751,7 +754,7 @@ public class MarkdownTransformer implements JavacTrees.DocCommentTreeTransformer
 
             sourceLineOffsets = Stream.concat(
                             Stream.of(0),
-                            lineBreak.matcher(source).results().map(MatchResult::end))
+                            MatcherShims.results(lineBreak.matcher(source)).map(MatchResult::end))
                     .mapToInt(Integer::intValue)
                     .toArray();
 
@@ -813,7 +816,7 @@ public class MarkdownTransformer implements JavacTrees.DocCommentTreeTransformer
                             && t.getLiteral().equals(ref) ? DocTree.Kind.LINK : DocTree.Kind.LINK_PLAIN;
 
                     DCTree newLinkTree = linkKind == DocTree.Kind.LINK
-                            ? m.at(NOPOS).newLinkTree(newRefTree, List.of()) // ignore the child trees
+                            ? m.at(NOPOS).newLinkTree(newRefTree, CollectionShims.list()) // ignore the child trees
                             : m.at(NOPOS).newLinkPlainTree(newRefTree, trees);
 
                     saveTrees.add(newLinkTree);
@@ -913,7 +916,7 @@ public class MarkdownTransformer implements JavacTrees.DocCommentTreeTransformer
          */
         private int getStartPos(Node node) {
             var spans = node.getSourceSpans();
-            var firstSpan = spans.getFirst();
+            var firstSpan = CollectionShims.getFirst(spans);
             return toSourcePos(firstSpan.getLineIndex(), firstSpan.getColumnIndex());
         }
 
@@ -925,7 +928,7 @@ public class MarkdownTransformer implements JavacTrees.DocCommentTreeTransformer
          */
         private int getEndPos(Node node) {
             var spans = node.getSourceSpans();
-            var lastSpan = spans.getLast();
+            var lastSpan = CollectionShims.getLast(spans);
             return toSourcePos(lastSpan.getLineIndex(), lastSpan.getColumnIndex() + lastSpan.getLength());
         }
 
@@ -976,7 +979,7 @@ public class MarkdownTransformer implements JavacTrees.DocCommentTreeTransformer
          * Markdown source text node and adding it to the list of trees.
          */
         private void flushText(int pos) {
-            if (!text.isEmpty()) {
+            if (!(text.length() == 0)) {
                 trees.add(m.at(sourcePosToTreePos(pos)).newRawTextTree(DocTree.Kind.MARKDOWN, text.toString()));
                 text.setLength(0);
             }

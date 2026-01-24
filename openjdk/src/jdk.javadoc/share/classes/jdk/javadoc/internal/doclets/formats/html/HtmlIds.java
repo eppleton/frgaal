@@ -50,6 +50,7 @@ import javax.lang.model.util.SimpleTypeVisitor9;
 import jdk.javadoc.internal.doclets.toolkit.util.SummaryAPIListBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.HtmlId;
 
 /**
@@ -199,9 +200,9 @@ public class HtmlIds {
         // Use simple id, unless we have to use erased id; for that, do the
         // following _in order_:
         // 1. Map all elements that can _only_ be addressed by the simple id
-        for (var e : buckets.getOrDefault(ErasedId.ABSENT, List.of())) {
+        for (var e : buckets.getOrDefault(ErasedId.ABSENT, CollectionShims.list())) {
             var simpleId = forMember0(e.element);
-            ids.put(e.element, List.of(simpleId));
+            ids.put(e.element, CollectionShims.list(simpleId));
             boolean added = dups.add(simpleId.name());
             // we assume that the simple id for an executable member that
             // does not use type parameters is unique
@@ -209,12 +210,12 @@ public class HtmlIds {
         }
         // 2. Map all elements that can be addressed by simple id or erased id;
         // if the simple id is not yet used, use it, otherwise use the erased id
-        for (var e : buckets.getOrDefault(ErasedId.PRESENT, List.of())) {
+        for (var e : buckets.getOrDefault(ErasedId.PRESENT, CollectionShims.list())) {
             var simpleId = forMember0(e.element);
             if (dups.add(simpleId.name())) {
-                ids.put(e.element, List.of(simpleId, e.id));
+                ids.put(e.element, CollectionShims.list(simpleId, e.id));
             } else {
-                ids.put(e.element, List.of(e.id));
+                ids.put(e.element, CollectionShims.list(e.id));
                 boolean added = dups.add(e.id.name());
                 // Not only must an erased id not clash with any simple id,
                 // but it must also not clash with any other erased id.
@@ -237,7 +238,7 @@ public class HtmlIds {
         // - another example is annotation interface methods: they are not
         //   included in VisibleMemberTable.Kind.METHODS and so cannot be
         //   found among them
-        return ids.computeIfAbsent(executable, e -> List.of(forMember0(e)));
+        return ids.computeIfAbsent(executable, e -> CollectionShims.list(forMember0(e)));
     }
 
     private final Map<ExecutableElement, List<HtmlId>> ids = new HashMap<>();
@@ -472,7 +473,7 @@ public class HtmlIds {
      */
     public HtmlId forTypeParam(String paramName, Element owner) {
         if (utils.isExecutableElement(owner)) {
-            return HtmlId.of(forMember((ExecutableElement) owner).getFirst().name()
+            return HtmlId.of(CollectionShims.getFirst(forMember((ExecutableElement) owner)).name()
                     + "-type-param-" + paramName);
         }
         return HtmlId.of("type-param-" + paramName);
@@ -561,7 +562,7 @@ public class HtmlIds {
      */
     public HtmlId forPreviewSection(Element el) {
         return HtmlId.of("preview-" + switch (el.getKind()) {
-            case CONSTRUCTOR, METHOD -> forMember((ExecutableElement) el).getFirst().name();
+            case CONSTRUCTOR, METHOD -> CollectionShims.getFirst(forMember((ExecutableElement) el)).name();
             case PACKAGE -> forPackage((PackageElement) el).name();
             default -> utils.getFullyQualifiedName(el, false);
         });
@@ -575,7 +576,7 @@ public class HtmlIds {
      * @return the id
      */
     public HtmlId forRestrictedSection(ExecutableElement el) {
-        return HtmlId.of("restricted-" + forMember(el).getFirst().name());
+        return HtmlId.of("restricted-" + CollectionShims.getFirst(forMember(el)).name());
     }
 
     /**
@@ -629,7 +630,7 @@ public class HtmlIds {
         } else if (kind.isDeclaredType()) {
             id += forClass((TypeElement) e).name();
         } else if (kind.isExecutable()) {
-            id += forMember((ExecutableElement) e).getFirst().name();
+            id += CollectionShims.getFirst(forMember((ExecutableElement) e)).name();
         } else if (kind.isField()) {
             id += forMember((VariableElement) e).name();
         } else if (kind == ElementKind.MODULE) {

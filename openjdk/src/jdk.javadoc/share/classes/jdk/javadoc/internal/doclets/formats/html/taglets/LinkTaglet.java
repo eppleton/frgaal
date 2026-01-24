@@ -56,6 +56,7 @@ import jdk.javadoc.internal.html.Text;
 import static com.sun.source.doctree.DocTree.Kind.LINK;
 import static com.sun.source.doctree.DocTree.Kind.LINK_PLAIN;
 import static com.sun.source.doctree.DocTree.Kind.SEE;
+import org.frgaal.ObjectsShims;
 
 /**
  * A taglet that represents the {@code {@link ...}} and {@linkplain ...} tags,
@@ -141,7 +142,7 @@ public class LinkTaglet extends BaseTaglet {
 
         // The signature from the @see tag. We will output this text when a label is not specified.
         Content text = plainOrCode(isPlain,
-                Text.of(Objects.requireNonNullElse(refSignature, "")));
+                Text.of(ObjectsShims.requireNonNullElse(refSignature, "")));
 
         CommentHelper ch = utils.getCommentHelper(holder);
         TypeElement refClass = ch.getReferencedClass(ref);

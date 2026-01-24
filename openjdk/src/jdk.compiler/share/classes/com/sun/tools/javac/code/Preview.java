@@ -81,6 +81,7 @@ public class Preview {
     private final Lint lint;
     private final Log log;
     private final Source source;
+    private final Target target;
 
     protected static final Context.Key<Preview> previewKey = new Context.Key<>();
 
@@ -101,6 +102,7 @@ public class Preview {
         log = Log.instance(context);
         lint = Lint.instance(context);
         source = Source.instance(context);
+        target = Target.instance(context);
         this.previewHandler =
                 new MandatoryWarningHandler(log, source, lint.isEnabled(LintCategory.PREVIEW), true, "preview", LintCategory.PREVIEW);
         forcePreview = options.isSet("forcePreview");
@@ -285,7 +287,7 @@ public class Preview {
             //preview feature without --preview flag, error
             log.error(JCDiagnostic.DiagnosticFlag.SOURCE_LEVEL, pos, disabledError(feature));
         } else {
-            if (!feature.allowedInSource(source)) {
+            if (!feature.allowedInSource(source, target)) {
                 log.error(JCDiagnostic.DiagnosticFlag.SOURCE_LEVEL, pos,
                           feature.error(source.name));
             }

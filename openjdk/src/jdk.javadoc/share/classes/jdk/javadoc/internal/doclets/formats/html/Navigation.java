@@ -27,6 +27,8 @@ package jdk.javadoc.internal.doclets.formats.html;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.Objects;
 
 import javax.lang.model.element.Element;

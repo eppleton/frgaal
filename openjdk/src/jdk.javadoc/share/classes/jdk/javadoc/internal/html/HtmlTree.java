@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import org.frgaal.CollectionShims;
 
 /**
  * A tree node representing an HTML element, containing the name of the element,
@@ -69,13 +70,13 @@ public class HtmlTree extends Content {
      * The attributes for the HTML element.
      * The keys and values in this map are never {@code null}.
      */
-    private Map<HtmlAttr, String> attrs = Map.of();
+    private Map<HtmlAttr, String> attrs = CollectionShims.map();
 
     /**
      * The enclosed content ("inner HTML") for this HTML element.
      * The items in this list are never {@code null}.
      */
-    private List<Content> content = List.of();
+    private List<Content> content = CollectionShims.list();
 
     /**
      * Creates an {@code HTMLTree} object representing an HTML element

@@ -40,6 +40,7 @@ import jdk.javadoc.internal.doclets.toolkit.BaseOptions;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.Entity;
@@ -116,7 +117,7 @@ public class MethodWriter extends AbstractExecutableMemberWriter {
                 buildTagInfo(div);
                 methodContent.add(div);
                 memberList.add(writer.getMemberListItem(methodContent));
-                writer.tableOfContents.addLink(htmlIds.forMember(currentMethod).getFirst(),
+                writer.tableOfContents.addLink(CollectionShims.getFirst(htmlIds.forMember(currentMethod)),
                         Text.of(utils.getSimpleName(method)
                                 + utils.makeSignature(currentMethod, typeElement, false, true)));
             }
@@ -206,11 +207,11 @@ public class MethodWriter extends AbstractExecutableMemberWriter {
                 Text.of(name(method)));
         var anchors = htmlIds.forMember(method);
         if (anchors.size() > 1) {
-            heading.setId(anchors.getLast());
+            heading.setId(CollectionShims.getLast(anchors));
         }
         content.add(heading);
         return HtmlTree.SECTION(HtmlStyles.detail, content)
-                .setId(anchors.getFirst());
+                .setId(CollectionShims.getFirst(anchors));
     }
 
     protected Content getSignature(ExecutableElement method) {
@@ -375,7 +376,7 @@ public class MethodWriter extends AbstractExecutableMemberWriter {
         var codeOverriddenTypeLink = HtmlTree.CODE(overriddenTypeLink);
         Content methlink = writer.getLink(
                 new HtmlLinkInfo(writer.configuration, HtmlLinkInfo.Kind.PLAIN, holder)
-                        .fragment(writer.htmlIds.forMember(method).getFirst().name())
+                        .fragment(CollectionShims.getFirst(writer.htmlIds.forMember(method)).name())
                         .label(method.getSimpleName()));
         var codeMethLink = HtmlTree.CODE(methlink);
         var dd = HtmlTree.DD(codeMethLink);

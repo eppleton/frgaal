@@ -24,7 +24,7 @@
  */
 package com.sun.source.tree;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 /**
  * A tree node for a binding pattern that matches a pattern

@@ -32,6 +32,7 @@ import com.sun.tools.javac.code.DeferredLintHandler;
 import com.sun.tools.javac.code.Lint;
 import com.sun.tools.javac.code.Preview;
 import com.sun.tools.javac.code.Source;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.tree.DocTreeMaker;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
@@ -65,6 +66,7 @@ public class ParserFactory {
     final Log log;
     final Tokens tokens;
     final Source source;
+    final Target target;
     final Preview preview;
     final Names names;
     final Options options;
@@ -84,6 +86,7 @@ public class ParserFactory {
         this.names = Names.instance(context);
         this.tokens = Tokens.instance(context);
         this.source = Source.instance(context);
+        this.target = Target.instance(context);
         this.preview = Preview.instance(context);
         this.options = Options.instance(context);
         this.scannerFactory = ScannerFactory.instance(context);

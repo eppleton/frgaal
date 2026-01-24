@@ -92,7 +92,9 @@ import static com.sun.tools.javac.code.Lint.LintCategory.PROCESSING;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import com.sun.tools.javac.comp.Annotate;
 import static com.sun.tools.javac.comp.CompileStates.CompileState;
+import com.sun.tools.javac.jvm.Target;
 import static com.sun.tools.javac.util.JCDiagnostic.DiagnosticFlag.*;
+import java.util.stream.Collectors;
 
 /**
  * Objects of this class hold and manage the state needed to support
@@ -160,6 +162,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
      * Source level of the compile.
      */
     Source source;
+    Target target;
 
     private ClassLoader processorClassLoader;
     private ServiceLoader<Processor> serviceLoader;
@@ -199,6 +202,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         context.put(JavacProcessingEnvironment.class, this);
         log = Log.instance(context);
         source = Source.instance(context);
+        target = Target.instance(context);
         diags = JCDiagnostic.Factory.instance(context);
         options = Options.instance(context);
         printProcessorInfo = options.isSet(Option.XPRINTPROCESSORINFO);
@@ -245,8 +249,9 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
 
     private Set<String> initPlatformAnnotations() {
         final String module_prefix =
-            Feature.MODULES.allowedInSource(source) ? "java.base/" : "";
-        return Set.of(module_prefix + "java.lang.Deprecated",
+            Feature.MODULES.allowedInSource(source, target) ? "java.base/" : "";
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                      module_prefix + "java.lang.Deprecated",
                       module_prefix + "java.lang.FunctionalInterface",
                       module_prefix + "java.lang.Override",
                       module_prefix + "java.lang.SafeVarargs",
@@ -259,7 +264,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                       module_prefix + "java.lang.annotation.Retention",
                       module_prefix + "java.lang.annotation.Target",
 
-                      module_prefix + "java.io.Serial");
+                      module_prefix + "java.io.Serial")));
     }
 
     private void initProcessorLoader() {
@@ -275,8 +280,8 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 ? fileManager.getClassLoader(ANNOTATION_PROCESSOR_PATH)
                 : fileManager.getClassLoader(CLASS_PATH);
 
-            if (options.isSet("accessInternalAPI"))
-                ModuleHelper.addExports(getClass().getModule(), processorClassLoader.getUnnamedModule());
+//            if (options.isSet("accessInternalAPI"))
+//                ModuleHelper.addExports(getClass().getModule(), processorClassLoader.getUnnamedModule());
 
             if (processorClassLoader != null && processorClassLoader instanceof Closeable closeable) {
                 compiler.closeables = compiler.closeables.prepend(closeable);
@@ -322,7 +327,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             platformProcessors = platformProvider.getAnnotationProcessors()
                                                  .stream()
                                                  .map(PluginInfo::getPlugin)
-                                                 .toList();
+                                                 .collect(Collectors.toList());
         }
         List<Iterator<? extends Processor>> iterators = List.of(processorIterator,
                                                                 platformProcessors.iterator());
@@ -757,7 +762,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 if (psi.processorIterator.hasNext()) {
                     ProcessorState ps = new ProcessorState(psi.processorIterator.next(),
                                                            log, source, dcfh,
-                                                           Feature.MODULES.allowedInSource(source),
+                                                           Feature.MODULES.allowedInSource(source, target),
                                                            JavacProcessingEnvironment.this,
                                                            lint);
                     psi.procStateList.add(ps);
@@ -825,7 +830,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
 
         for(TypeElement a  : annotationsPresent) {
             ModuleElement mod = elementUtils.getModuleOf(a);
-            String moduleSpec = Feature.MODULES.allowedInSource(source) && mod != null ? mod.getQualifiedName() + "/" : "";
+            String moduleSpec = Feature.MODULES.allowedInSource(source, target) && mod != null ? mod.getQualifiedName() + "/" : "";
             unmatchedAnnotations.put(moduleSpec + a.getQualifiedName().toString(),
                                      a);
         }

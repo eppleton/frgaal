@@ -70,6 +70,7 @@ import com.sun.tools.javac.util.Pair;
 import static com.sun.tools.javac.code.Kinds.Kind.*;
 import static com.sun.tools.javac.code.TypeTag.*;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
+import org.frgaal.OptionalShims;
 
 /**
  * Looks for possible 'this' escapes and generates corresponding warnings.
@@ -734,7 +735,7 @@ class ThisEscapeAnalyzer extends TreeScanner {
             scan(explicitOuterThis);
             return refs.removeExprs(depth)
               .map(ref -> ref.toOuter(explicitOuterThis.type.tsym))
-              .flatMap(Optional::stream)
+              .flatMap(OptionalShims::stream)
               .collect(RefSet.collector());
         }
 
@@ -742,7 +743,7 @@ class ThisEscapeAnalyzer extends TreeScanner {
         if (hasImplicitOuterInstance(tsym)) {
             return refs.find(ThisRef.class)
               .map(ref -> ref.toOuter(tsym))
-              .flatMap(Optional::stream)
+              .flatMap(OptionalShims::stream)
               .collect(RefSet.collector());
         }
 
@@ -820,7 +821,7 @@ class ThisEscapeAnalyzer extends TreeScanner {
                 if (isParamOrVar(foreach.var.sym)) {
                     refs.removeExprs(depth)
                       .map(ref -> ref.toIndirect(elemType.tsym))
-                      .flatMap(Optional::stream)
+                      .flatMap(OptionalShims::stream)
                       .map(ref -> new VarRef(foreach.var.sym, ref))
                       .forEach(refs::add);
                 } else
@@ -927,7 +928,7 @@ class ThisEscapeAnalyzer extends TreeScanner {
         scan(tree.indexed);
         refs.removeExprs(depth)
           .map(ref -> ref.toDirect(tree.type.tsym))
-          .flatMap(Optional::stream)
+          .flatMap(OptionalShims::stream)
           .forEach(refs::add);
     }
 
@@ -951,7 +952,7 @@ class ThisEscapeAnalyzer extends TreeScanner {
         if (isExplicitOuterThisReference(types, currentClassType, tree)) {
             refs.find(ThisRef.class)
               .map(ref -> ref.fromOuter(depth))
-              .flatMap(Optional::stream)
+              .flatMap(OptionalShims::stream)
               .forEach(refs::add);
             return;
         }
@@ -1036,7 +1037,7 @@ class ThisEscapeAnalyzer extends TreeScanner {
             if (methodClassSym.isEnclosedBy((ClassSymbol)sym.owner)) {
                 refs.find(ThisRef.class)
                   .map(ref -> ref.fromOuter(depth))
-                  .flatMap(Optional::stream)
+                  .flatMap(OptionalShims::stream)
                   .forEach(refs::add);
                 return;
             }
@@ -1108,7 +1109,7 @@ class ThisEscapeAnalyzer extends TreeScanner {
                 scan(elems.head);
                 refs.removeExprs(depth)
                   .map(ref -> ref.toIndirect(tree.type.tsym))
-                  .flatMap(Optional::stream)
+                  .flatMap(OptionalShims::stream)
                   .forEach(combinedRefs::add);
             }
         }

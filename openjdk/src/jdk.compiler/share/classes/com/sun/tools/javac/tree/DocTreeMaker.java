@@ -97,6 +97,8 @@ import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Pair;
 import com.sun.tools.javac.util.Position;
 import com.sun.tools.javac.util.StringUtils;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 
 /**
@@ -552,7 +554,7 @@ public class DocTreeMaker implements DocTreeFactory {
 
         // A subset of block tags, which acts as sentence breakers, appearing
         // anywhere but the zero'th position in the first sentence.
-        static final Set<String> sentenceBreakTags = Set.of(
+        static final Set<String> sentenceBreakTags = CollectionShims.set(
                 "H1", "H2", "H3", "H4", "H5", "H6",
                 "PRE", "P");
 
@@ -568,7 +570,7 @@ public class DocTreeMaker implements DocTreeFactory {
          */
         Pair<List<DCTree>, List<DCTree>> splitBody(List<? extends DocTree> list) {
             if (list.isEmpty()) {
-                return new Pair<>(List.of(), List.of());
+                return new Pair<>(CollectionShims.list(), CollectionShims.list());
             }
             // pos is modified as we create trees, therefore
             // we save the pos and restore it later.
@@ -601,7 +603,7 @@ public class DocTreeMaker implements DocTreeFactory {
                                 if (breakOffset > 0) {
                                     // the end of sentence is within the current node;
                                     // split it, skipping whitespace in between the two parts
-                                    var fsPart = newNode(dt.getKind(), dt.pos, content.substring(0, breakOffset).stripTrailing());
+                                    var fsPart = newNode(dt.getKind(), dt.pos, StringShims.stripTrailing(content.substring(0, breakOffset)));
                                     fs.add(fsPart);
                                     int wsOffset = skipWhiteSpace(content, breakOffset);
                                     if (wsOffset > 0) {
@@ -612,7 +614,7 @@ public class DocTreeMaker implements DocTreeFactory {
                                 } else if (peekedNext != null && isSentenceBreak(peekedNext, false)) {
                                     // the next node is a sentence break, so this is the end of the first sentence;
                                     // remove trailing spaces
-                                    var fsPart = newNode(dt.getKind(), dt.pos, content.stripTrailing());
+                                    var fsPart = newNode(dt.getKind(), dt.pos, StringShims.stripTrailing(content));
                                     fs.add(fsPart);
                                     foundFirstSentence = true;
                                 } else {

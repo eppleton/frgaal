@@ -25,6 +25,7 @@
 
 package com.sun.source.tree;
 
+import java.util.Collections;
 import java.util.List;
 import javax.lang.model.element.Name;
 
@@ -95,7 +96,7 @@ public interface ClassTree extends StatementTree {
      * @since 17
      */
     default List<? extends Tree> getPermitsClause() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     /**

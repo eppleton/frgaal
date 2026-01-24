@@ -67,6 +67,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.NewAPIBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.PreviewAPIListBuilder;
+import org.frgaal.PathShims;
 import jdk.javadoc.internal.doclets.toolkit.util.ResourceIOException;
 import jdk.javadoc.internal.doclets.toolkit.util.RestrictedAPIListBuilder;
 
@@ -359,7 +360,7 @@ public class HtmlDoclet extends AbstractDoclet {
                         DocPaths.RESOURCES.resolve(DocPaths.LEGAL).resolve(DocPaths.JQUERY_MD).getPath());
                 if (url != null) {
                     try {
-                        legalNoticesDir = Path.of(url.toURI()).getParent();
+                        legalNoticesDir = PathShims.of(url.toURI()).getParent();
                     } catch (URISyntaxException e) {
                         // should not happen when running javadoc from a system image
                         return;
@@ -375,7 +376,7 @@ public class HtmlDoclet extends AbstractDoclet {
 
             default -> {
                 try {
-                    legalNoticesDir = Path.of(legalNotices);
+                    legalNoticesDir = PathShims.of(legalNotices);
                 } catch (InvalidPathException e) {
                     messages.error("doclet.Error_invalid_path_for_legal_notices",
                             legalNotices, e.getMessage());

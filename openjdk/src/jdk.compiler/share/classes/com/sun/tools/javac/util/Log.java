@@ -176,7 +176,7 @@ public class Log extends AbstractLog {
 
         /** Report selected deferred diagnostics. */
         public void reportDeferredDiagnostics(Comparator<JCDiagnostic> order) {
-            JCDiagnostic[] diags = deferred.toArray(s -> new JCDiagnostic[s]);
+            JCDiagnostic[] diags = deferred.toArray(new JCDiagnostic[0]);
             Arrays.sort(diags, order);
             for (JCDiagnostic d : diags) {
                 prev.report(d);

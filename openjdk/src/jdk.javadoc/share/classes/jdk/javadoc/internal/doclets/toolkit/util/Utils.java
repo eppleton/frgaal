@@ -123,6 +123,10 @@ import static javax.lang.model.element.ElementKind.*;
 import static javax.lang.model.type.TypeKind.*;
 
 import static com.sun.source.doctree.DocTree.Kind.*;
+import org.frgaal.CollectionShims;
+import org.frgaal.ObjectsShims;
+import org.frgaal.StreamShims;
+import org.frgaal.StringShims;
 
 /**
  * Utilities Class for Doclets.
@@ -561,7 +565,7 @@ public class Utils {
         if (!bounds.isEmpty()) {
             TypeMirror upperBound = bounds.get(bounds.size() - 1);
             if (ignoreBounds(upperBound)) {
-                return List.of();
+                return CollectionShims.list();
             }
         }
         return bounds;
@@ -676,7 +680,7 @@ public class Utils {
     }
 
     public TypeMirror getDeclaredType(TypeElement enclosing, TypeMirror target) {
-        return getDeclaredType(List.of(), enclosing, target);
+        return getDeclaredType(CollectionShims.list(), enclosing, target);
     }
 
     /**
@@ -1107,7 +1111,7 @@ public class Utils {
             return text;
 
         final int tabLength = options.sourceTabSize();
-        final String whitespace = " ".repeat(tabLength);
+        final String whitespace = StringShims.repeat(" ", tabLength);
         final int textLength = text.length();
         StringBuilder result = new StringBuilder(textLength);
         int pos = 0;
@@ -1707,7 +1711,7 @@ public class Utils {
         return e.getEnclosedElements().stream()
                 .filter(e_ -> select.test(e_) && (all || shouldDocument(e_)))
                 .map(clazz::cast)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private SimpleElementVisitor14<Boolean, Void> shouldDocumentVisitor = null;
@@ -2029,7 +2033,7 @@ public class Utils {
      * @return the list
      */
     public List<? extends DocTree> getBlockTags(DocCommentTree dcTree) {
-        return dcTree == null ? List.of() : dcTree.getBlockTags();
+        return dcTree == null ? CollectionShims.list() : dcTree.getBlockTags();
     }
 
     /**
@@ -2045,7 +2049,7 @@ public class Utils {
                 .filter(t -> t.getKind() != ERRONEOUS)
                 .map(t -> (BlockTagTree) t)
                 .filter(filter)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -2065,7 +2069,7 @@ public class Utils {
                 .map(t -> (BlockTagTree) t)
                 .filter(filter)
                 .map(tClass::cast)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -2291,21 +2295,21 @@ public class Utils {
     public List<? extends DocTree> getPreamble(Element element) {
         DocCommentTree docCommentTree = getDocCommentTree(element);
         return docCommentTree == null
-                ? List.of()
+                ? CollectionShims.list()
                 : docCommentTree.getPreamble();
     }
 
     public List<? extends DocTree> getFullBody(Element element) {
         DocCommentTree docCommentTree = getDocCommentTree(element);
             return (docCommentTree == null)
-                    ? List.of()
+                    ? CollectionShims.list()
                     : docCommentTree.getFullBody();
     }
 
     public List<? extends DocTree> getBody(Element element) {
         DocCommentTree docCommentTree = getDocCommentTree(element);
         return (docCommentTree == null)
-                ? List.of()
+                ? CollectionShims.list()
                 : docCommentTree.getFullBody();
     }
 
@@ -2364,7 +2368,7 @@ public class Utils {
     public List<? extends DocTree> getFirstSentenceTrees(Element element) {
         DocCommentTree dcTree = getDocCommentTree(element);
         if (dcTree == null) {
-            return List.of();
+            return CollectionShims.list();
         }
         return new ArrayList<>(dcTree.getFirstSentence());
     }
@@ -2464,7 +2468,7 @@ public class Utils {
     }
 
     public enum DeclarationPreviewLanguageFeatures {
-        NONE(List.of(""));
+        NONE(CollectionShims.list(""));
         public final List<String> features;
 
         DeclarationPreviewLanguageFeatures(List<String> features) {
@@ -2475,7 +2479,7 @@ public class Utils {
     public PreviewSummary declaredUsingPreviewAPIs(Element el) {
         if (el.asType().getKind() == ERROR) {
             // Can happen with undocumented --ignore-source-errors option
-            return new PreviewSummary(Set.of(), Set.of(), Set.of());
+            return new PreviewSummary(CollectionShims.set(), CollectionShims.set(), CollectionShims.set());
         }
         List<TypeElement> usedInDeclaration = new ArrayList<>(annotations2Classes(el));
         switch (el.getKind()) {
@@ -2484,24 +2488,24 @@ public class Utils {
                 for (TypeParameterElement tpe : te.getTypeParameters()) {
                     usedInDeclaration.addAll(types2Classes(tpe.getBounds()));
                 }
-                usedInDeclaration.addAll(types2Classes(List.of(te.getSuperclass())));
+                usedInDeclaration.addAll(types2Classes(CollectionShims.list(te.getSuperclass())));
                 usedInDeclaration.addAll(types2Classes(te.getPermittedSubclasses()));
-                usedInDeclaration.addAll(types2Classes(te.getRecordComponents().stream().map(Element::asType).toList())); //TODO: annotations on record components???
+                usedInDeclaration.addAll(types2Classes(te.getRecordComponents().stream().map(Element::asType).collect(Collectors.toList()))); //TODO: annotations on record components???
             }
             case CONSTRUCTOR, METHOD -> {
                 ExecutableElement ee = (ExecutableElement) el;
                 for (TypeParameterElement tpe : ee.getTypeParameters()) {
                     usedInDeclaration.addAll(types2Classes(tpe.getBounds()));
                 }
-                usedInDeclaration.addAll(types2Classes(List.of(ee.getReturnType())));
-                usedInDeclaration.addAll(types2Classes(List.of(ee.getReceiverType())));
+                usedInDeclaration.addAll(types2Classes(CollectionShims.list(ee.getReturnType())));
+                usedInDeclaration.addAll(types2Classes(CollectionShims.list(ee.getReceiverType())));
                 usedInDeclaration.addAll(types2Classes(ee.getThrownTypes()));
-                usedInDeclaration.addAll(types2Classes(ee.getParameters().stream().map(VariableElement::asType).toList()));
+                usedInDeclaration.addAll(types2Classes(ee.getParameters().stream().map(VariableElement::asType).collect(Collectors.toList())));
                 usedInDeclaration.addAll(annotationValue2Classes(ee.getDefaultValue()));
             }
             case FIELD, ENUM_CONSTANT, RECORD_COMPONENT -> {
                 VariableElement ve = (VariableElement) el;
-                usedInDeclaration.addAll(types2Classes(List.of(ve.asType())));
+                usedInDeclaration.addAll(types2Classes(CollectionShims.list(ve.asType())));
             }
             case MODULE, PACKAGE -> {
             }
@@ -2563,7 +2567,7 @@ public class Utils {
     private Collection<TypeElement> annotation2Classes(AnnotationMirror am) {
         List<TypeElement> result = new ArrayList<>();
 
-        result.addAll(types2Classes(List.of(am.getAnnotationType())));
+        result.addAll(types2Classes(CollectionShims.list(am.getAnnotationType())));
         am.getElementValues()
           .values()
           .stream()
@@ -2575,7 +2579,7 @@ public class Utils {
 
     private Collection<TypeElement> annotationValue2Classes(AnnotationValue value) {
         if (value == null) {
-            return List.of();
+            return CollectionShims.list();
         }
 
         List<TypeElement> result = new ArrayList<>();
@@ -2595,7 +2599,7 @@ public class Utils {
 
             @Override
             public Object visitType(TypeMirror t, Object p) {
-                result.addAll(types2Classes(List.of(t)));
+                result.addAll(types2Classes(CollectionShims.list(t)));
                 return super.visitType(t, p);
             }
 
@@ -2800,12 +2804,12 @@ public class Utils {
 
                 // <TODO refactor once java.util.List.reversed() from
                 //   SequencedCollection is available>
-                var filteredSupertypes = typeUtils.directSupertypes(t.asType()).stream()
+                var filteredSupertypes = StreamShims.dropWhile(typeUtils.directSupertypes(t.asType()).stream()
                         .map(t_ -> (TypeElement) ((DeclaredType) t_).asElement())
                         // filter out java.lang.Object using the fact that at
                         // most one class type comes first in the stream of
                         // direct supertypes
-                        .dropWhile(JAVA_LANG_OBJECT::equals)
+                        , JAVA_LANG_OBJECT::equals)
                         .filter(visited::add) // idempotent side effect
                         .collect(Collectors.toCollection(ArrayList::new));
                 // push supertypes in reverse order, so that they are popped
@@ -2861,6 +2865,6 @@ public class Utils {
         if (e == null) // shouldn't NPE if passed null
             return "null";
         return e + ", " + (e instanceof QualifiedNameable q ? q.getQualifiedName() : e.getSimpleName())
-                + ", " + e.getKind() + ", " + Objects.toIdentityString(e);
+                + ", " + e.getKind() + ", " + ObjectsShims.toIdentityString(e);
     }
 }

@@ -30,6 +30,7 @@ import java.util.Set;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Scope.WriteableScope;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
@@ -58,6 +59,7 @@ public class MemberEnter extends JCTree.Visitor {
 
     /** The Source language setting. */
     private final Source source;
+    private final Target target;
     private final Enter enter;
     private final Log log;
     private final Check chk;
@@ -86,6 +88,7 @@ public class MemberEnter extends JCTree.Visitor {
         annotate = Annotate.instance(context);
         types = Types.instance(context);
         source = Source.instance(context);
+        target = Target.instance(context);
         names = Names.instance(context);
         deferredLintHandler = DeferredLintHandler.instance(context);
     }
@@ -305,7 +308,7 @@ public class MemberEnter extends JCTree.Visitor {
             }
         }
 
-        if(!(Feature.UNNAMED_VARIABLES.allowedInSource(source) && tree.sym.isUnnamedVariable())) {
+        if(!(Feature.UNNAMED_VARIABLES.allowedInSource(source, target) && tree.sym.isUnnamedVariable())) {
             if (chk.checkUnique(tree.pos(), v, enclScope)) {
                 chk.checkTransparentVar(tree.pos(), v, enclScope);
                 enclScope.enter(v);

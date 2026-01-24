@@ -44,6 +44,7 @@ import com.sun.tools.javac.util.DefinedBy.Api;
 import com.sun.tools.javac.util.JCDiagnostic;
 
 import static com.sun.tools.javac.util.Position.NOPOS;
+import org.frgaal.StringShims;
 
 /**
  *
@@ -915,7 +916,7 @@ public abstract class DCTree implements DocTree {
 
         @Override
         public boolean isBlank() {
-            return code.isBlank();
+            return StringShims.isBlank(code);
         }
 
         @Override @DefinedBy(Api.COMPILER_TREE)
@@ -1290,7 +1291,7 @@ public abstract class DCTree implements DocTree {
 
         @Override
         public boolean isBlank() {
-            return text.isBlank();
+            return StringShims.isBlank(text);
         }
 
         @Override @DefinedBy(Api.COMPILER_TREE)

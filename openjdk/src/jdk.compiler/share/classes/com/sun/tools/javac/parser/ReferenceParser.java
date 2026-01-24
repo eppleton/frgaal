@@ -37,6 +37,7 @@ import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Name;
 
 import javax.tools.JavaFileObject;
+import org.frgaal.StringShims;
 
 /**
  *  A utility class to parse a string in a doc comment containing a
@@ -236,7 +237,7 @@ public class ReferenceParser {
 
     private List<JCTree> parseParams(String sig, int beginIndex, int endIndex, Log.DeferredDiagnosticHandler dh) throws ParseException {
         String s = sig.substring(beginIndex, endIndex);
-        if (s.isBlank()) {
+        if (StringShims.isBlank(s)) {
             return List.nil();
         }
 

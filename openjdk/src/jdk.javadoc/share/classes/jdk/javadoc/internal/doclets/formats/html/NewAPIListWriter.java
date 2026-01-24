@@ -42,6 +42,7 @@ import jdk.javadoc.internal.html.HtmlTree;
 import jdk.javadoc.internal.html.Text;
 
 import static com.sun.source.doctree.DocTree.Kind.SINCE;
+import org.frgaal.CollectionShims;
 
 /**
  * Generates a file containing a list of new API elements with the appropriate links.
@@ -133,7 +134,7 @@ public class NewAPIListWriter extends SummaryListWriter<NewAPIBuilder> {
         var sinceTrees = utils.getBlockTags(element, SINCE, SinceTree.class);
         if (!sinceTrees.isEmpty()) {
             // assumes a simple string value with no formatting
-            return Text.of(sinceTrees.getFirst().getBody().getFirst().toString());
+            return Text.of(CollectionShims.getFirst(CollectionShims.getFirst(sinceTrees).getBody()).toString());
         }
         return Text.EMPTY;
     }

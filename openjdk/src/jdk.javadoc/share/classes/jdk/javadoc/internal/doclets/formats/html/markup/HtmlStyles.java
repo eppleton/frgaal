@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import jdk.javadoc.internal.html.HtmlStyle;
+import org.frgaal.MatcherShims;
 
 /**
  * Enum representing HTML styles, with associated entries in the stylesheet files.
@@ -1108,9 +1109,9 @@ public enum HtmlStyles implements HtmlStyle {
     private final String cssName;
 
     HtmlStyles() {
-        cssName = Pattern.compile("\\p{Upper}")
-                .matcher(toString())
-                .replaceAll(mr -> "-" + mr.group().toLowerCase(Locale.US));
+        cssName = MatcherShims.replaceAll(Pattern.compile("\\p{Upper}")
+                .matcher(toString()),
+                mr -> "-" + mr.group().toLowerCase(Locale.US));
     }
 
     HtmlStyles(String cssName) {

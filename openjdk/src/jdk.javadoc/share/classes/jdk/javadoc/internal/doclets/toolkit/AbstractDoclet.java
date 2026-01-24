@@ -123,9 +123,9 @@ public abstract class AbstractDoclet implements Doclet {
     }
 
     private void reportInternalError(Throwable t) {
-        if (getClass().getModule() == AbstractDoclet.class.getModule()) {
+//        if (getClass().getModule() == AbstractDoclet.class.getModule()) {
             System.err.println(configuration.getDocResources().getText("doclet.internal.report.bug"));
-        }
+//        }
         dumpStack(true, t);
     }
 
