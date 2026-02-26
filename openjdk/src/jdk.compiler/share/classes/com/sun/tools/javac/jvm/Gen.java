@@ -55,6 +55,7 @@ import static com.sun.tools.javac.jvm.ByteCodes.*;
 import static com.sun.tools.javac.jvm.CRTFlags.*;
 import static com.sun.tools.javac.main.Option.*;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
+import org.frgaal.CollectionShims;
 
 /** This pass maps flat Java (i.e. without inner classes) to bytecodes.
  *
@@ -173,7 +174,7 @@ public class Gen extends JCTree.Visitor {
     List<LocalItem> stackBeforeSwitchExpression;
     LocalItem switchResult;
     PatternMatchingCatchConfiguration patternMatchingCatchConfiguration =
-            new PatternMatchingCatchConfiguration(Set.of(), null, null, null);
+            new PatternMatchingCatchConfiguration(CollectionShims.set(), null, null, null);
 
     /** Cache the symbol to reflect the qualifying type.
      *  key: corresponding type

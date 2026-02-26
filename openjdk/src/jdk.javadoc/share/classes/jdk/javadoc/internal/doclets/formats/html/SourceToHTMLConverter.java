@@ -47,6 +47,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.SimpleDocletException;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.HtmlId;
 import jdk.javadoc.internal.html.HtmlTag;
@@ -233,7 +234,7 @@ public class SourceToHTMLConverter {
                 .setDescription(HtmlDocletWriter.getDescription("source", te))
                 .setGenerator(HtmlDocletWriter.getGenerator(getClass()))
                 .addDefaultScript(false)
-                .setStylesheets(configuration.getMainStylesheet(), configuration.getAdditionalStylesheets(), List.of());
+                .setStylesheets(configuration.getMainStylesheet(), configuration.getAdditionalStylesheets(), CollectionShims.list());
         var html = HtmlTree.HTML(configuration.getLocale().getLanguage(), head, body);
         HtmlDocument document = new HtmlDocument(html);
         messages.notice("doclet.Generating_0", path.getPath());

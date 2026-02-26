@@ -51,6 +51,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocLink;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.HtmlTree;
@@ -71,7 +72,7 @@ public class SeeTaglet extends BaseTaglet implements InheritableTaglet {
         CommentHelper ch = utils.getCommentHelper(dst);
         var path = ch.getDocTreePath(tag);
         messages.warning(path, "doclet.inheritDocWithinInappropriateTag");
-        return new Output(null, null, List.of(), true /* true, otherwise there will be an exception up the stack */);
+        return new Output(null, null, CollectionShims.list(), true /* true, otherwise there will be an exception up the stack */);
     }
 
     @Override
@@ -242,7 +243,7 @@ public class SeeTaglet extends BaseTaglet implements InheritableTaglet {
         var sb = new StringBuilder();
         for (var i = 0; i < s.length(); i++) {
              var ch = s.charAt(i);
-             if (!sb.isEmpty() && !Character.isJavaIdentifierPart(ch)) {
+             if (!(sb.length() == 0) && !Character.isJavaIdentifierPart(ch)) {
                  ids.add(sb.toString());
                  sb.setLength(0);
              }
@@ -265,7 +266,7 @@ public class SeeTaglet extends BaseTaglet implements InheritableTaglet {
                  default -> {
                      if (!inParens) {
                          if (Character.isJavaIdentifierStart(ch)
-                                 || (!sb.isEmpty() && Character.isJavaIdentifierPart(ch))) {
+                                 || (!(sb.length() == 0) && Character.isJavaIdentifierPart(ch))) {
                              sb.append(ch);
                          } else if (Character.isWhitespace(ch)) {
                              return true;
@@ -275,7 +276,7 @@ public class SeeTaglet extends BaseTaglet implements InheritableTaglet {
              }
         }
 
-        if (!sb.isEmpty()) {
+        if (!(sb.length() == 0)) {
             ids.add(sb.toString());
         }
 

@@ -54,6 +54,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.ClassTree;
 import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.HtmlAttr;
@@ -68,11 +69,11 @@ import jdk.javadoc.internal.html.Text;
 public class ClassWriter extends SubWriterHolderWriter {
 
     private static final Set<String> suppressSubtypesSet
-            = Set.of("java.lang.Object",
+            = CollectionShims.set("java.lang.Object",
                      "org.omg.CORBA.Object");
 
     private static final Set<String> suppressImplementingSet
-            = Set.of("java.lang.Cloneable",
+            = CollectionShims.set("java.lang.Cloneable",
                      "java.lang.constant.Constable",
                      "java.lang.constant.ConstantDesc",
                      "java.io.Serializable");
@@ -685,7 +686,7 @@ public class ClassWriter extends SubWriterHolderWriter {
                 dl.add(HtmlTree.DT(utils.isPlainInterface(e)
                         ? contents.enclosingInterfaceLabel
                         : contents.enclosingClassLabel));
-                dl.add(HtmlTree.DD(getClassLinks(HtmlLinkInfo.Kind.LINK_TYPE_PARAMS_AND_BOUNDS, List.of(e))));
+                dl.add(HtmlTree.DD(getClassLinks(HtmlLinkInfo.Kind.LINK_TYPE_PARAMS_AND_BOUNDS, CollectionShims.list(e))));
                 target.add(dl);
                 return null;
             }

@@ -111,5 +111,5 @@ public interface VariableElement extends Element {
      *
      * @since 22
      */
-    default boolean isUnnamed() { return getSimpleName().isEmpty(); }
+    default boolean isUnnamed() { return getSimpleName().length() == 0; }
 }

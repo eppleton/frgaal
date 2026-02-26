@@ -76,6 +76,7 @@ import static com.sun.tools.javac.code.TypeTag.CLASS;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.tools.javac.comp.Modules;
 import com.sun.tools.javac.comp.Resolve;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.resources.CompilerProperties.Notes;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 
@@ -123,7 +124,8 @@ public class JavacElements implements Elements {
         javacTaskImpl = t instanceof JavacTaskImpl taskImpl ? taskImpl : null;
         log = Log.instance(context);
         Source source = Source.instance(context);
-        allowModules = Feature.MODULES.allowedInSource(source);
+        Target target = Target.instance(context);
+        allowModules = Feature.MODULES.allowedInSource(source, target);
     }
 
     @Override @DefinedBy(Api.LANGUAGE_MODEL)

@@ -25,6 +25,7 @@
 
 package javax.tools;
 
+import com.sun.tools.javac.api.JavacTool;
 import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -57,8 +58,7 @@ public class ToolProvider {
      * and {@code null} otherwise.
      */
     public static JavaCompiler getSystemJavaCompiler() {
-        return getSystemTool(JavaCompiler.class,
-                systemJavaCompilerModule, systemJavaCompilerName);
+        return JavacTool.create();
     }
 
     private static final String systemDocumentationToolModule = "jdk.javadoc";
@@ -93,7 +93,7 @@ public class ToolProvider {
      * locate system tools as well as user-installed tools.
      * @return a class loader, or {@code null}
      */
-    @Deprecated(since="9")
+    @Deprecated(/*since="9"*/)
     public static ClassLoader getSystemToolClassLoader() {
         return null;
     }
@@ -116,7 +116,7 @@ public class ToolProvider {
         try {
             ServiceLoader<T> sl = ServiceLoader.load(clazz, ClassLoader.getSystemClassLoader());
             for (T tool : sl) {
-                if (Objects.equals(tool.getClass().getModule().getName(), moduleName)) {
+                if (true) {
                     return tool;
                 }
             }

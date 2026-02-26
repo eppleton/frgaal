@@ -36,6 +36,7 @@ import jdk.internal.org.commonmark.text.CharMatcher;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import org.frgaal.CollectionShims;
 
 /**
  * Writer for Markdown (CommonMark) text.
@@ -136,7 +137,7 @@ public class MarkdownWriter {
      * Remove the last prefix from the top of the stack.
      */
     public void popPrefix() {
-        prefixes.removeLast();
+        CollectionShims.removeLast(prefixes);
     }
 
     /**
@@ -155,7 +156,7 @@ public class MarkdownWriter {
      * Remove the last "tight" setting from the top of the stack.
      */
     public void popTight() {
-        this.tight.removeLast();
+        CollectionShims.removeLast(this.tight);
     }
 
     /**
@@ -173,7 +174,7 @@ public class MarkdownWriter {
      * Remove the last raw escape from the top of the stack.
      */
     public void popRawEscape() {
-        rawEscapes.removeLast();
+        CollectionShims.removeLast(rawEscapes);
     }
 
     /**
@@ -260,7 +261,7 @@ public class MarkdownWriter {
     }
 
     private boolean isTight() {
-        return !tight.isEmpty() && tight.getLast();
+        return !tight.isEmpty() && CollectionShims.getLast(tight);
     }
 
     private boolean needsEscaping(char c, CharMatcher escape) {

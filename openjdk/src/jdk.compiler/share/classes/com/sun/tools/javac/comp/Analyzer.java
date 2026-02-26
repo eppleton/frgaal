@@ -84,6 +84,7 @@ import com.sun.tools.javac.util.Position;
 
 import static com.sun.tools.javac.code.Flags.GENERATEDCONSTR;
 import static com.sun.tools.javac.code.TypeTag.CLASS;
+import com.sun.tools.javac.jvm.Target;
 import static com.sun.tools.javac.tree.JCTree.Tag.APPLY;
 import static com.sun.tools.javac.tree.JCTree.Tag.FOREACHLOOP;
 import static com.sun.tools.javac.tree.JCTree.Tag.LABELLED;
@@ -132,8 +133,9 @@ public class Analyzer {
         String findOpt = options.get("find");
         //parse modes
         Source source = Source.instance(context);
-        allowDiamondWithAnonymousClassCreation = Feature.DIAMOND_WITH_ANONYMOUS_CLASS_CREATION.allowedInSource(source);
-        analyzerModes = AnalyzerMode.getAnalyzerModes(findOpt, source);
+        Target target = Target.instance(context);
+        allowDiamondWithAnonymousClassCreation = Feature.DIAMOND_WITH_ANONYMOUS_CLASS_CREATION.allowedInSource(source, target);
+        analyzerModes = AnalyzerMode.getAnalyzerModes(findOpt, source, target);
     }
 
     /**
@@ -164,7 +166,7 @@ public class Analyzer {
          * prepending '-' to its name. Finally, the special mode 'all' can be used to
          * add all modes to the resulting enum.
          */
-        static EnumSet<AnalyzerMode> getAnalyzerModes(String opt, Source source) {
+        static EnumSet<AnalyzerMode> getAnalyzerModes(String opt, Source source, Target target) {
             if (opt == null) {
                 return EnumSet.noneOf(AnalyzerMode.class);
             }
@@ -174,7 +176,7 @@ public class Analyzer {
                 res = EnumSet.allOf(AnalyzerMode.class);
             }
             for (AnalyzerMode mode : values()) {
-                if (modes.contains("-" + mode.opt) || (mode.feature != null && !mode.feature.allowedInSource(source))) {
+                if (modes.contains("-" + mode.opt) || (mode.feature != null && !mode.feature.allowedInSource(source, target))) {
                     res.remove(mode);
                 } else if (modes.contains(mode.opt)) {
                     res.add(mode);

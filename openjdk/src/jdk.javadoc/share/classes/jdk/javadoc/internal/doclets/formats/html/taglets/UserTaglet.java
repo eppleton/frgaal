@@ -32,6 +32,7 @@ import javax.lang.model.element.Element;
 
 import com.sun.source.doctree.DocTree;
 
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.RawHtml;
 
@@ -70,7 +71,7 @@ public final class UserTaglet implements Taglet {
     @Override
     public Content getInlineTagOutput(Element element, DocTree tag, TagletWriter tagletWriter) {
         Content output = tagletWriter.getOutputInstance();
-        output.add(RawHtml.of(userTaglet.toString(List.of(tag), element)));
+        output.add(RawHtml.of(userTaglet.toString(CollectionShims.list(tag), element)));
         return output;
     }
 

@@ -56,6 +56,8 @@ import static com.sun.tools.javac.code.Kinds.Kind.*;
 import com.sun.tools.javac.code.Type.TypeVar;
 import static com.sun.tools.javac.code.TypeTag.BOOLEAN;
 import static com.sun.tools.javac.code.TypeTag.VOID;
+import com.sun.tools.javac.jvm.Target;
+import com.sun.tools.javac.code.Types.UniqueType;
 import com.sun.tools.javac.resources.CompilerProperties.Fragments;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 import com.sun.tools.javac.util.JCDiagnostic.Fragment;
@@ -65,6 +67,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
+
+import org.frgaal.CollectionShims;
 
 /** This pass implements dataflow analysis for Java programs though
  *  different AST visitor steps. Liveness analysis (see AliveAnalyzer) checks that
@@ -782,7 +786,7 @@ public class Flow {
         private boolean exhausts(JCExpression selector, List<JCCase> cases) {
             Set<PatternDescription> patternSet = new HashSet<>();
             Map<Symbol, Set<Symbol>> enum2Constants = new HashMap<>();
-            Set<Object> booleanLiterals = new HashSet<>(Set.of(0, 1));
+            Set<Object> booleanLiterals = new HashSet<>(CollectionShims.set(0, 1));
             for (JCCase c : cases) {
                 if (!TreeInfo.unguardedCase(c))
                     continue;
@@ -1061,7 +1065,7 @@ public class Flow {
                              .filter(pd -> pd.nested.length == nestedPatternsCount)
                              .collect(groupingBy(pd -> useHashes ? pd.hashCode(mismatchingCandidateFin) : 0));
                     for (var candidates : groupEquivalenceCandidates.values()) {
-                        var candidatesArr = candidates.toArray(RecordPattern[]::new);
+                        var candidatesArr = candidates.toArray(new RecordPattern[0]);
 
                         for (int firstCandidate = 0;
                              firstCandidate < candidatesArr.length;
@@ -3540,10 +3544,10 @@ public class Flow {
             if (!record.type.isErroneous()) {
                 componentTypes = ((ClassSymbol) record.type.tsym).getRecordComponents()
                         .map(r -> types.memberType(record.type, r))
-                        .toArray(s -> new Type[s]);
+                        .toArray(new Type[0]);
             }
             else {
-                componentTypes = record.nested.map(t -> types.createErrorType(t.type)).toArray(s -> new Type[s]);;
+                componentTypes = record.nested.map(t -> types.createErrorType(t.type)).toArray(new Type[0]);;
             }
 
             PatternDescription[] nestedDescriptions =

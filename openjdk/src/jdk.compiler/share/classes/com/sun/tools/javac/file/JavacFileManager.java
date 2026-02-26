@@ -28,8 +28,8 @@ package com.sun.tools.javac.file;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.module.Configuration;
-import java.lang.module.ModuleFinder;
+//import java.lang.module.Configuration;
+//import java.lang.module.ModuleFinder;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -76,6 +76,7 @@ import com.sun.tools.javac.resources.CompilerProperties.Errors;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Context.Factory;
+import com.sun.tools.javac.util.Context.Key;
 import com.sun.tools.javac.util.DefinedBy;
 import com.sun.tools.javac.util.DefinedBy.Api;
 import com.sun.tools.javac.util.List;
@@ -84,6 +85,8 @@ import com.sun.tools.javac.util.Options;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
+import java.util.EnumSet;
+import java.util.stream.Collectors;
 
 import static javax.tools.StandardLocation.*;
 
@@ -98,9 +101,11 @@ import static javax.tools.StandardLocation.*;
  */
 public class JavacFileManager extends BaseFileManager implements StandardJavaFileManager {
 
+    public static final Key<JavacFileManager> javacFileManagerKey = new Key<>();
+
     public static char[] toArray(CharBuffer buffer) {
         if (buffer.hasArray())
-            return buffer.compact().flip().array();
+            return (char[]) buffer.compact().flip().array();
         else
             return buffer.toString().toCharArray();
     }
@@ -108,7 +113,7 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
     private FSInfo fsInfo;
 
     private static final Set<JavaFileObject.Kind> SOURCE_OR_CLASS =
-        Set.of(JavaFileObject.Kind.SOURCE, JavaFileObject.Kind.CLASS);
+        EnumSet.of(JavaFileObject.Kind.SOURCE, JavaFileObject.Kind.CLASS);
 
     protected boolean symbolFileEnabled = true;
 
@@ -159,8 +164,10 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
     @SuppressWarnings("this-escape")
     public JavacFileManager(Context context, boolean register, Charset charset) {
         super(charset);
-        if (register)
+        if (register) {
             context.put(JavaFileManager.class, this);
+            context.put(javacFileManagerKey, this);
+        }
         setContext(context);
     }
 
@@ -492,7 +499,7 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
 
             java.util.List<Path> files;
             try (Stream<Path> s = Files.list(d)) {
-                files = (sortFiles == null ? s : s.sorted(sortFiles)).toList();
+                files = (sortFiles == null ? s : s.sorted(sortFiles)).collect(Collectors.toList());
             } catch (IOException ignore) {
                 return;
             }
@@ -551,8 +558,8 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
         }
     }
 
-    private static final Set<FileVisitOption> NO_FILE_VISIT_OPTIONS = Set.of();
-    private static final Set<FileVisitOption> FOLLOW_LINKS_OPTIONS = Set.of(FOLLOW_LINKS);
+    private static final Set<FileVisitOption> NO_FILE_VISIT_OPTIONS = Collections.emptySet();
+    private static final Set<FileVisitOption> FOLLOW_LINKS_OPTIONS = Collections.singleton(FOLLOW_LINKS);
 
     private final class ArchiveContainer implements Container {
         private final Path archivePath;
@@ -578,7 +585,7 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
             } else {
                 // Less common case is possible if the file manager was not initialized in JavacTask,
                 // or if non "*.jar" files are on the classpath.
-                this.fileSystem = FileSystems.newFileSystem(archivePath, env, (ClassLoader)null);
+                this.fileSystem = FileSystems.newFileSystem(archivePath, (ClassLoader)null);
             }
             packages = new HashMap<>();
             for (Path root : fileSystem.getRootDirectories()) {
@@ -1161,14 +1168,16 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
     public <S> ServiceLoader<S> getServiceLoader(Location location, Class<S> service) throws IOException {
         nullCheck(location);
         nullCheck(service);
-        getClass().getModule().addUses(service);
+//        getClass().getModule().addUses(service); //XXX
         if (location.isModuleOrientedLocation()) {
-            Collection<Path> paths = locations.getLocation(location);
-            ModuleFinder finder = ModuleFinder.of(paths.toArray(new Path[paths.size()]));
-            ModuleLayer bootLayer = ModuleLayer.boot();
-            Configuration cf = bootLayer.configuration().resolveAndBind(ModuleFinder.of(), finder, Collections.emptySet());
-            ModuleLayer layer = bootLayer.defineModulesWithOneLoader(cf, ClassLoader.getSystemClassLoader());
-            return ServiceLoader.load(layer, service);
+//            Collection<Path> paths = locations.getLocation(location);
+//            ModuleFinder finder = ModuleFinder.of(paths.toArray(new Path[paths.size()]));
+//            ModuleLayer bootLayer = ModuleLayer.boot();
+//            Configuration cf = bootLayer.configuration().resolveAndBind(ModuleFinder.of(), finder, Collections.emptySet());
+//            ModuleLayer layer = bootLayer.defineModulesWithOneLoader(cf, ClassLoader.getSystemClassLoader());
+//            return ServiceLoader.load(layer, service);
+            //XXX:
+            return null;
         } else {
             return ServiceLoader.load(service, getClassLoader(location));
         }

@@ -44,6 +44,8 @@ import jdk.javadoc.internal.doclets.formats.html.HtmlConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.CollectionShims;
+import org.frgaal.StreamShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.Entity;
@@ -68,7 +70,7 @@ public class SpecTaglet extends BaseTaglet implements InheritableTaglet {
         CommentHelper ch = utils.getCommentHelper(dst);
         var path = ch.getDocTreePath(tag);
         messages.warning(path, "doclet.inheritDocWithinInappropriateTag");
-        return new Output(null, null, List.of(), true /* true, otherwise there will be an exception up the stack */);
+        return new Output(null, null, CollectionShims.list(), true /* true, otherwise there will be an exception up the stack */);
     }
 
     @Override
@@ -101,8 +103,8 @@ public class SpecTaglet extends BaseTaglet implements InheritableTaglet {
             return Text.EMPTY;
         }
 
-        var links = specTags.stream()
-                .map(st -> specTagToContent(holder, st)).toList();
+        var links = StreamShims.toList(specTags.stream()
+                .map(st -> specTagToContent(holder, st)));
 
         var specList = tagletWriter.tagList(links);
         return new ContentBuilder(

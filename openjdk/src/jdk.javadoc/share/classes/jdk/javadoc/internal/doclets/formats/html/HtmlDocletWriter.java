@@ -131,6 +131,8 @@ import jdk.javadoc.internal.html.TextBuilder;
 import static com.sun.source.doctree.DocTree.Kind.COMMENT;
 import static com.sun.source.doctree.DocTree.Kind.START_ELEMENT;
 import static com.sun.source.doctree.DocTree.Kind.TEXT;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 
 /**
@@ -460,7 +462,7 @@ public abstract class HtmlDocletWriter {
                                   String description,
                                   Content body)
             throws DocFileIOException {
-        printHtmlDocument(metakeywords, description, new ContentBuilder(), List.of(), body);
+        printHtmlDocument(metakeywords, description, new ContentBuilder(), CollectionShims.list(), body);
     }
 
     /**
@@ -1126,7 +1128,7 @@ public abstract class HtmlDocletWriter {
 
         if (utils.isExecutableElement(element)) {
             ExecutableElement ee = (ExecutableElement)element;
-            HtmlId id = isProperty ? htmlIds.forProperty(ee) : htmlIds.forMember(ee).getFirst();
+            HtmlId id = isProperty ? htmlIds.forProperty(ee) : CollectionShims.getFirst(htmlIds.forMember(ee));
             return getLink(new HtmlLinkInfo(configuration, context, typeElement)
                 .label(label)
                 .fragment(id.name())
@@ -1280,8 +1282,8 @@ public abstract class HtmlDocletWriter {
                 if (kind == START_ELEMENT && htmlTag.endKind == HtmlTag.EndKind.REQUIRED) {
                     openTags.add(name);
                 } else if (kind == Kind.END_ELEMENT && !openTags.isEmpty()
-                        && openTags.getLast().equals(name)) {
-                    openTags.removeLast();
+                        && CollectionShims.getLast(openTags).equals(name)) {
+                    CollectionShims.removeLast(openTags);
                 }
             }
         }
@@ -1373,7 +1375,7 @@ public abstract class HtmlDocletWriter {
                 // Ignore any trailing whitespace OR whitespace after removed html comment
                 if ((isLastNode || commentRemoved)
                         && tag.getKind() == TEXT
-                        && ((tag instanceof TextTree tt) && tt.getBody().isBlank())) {
+                        && ((tag instanceof TextTree tt) && StringShims.isBlank(tt.getBody()))) {
                     continue;
                 }
 
@@ -1400,7 +1402,7 @@ public abstract class HtmlDocletWriter {
 
         // Close any open inline tags
         while (!openTags.isEmpty()) {
-            result.add(RawHtml.endElement(openTags.removeLast()));
+            result.add(RawHtml.endElement(CollectionShims.removeLast(openTags)));
         }
         return result;
     }
@@ -1429,11 +1431,11 @@ public abstract class HtmlDocletWriter {
         private final Element element;
 
         private final Parser parser = Parser.builder()
-                .extensions(List.of(tablesExtn))
+                .extensions(CollectionShims.list(tablesExtn))
                 .build();
         private final HtmlRenderer renderer = HtmlRenderer.builder()
                 .nodeRendererFactory(headingRendererFactory)
-                .extensions(List.of(tablesExtn))
+                .extensions(CollectionShims.list(tablesExtn))
                 .build();
 
         MarkdownHandler(Element element) {
@@ -1465,7 +1467,7 @@ public abstract class HtmlDocletWriter {
                 if (embeddedContent.isPhrasingContent()) {
                     markdownInput.append(PLACEHOLDER_CHAR);
                 } else {
-                    if (!markdownInput.isEmpty() && markdownInput.charAt(markdownInput.length() - 1) != '\n') {
+                    if (!(markdownInput.length() == 0) && markdownInput.charAt(markdownInput.length() - 1) != '\n') {
                         markdownInput.append('\n');
                     }
                     markdownInput.append(PLACEHOLDER_BLOCK);
@@ -1530,7 +1532,7 @@ public abstract class HtmlDocletWriter {
 
             @Override
             public Set<Class<? extends Node>> getNodeTypes() {
-                return Set.of(Heading.class);
+                return CollectionShims.set(Heading.class);
             }
 
             @Override
@@ -1544,7 +1546,7 @@ public abstract class HtmlDocletWriter {
                 var id = getId(heading);
 
                 htmlWriter.line();
-                htmlWriter.tag(htag, Map.of("id", id.name()));
+                htmlWriter.tag(htag, CollectionShims.map("id", id.name()));
                 visitChildren(heading);
                 htmlWriter.tag('/' + htag);
                 htmlWriter.line();
@@ -1793,11 +1795,11 @@ public abstract class HtmlDocletWriter {
         private CharSequence textCleanup(String text, boolean isLast, boolean stripLeading) {
             boolean stripTrailing = context.isFirstSentence && isLast;
             if (stripLeading && stripTrailing) {
-                text = text.strip();
+                text = StringShims.strip(text);
             } else if (stripLeading) {
-                text = text.stripLeading();
+                text = StringShims.stripLeading(text);
             } else if (stripTrailing) {
-                text = text.stripTrailing();
+                text = StringShims.stripTrailing(text);
             }
             text = utils.replaceTabs(text);
             return Text.normalizeNewlines(text);
@@ -1947,7 +1949,7 @@ public abstract class HtmlDocletWriter {
      */
     public Content invalidTagOutput(String summary, Optional<Content> detail) {
         messages.setContainsDiagnosticMarkers();
-        if (detail.isEmpty() || detail.get().isEmpty()) {
+        if (!detail.isPresent() || detail.get().isEmpty()) {
             return HtmlTree.SPAN(HtmlStyles.invalidTag, Text.of(summary));
         }
         return HtmlTree.DETAILS(HtmlStyles.invalidTag)
@@ -2321,7 +2323,7 @@ public abstract class HtmlDocletWriter {
 
             @Override
             public Content visitAnnotation(AnnotationMirror a, Void p) {
-                List<Content> list = getAnnotations(List.of(a), false);
+                List<Content> list = getAnnotations(CollectionShims.list(a), false);
                 ContentBuilder buf = new ContentBuilder();
                 for (Content c : list) {
                     buf.add(c);

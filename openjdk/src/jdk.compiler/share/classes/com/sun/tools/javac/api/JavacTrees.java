@@ -1191,11 +1191,15 @@ public class JavacTrees extends DocTrees {
     public void initDocCommentTreeTransformer() {
         if (docCommentTreeTransformer == null) {
             var sl = ServiceLoader.load(DocCommentTreeTransformer.class);
-            docCommentTreeTransformer = sl.stream()
-                    .map(ServiceLoader.Provider::get)
-                    .filter(t -> t.name().equals(DocCommentTreeTransformer.STANDARD))
-                    .findFirst()
-                    .orElseGet(() -> new IdentityTransformer());
+            for (DocCommentTreeTransformer t : sl) {
+                if (t.name().equals(DocCommentTreeTransformer.STANDARD)) {
+                    docCommentTreeTransformer = t;
+                    break;
+                }
+            }
+            if (docCommentTreeTransformer == null) {
+                docCommentTreeTransformer = new IdentityTransformer();
+            }
         }
     }
 

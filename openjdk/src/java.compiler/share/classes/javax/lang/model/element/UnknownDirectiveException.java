@@ -25,7 +25,7 @@
 
 package javax.lang.model.element;
 
-import java.io.Serial;
+//import java.io.Serial;
 
 import javax.lang.model.UnknownEntityException;
 
@@ -41,7 +41,7 @@ import javax.lang.model.UnknownEntityException;
  */
 public class UnknownDirectiveException extends UnknownEntityException {
 
-    @Serial
+//    @Serial
     private static final long serialVersionUID = 269L;
 
     private final transient ModuleElement.Directive directive;

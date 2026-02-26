@@ -36,6 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.sun.tools.javac.code.Symbol.*;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.main.Option;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.Assert;
@@ -164,10 +166,11 @@ public class Lint {
             values = LintCategory.newEmptySet();
 
             Source source = Source.instance(context);
+            Target target = Target.instance(context);
             if (source.compareTo(Source.JDK9) >= 0) {
                 values.add(LintCategory.DEP_ANN);
             }
-            if (Source.Feature.REDUNDANT_STRICTFP.allowedInSource(source)) {
+            if (Source.Feature.REDUNDANT_STRICTFP.allowedInSource(source, target)) {
                 values.add(LintCategory.STRICTFP);
             }
             values.add(LintCategory.REQUIRES_TRANSITIVE_AUTOMATIC);

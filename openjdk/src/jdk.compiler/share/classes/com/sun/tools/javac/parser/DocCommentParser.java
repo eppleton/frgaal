@@ -25,7 +25,7 @@
 
 package com.sun.tools.javac.parser;
 
-import java.io.Serial;
+//import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +59,10 @@ import com.sun.tools.javac.util.Names;
 import com.sun.tools.javac.util.Position;
 import com.sun.tools.javac.util.StringUtils;
 
+import org.frgaal.CollectionShims;
+
 import static com.sun.tools.javac.util.LayoutCharacters.EOI;
+import org.frgaal.StringShims;
 
 /**
  *
@@ -70,7 +73,7 @@ import static com.sun.tools.javac.util.LayoutCharacters.EOI;
  */
 public class DocCommentParser {
     static class ParseException extends Exception {
-        @Serial
+//        @Serial
         private static final long serialVersionUID = 0;
         final int pos;
 
@@ -1537,7 +1540,7 @@ public class DocCommentParser {
                     if (prevLeafKind == LeafBlockKind.FENCED_CODE) {
                         return;
                     } else {
-                        var codeIndent = (containers.isEmpty() ? 0 : containers.getLast().indent) + 4;
+                        var codeIndent = (containers.isEmpty() ? 0 : CollectionShims.getLast(containers).indent) + 4;
                         if (indent >= codeIndent && prevLeafKind != LeafBlockKind.PARAGRAPH) {
                             leafKind = LeafBlockKind.INDENTED_CODE;
                             if (leafKind != prevLeafKind) {
@@ -1752,7 +1755,7 @@ public class DocCommentParser {
          * @return the "kind" of the line
          */
         private LineKind getLineKind(String s) {
-            if (s.isBlank()) {
+            if (StringShims.isBlank(s)) {
                 return LineKind.BLANK;
             }
 

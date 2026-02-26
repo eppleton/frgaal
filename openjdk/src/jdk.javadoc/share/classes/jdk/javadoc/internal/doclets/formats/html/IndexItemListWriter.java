@@ -52,6 +52,8 @@ import jdk.javadoc.internal.html.HtmlTree;
 import jdk.javadoc.internal.html.Text;
 
 import static java.util.stream.Collectors.groupingBy;
+import org.frgaal.PathShims;
+import org.frgaal.StringShims;
 
 /**
  * Generates summary files for tags represented by {@code IndexItem}.
@@ -116,10 +118,10 @@ public abstract class IndexItemListWriter extends HtmlDocletWriter {
         } else if (element instanceof DocFileElement e) {
             var fo = e.getFileObject();
             var t = titles.computeIfAbsent(e, this::getFileTitle);
-            if (t.isBlank()) {
+            if (StringShims.isBlank(t)) {
                 // The user should probably be notified (a warning?) that this
                 // file does not have a title
-                var p = Path.of(fo.toUri());
+                var p = PathShims.of(fo.toUri());
                 t = p.getFileName().toString();
             }
             var b = new ContentBuilder()

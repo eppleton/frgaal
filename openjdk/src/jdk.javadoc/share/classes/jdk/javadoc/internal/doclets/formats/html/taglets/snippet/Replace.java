@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.frgaal.CollectionShims;
+import org.frgaal.MatcherShims;
 
 /**
  * An action that replaces characters in text.
@@ -66,7 +68,7 @@ public final class Replace implements Action {
             int start = matcher.start();
             int end = matcher.end();
             // replacements are computed as they may have special symbols
-            matcher.appendReplacement(b, replacement);
+            MatcherShims.appendReplacement(matcher, b, replacement);
             String s = b.substring(start + off);
             off = b.length() - end;
             replacements.add(new Replacement(start, end, s));
@@ -74,7 +76,7 @@ public final class Replace implements Action {
         // there's no need to call matcher.appendTail(b)
         for (int i = replacements.size() - 1; i >= 0; i--) {
             Replacement r = replacements.get(i);
-            text.subText(r.start(), r.end()).replace(Set.of(), r.value());
+            text.subText(r.start(), r.end()).replace(CollectionShims.set(), r.value());
         }
     }
 }

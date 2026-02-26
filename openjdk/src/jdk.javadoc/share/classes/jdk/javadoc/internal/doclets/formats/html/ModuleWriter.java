@@ -50,6 +50,7 @@ import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyles;
 import jdk.javadoc.internal.doclets.toolkit.DocletException;
 import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.Entity;
@@ -320,11 +321,11 @@ public class ModuleWriter extends HtmlDocletWriter {
         });
 
         // Get all packages if module is open or if displaying concealed modules
-        for (PackageElement pkg : utils.getModulePackageMap().getOrDefault(mdle, Set.of())) {
+        for (PackageElement pkg : utils.getModulePackageMap().getOrDefault(mdle, CollectionShims.set())) {
             if (shouldDocument(pkg) && (mdle.isOpen() || moduleMode == ModuleMode.ALL)) {
                 PackageEntry e = new PackageEntry();
                 if (mdle.isOpen()) {
-                    e.openedTo = Set.of();
+                    e.openedTo = CollectionShims.set();
                 }
                 packages.put(pkg, e);
             }
@@ -385,7 +386,7 @@ public class ModuleWriter extends HtmlDocletWriter {
             }
             SortedSet<PackageElement> openPackages = new TreeSet<>(utils.comparators.packageComparator());
             if (module.isOpen()) {
-                openPackages.addAll(utils.getModulePackageMap().getOrDefault(module, Set.of()));
+                openPackages.addAll(utils.getModulePackageMap().getOrDefault(module, CollectionShims.set()));
             } else {
                 ElementFilter.opensIn(module.getDirectives()).forEach(directive -> {
                     PackageElement pkg = directive.getPackage();

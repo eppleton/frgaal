@@ -53,6 +53,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.frgaal.CollectionShims;
+import org.frgaal.StreamShims;
 
 /**
  * An object to encapsulate the set of in-memory classes, such that
@@ -84,7 +86,7 @@ final class MemoryContext {
         this.compiler = JavacTool.create();
         this.standardFileManager = compiler.getStandardFileManager(null, null, null);
         try {
-            List<File> searchPath = descriptor.fileObject().isFirstLineIgnored() ? List.of() : List.of(descriptor.sourceRootPath().toFile());
+            List<File> searchPath = descriptor.fileObject().isFirstLineIgnored() ? CollectionShims.list() : CollectionShims.list(descriptor.sourceRootPath().toFile());
             standardFileManager.setLocation(StandardLocation.SOURCE_PATH, searchPath);
         } catch (IOException e) {
             throw new Error("unexpected exception from file manager", e);
@@ -101,7 +103,7 @@ final class MemoryContext {
     }
 
     Set<String> getNamesOfCompiledClasses() {
-        return Set.copyOf(inMemoryClasses.keySet());
+        return CollectionShims.setCopyOf(inMemoryClasses.keySet());
     }
 
     /**
@@ -164,7 +166,7 @@ final class MemoryContext {
         // Compile source file (unit) with similar options as the program.
         var opts = options.forSubsequentCompilations();
         var unit = standardFileManager.getJavaFileObject(file);
-        var task = compiler.getTask(out, memoryFileManager, null, opts, null, List.of(unit));
+        var task = compiler.getTask(out, memoryFileManager, null, opts, null, CollectionShims.list(unit));
 
         var ok = task.call();
         if (!ok) {
@@ -205,22 +207,22 @@ final class MemoryContext {
 
         // Optionally create module layer for all modules on the module path.
         var modulePathFinder = createModuleFinderFromModulePath();
-        var modulePathModules = modulePathFinder.findAll().stream().map(ModuleReference::descriptor).map(ModuleDescriptor::name).toList();
+        var modulePathModules = StreamShims.toList(modulePathFinder.findAll().stream().map(ModuleReference::descriptor).map(ModuleDescriptor::name));
         if (!modulePathModules.isEmpty()) {
-            var modulePathConfiguration = bootLayer.configuration().resolveAndBind(modulePathFinder, ModuleFinder.of(), Set.copyOf(modulePathModules));
-            var modulePathController = ModuleLayer.defineModulesWithOneLoader(modulePathConfiguration, List.of(bootLayer), parent);
+            var modulePathConfiguration = bootLayer.configuration().resolveAndBind(modulePathFinder, ModuleFinder.of(), CollectionShims.setCopyOf(modulePathModules));
+            var modulePathController = ModuleLayer.defineModulesWithOneLoader(modulePathConfiguration, CollectionShims.list(bootLayer), parent);
             enableNativeAccess(modulePathController, false);
             var modulePathLayer = modulePathController.layer();
             parentLayer = modulePathLayer;
-            parentLoader = modulePathLayer.findLoader(modulePathModules.getFirst());
+            parentLoader = modulePathLayer.findLoader(CollectionShims.getFirst(modulePathModules));
         }
 
         // Create in-memory module layer for the modular application.
         var applicationModule = ModuleDescriptor.read(ByteBuffer.wrap(moduleInfoBytes), descriptor::computePackageNames);
         var memoryFinder = new MemoryModuleFinder(inMemoryClasses, applicationModule, descriptor);
-        var memoryConfig = parentLayer.configuration().resolveAndBind(memoryFinder, ModuleFinder.of(), Set.of(applicationModule.name()));
+        var memoryConfig = parentLayer.configuration().resolveAndBind(memoryFinder, ModuleFinder.of(), CollectionShims.set(applicationModule.name()));
         var memoryClassLoader = new MemoryClassLoader(inMemoryClasses, parentLoader, applicationModule, descriptor, this::compileJavaFileByName);
-        var memoryController = ModuleLayer.defineModules(memoryConfig, List.of(parentLayer), __ -> memoryClassLoader);
+        var memoryController = ModuleLayer.defineModules(memoryConfig, CollectionShims.list(parentLayer), __ -> memoryClassLoader);
         var memoryLayer = memoryController.layer();
 
         // Make application class accessible from the calling (unnamed) module, that loaded this class.

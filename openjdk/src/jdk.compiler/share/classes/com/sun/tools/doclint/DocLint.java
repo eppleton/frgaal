@@ -25,8 +25,6 @@
 
 package com.sun.tools.doclint;
 
-import java.util.ServiceLoader;
-
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.Plugin;
 
@@ -43,28 +41,18 @@ public abstract class DocLint implements Plugin {
     public static final String XMSGS_CUSTOM_PREFIX = "-Xmsgs:";
     public static final String XCHECK_PACKAGE = "-XcheckPackage:";
 
-    private static ServiceLoader.Provider<DocLint> docLintProvider;
-
     public abstract boolean isValidOption(String opt);
 
     public static synchronized DocLint newDocLint() {
-        if (docLintProvider == null) {
-            docLintProvider = ServiceLoader.load(DocLint.class, ClassLoader.getSystemClassLoader()).stream()
-                    .filter(p_ -> p_.get().getName().equals("doclint"))
-                    .findFirst()
-                    .orElse(new ServiceLoader.Provider<>() {
-                        @Override
-                        public Class<? extends DocLint> type() {
-                            return NoDocLint.class;
-                        }
-
-                        @Override
-                        public DocLint get() {
-                            return new NoDocLint();
-                        }
-                    });
+        try {
+            Class<?> docLintImplClass = Class.forName("jdk.javadoc.internal.doclint.DocLint");
+            return (DocLint) docLintImplClass.getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException ex) {
+            //OK
+        } catch (ReflectiveOperationException ex) {
+            throw new InternalError(ex);
         }
-        return docLintProvider.get();
+        return new NoDocLint();
     }
 
     private static class NoDocLint extends DocLint {

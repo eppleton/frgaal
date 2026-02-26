@@ -44,6 +44,9 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import com.sun.tools.javac.util.Context;
+import java.net.URI;
+import java.nio.file.FileSystemNotFoundException;
+import org.frgaal.PathShims;
 
 /**
  * Get meta-info about files. Default direct (non-caching) implementation.
@@ -118,10 +121,10 @@ public class FSInfo {
                 try {
                     URL url = tryResolveFile(base, elt);
                     if (url != null) {
-                        list.add(Path.of(url.toURI()));
+                        list.add(PathShims.of(url.toURI()));
                     }
                 } catch (URISyntaxException ex) {
-                    throw new IOException(ex);
+//                    throw new IOException(ex);
                 }
             }
 

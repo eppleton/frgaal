@@ -31,6 +31,7 @@ import com.sun.tools.javac.code.Preview;
 import com.sun.tools.javac.code.Source;
 import com.sun.tools.javac.code.Source.Feature;
 import com.sun.tools.javac.file.JavacFileManager;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
 import com.sun.tools.javac.resources.CompilerProperties.Errors;
 import com.sun.tools.javac.resources.CompilerProperties.LintWarnings;
@@ -44,6 +45,8 @@ import java.util.Set;
 
 import static com.sun.tools.javac.parser.Tokens.*;
 import static com.sun.tools.javac.util.LayoutCharacters.EOI;
+
+import org.frgaal.StringShims;
 
 /**
  * The lexical analyzer maps an input stream consisting of UTF-8 characters and unicode
@@ -69,6 +72,7 @@ public class JavaTokenizer extends UnicodeReader {
      * The source language setting. Copied from scanner factory.
      */
     private final Source source;
+    private final Target target;
 
     /**
      * The preview language setting. Copied from scanner factory.
@@ -166,6 +170,7 @@ public class JavaTokenizer extends UnicodeReader {
         this.names = fac.names;
         this.tokens = fac.tokens;
         this.source = fac.source;
+        this.target = fac.target;
         this.preview = fac.preview;
         this.enableLineDocComments = fac.enableLineDocComments;
         this.lint = fac.lint;
@@ -182,7 +187,7 @@ public class JavaTokenizer extends UnicodeReader {
         if (preview.isPreview(feature) && !preview.isEnabled()) {
             //preview feature without --preview flag, error
             lexError(DiagnosticFlag.SOURCE_LEVEL, pos, preview.disabledError(feature));
-        } else if (!feature.allowedInSource(source)) {
+        } else if (!feature.allowedInSource(source, target)) {
             //incompatible source level, error
             lexError(DiagnosticFlag.SOURCE_LEVEL, pos, feature.error(source.name));
         } else if (preview.isPreview(feature)) {
@@ -1049,7 +1054,7 @@ public class JavaTokenizer extends UnicodeReader {
                             } else {
                                 char ch = get();
                                 arg = (32 < ch && ch < 127) ? String.valueOf(ch) :
-                                                              "\\u%04x".formatted((int) ch);
+                                                              String.format("\\u%04x", (int) ch);
                             }
 
                             lexError(pos, Errors.IllegalChar(arg));
@@ -1087,7 +1092,7 @@ public class JavaTokenizer extends UnicodeReader {
                     }
                     // Remove incidental indentation.
                     try {
-                        string = string.stripIndent();
+                        string = StringShims.stripIndent(string);
                     } catch (Exception ex) {
                         // Error already reported, just use unstripped string.
                     }
@@ -1096,7 +1101,7 @@ public class JavaTokenizer extends UnicodeReader {
                 // Translate escape sequences if present.
                 if (hasEscapeSequences) {
                     try {
-                        string = string.translateEscapes();
+                        string = StringShims.translateEscapes(string);
                     } catch (Exception ex) {
                         // Error already reported, just use untranslated string.
                     }

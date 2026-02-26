@@ -60,6 +60,8 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.MatchingUtils;
 import jdk.javadoc.internal.tool.AccessLevel;
 
+import org.frgaal.CollectionShims;
+
 /**
  * Utility container for current execution environment,
  * providing the current declaration and its doc comment.
@@ -329,6 +331,6 @@ public class Env {
 
             }
         }
-        return List.of();
+        return CollectionShims.list();
     }
 }

@@ -101,6 +101,10 @@ import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.DefinedBy;
 import com.sun.tools.javac.util.DefinedBy.Api;
 
+//import jdk.javadoc.internal.doclint.HtmlTag.AttrKind;
+//import jdk.javadoc.internal.doclint.HtmlTag.ElemKind;
+import static jdk.javadoc.internal.doclint.Messages.Group.*;
+import org.frgaal.StringShims;
 import jdk.javadoc.internal.html.HtmlAttr;
 import jdk.javadoc.internal.html.HtmlAttr.AttrKind;
 import jdk.javadoc.internal.html.HtmlTag;
@@ -1043,7 +1047,7 @@ public class Checker extends DocTreePathScanner<Void, Void> {
             var first = dct.getFirstSentence().stream()
                     .filter(t -> !isBlank(t))
                     .findFirst();
-            if (first.isEmpty() || first.get() != tree) {
+            if (!first.isPresent() || first.get() != tree) {
                 env.messages.warning(SYNTAX, tree, "dc.return.not.first");
             }
         }
@@ -1059,8 +1063,8 @@ public class Checker extends DocTreePathScanner<Void, Void> {
 
     private static boolean isBlank(DocTree t) {
         return switch (t.getKind()) {
-            case TEXT -> ((TextTree) t).getBody().isBlank();
-            case MARKDOWN -> ((RawTextTree) t).getContent().isBlank();
+            case TEXT -> StringShims.isBlank(((TextTree) t).getBody());
+            case MARKDOWN -> StringShims.isBlank(((RawTextTree) t).getContent());
             default -> false;
         };
     }
@@ -1207,7 +1211,7 @@ public class Checker extends DocTreePathScanner<Void, Void> {
         return Stream.of(DocTree.Kind.values())
                 .filter(k -> k.tagName != null) // not all DocTree represent tags
                 .map(k -> k.tagName)
-                .collect(Collectors.toUnmodifiableSet());
+                .collect(Collectors.toSet());
     }
 
     @Override @DefinedBy(Api.COMPILER_TREE)
@@ -1368,7 +1372,7 @@ public class Checker extends DocTreePathScanner<Void, Void> {
     }
 
     boolean hasNonWhitespace(TextTree tree) {
-        return !tree.getBody().isBlank();
+        return !StringShims.isBlank(tree.getBody());
     }
 
     // </editor-fold>

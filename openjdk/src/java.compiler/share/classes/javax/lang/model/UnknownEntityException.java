@@ -25,7 +25,7 @@
 
 package javax.lang.model;
 
-import java.io.Serial;
+//import java.io.Serial;
 
 /**
  * Superclass of exceptions which indicate that an unknown kind of
@@ -41,7 +41,7 @@ import java.io.Serial;
  */
 public class UnknownEntityException extends RuntimeException {
 
-    @Serial
+//    @Serial
     private static final long serialVersionUID = 269L;
 
     /**

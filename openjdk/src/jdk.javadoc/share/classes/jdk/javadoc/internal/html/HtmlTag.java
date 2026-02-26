@@ -25,7 +25,6 @@
 
 package jdk.javadoc.internal.html;
 
-import java.io.Serial;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -35,6 +34,7 @@ import java.util.Set;
 import javax.lang.model.element.Name;
 
 import static jdk.javadoc.internal.html.HtmlAttr.*;
+import org.frgaal.CollectionShims;
 
 /**
  * Enum representing HTML tags.
@@ -441,7 +441,6 @@ public enum HtmlTag {
     // This class exists to avoid warnings from using parameterized vararg type
     // Map<Attr,AttrKind> in signature of HtmlTag constructor.
     private static class AttrMap extends EnumMap<HtmlAttr,AttrKind> {
-        @Serial
         private static final long serialVersionUID = 0;
         AttrMap() {
             super(HtmlAttr.class);
@@ -456,11 +455,11 @@ public enum HtmlTag {
     private final Map<HtmlAttr,AttrKind> attrs;
 
     HtmlTag(BlockType blockType, EndKind endKind, AttrMap... attrMaps) {
-        this(ElemKind.OK, blockType, endKind, Set.of(), attrMaps);
+        this(ElemKind.OK, blockType, endKind, CollectionShims.set(), attrMaps);
     }
 
     HtmlTag(ElemKind elemKind, BlockType blockType, EndKind endKind, AttrMap... attrMaps) {
-        this(elemKind, blockType, endKind, Set.of(), attrMaps);
+        this(elemKind, blockType, endKind, CollectionShims.set(), attrMaps);
     }
 
     HtmlTag(BlockType blockType, EndKind endKind, Set<Flag> flags, AttrMap... attrMaps) {

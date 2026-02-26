@@ -42,6 +42,7 @@ import javax.lang.model.util.SimpleTypeVisitor9;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import org.frgaal.ArraysShims;
 
 /**
  * A collection of {@code Comparator} factory methods.
@@ -446,10 +447,10 @@ public class Comparators {
             var typeParameters2 = ((ExecutableElement) e2).getTypeParameters();
             var parameters1 = typeParameters1.toArray(new TypeParameterElement[0]);
             var parameters2 = typeParameters2.toArray(new TypeParameterElement[0]);
-            return Arrays.compare(parameters1, parameters2, (p1, p2) -> {
+            return ArraysShims.compare(parameters1, parameters2, (p1, p2) -> {
                 var bounds1 = p1.getBounds().toArray(new TypeMirror[0]);
                 var bounds2 = p2.getBounds().toArray(new TypeMirror[0]);
-                return Arrays.compare(bounds1, bounds2, (b1, b2) ->
+                return ArraysShims.compare(bounds1, bounds2, (b1, b2) ->
                         utils.compareStrings(true, b1.toString(), b2.toString()));
             });
         }

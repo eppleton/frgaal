@@ -35,6 +35,7 @@ import javax.lang.model.type.TypeMirror;
 import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyles;
 import jdk.javadoc.internal.doclets.toolkit.BaseOptions;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Comment;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
@@ -101,7 +102,7 @@ public class AnnotationTypeMemberWriter extends AbstractMemberWriter {
                 buildAnnotationTypeMemberChildren(div);
                 annotationContent.add(div);
                 memberList.add(writer.getMemberListItem(annotationContent));
-                writer.tableOfContents.addLink(htmlIds.forMember((ExecutableElement) member).getFirst(),
+                writer.tableOfContents.addLink(CollectionShims.getFirst(htmlIds.forMember((ExecutableElement) member)),
                         Text.of(name(member)), TableOfContents.Level.SECOND);
             }
             Content annotationDetails = getAnnotationDetails(annotationDetailsHeader, memberList);
@@ -210,7 +211,7 @@ public class AnnotationTypeMemberWriter extends AbstractMemberWriter {
                 Text.of(name(member)));
         content.add(heading);
         return HtmlTree.SECTION(HtmlStyles.detail, content)
-                .setId(htmlIds.forMember((ExecutableElement) member).getFirst());
+                .setId(CollectionShims.getFirst(htmlIds.forMember((ExecutableElement) member)));
     }
 
     protected Content getSignature(Element member) {

@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 import com.sun.tools.javac.util.DefinedBy;
 import com.sun.tools.javac.util.DefinedBy.Api;
 import com.sun.tools.javac.util.StringUtils;
+import org.frgaal.CollectionShims;
 
 /**
  * A processor which prints out elements.  Used to implement the
@@ -299,7 +300,7 @@ public class PrintingProcessor extends AbstractProcessor {
                          e.getEnclosedElements()
                          .stream()
                          .filter(elt -> elementUtils.getOrigin(elt) == Elements.Origin.EXPLICIT )
-                         .toList() ) )
+                         .collect(Collectors.toList()) ) )
                     this.visit(element);
             }
 
@@ -317,7 +318,7 @@ public class PrintingProcessor extends AbstractProcessor {
             if (kind == ENUM_CONSTANT)
                 writer.print(e.getSimpleName());
             else {
-                writer.print(e.asType().toString() + " " + (e.getSimpleName().isEmpty() ? "_" : e.getSimpleName()));
+                writer.print(e.asType().toString() + " " + (e.getSimpleName().length() == 0 ? "_" : e.getSimpleName()));
                 Object constantValue  = e.getConstantValue();
                 if (constantValue != null) {
                     writer.print(" = ");
@@ -534,7 +535,7 @@ public class PrintingProcessor extends AbstractProcessor {
                     tpe.getBounds()
                        .stream()
                        .filter(type -> isImportantType(type))
-                       .toList();
+                       .collect(Collectors.toList());
 
             if (printableBounds.isEmpty()) {
                 return "";

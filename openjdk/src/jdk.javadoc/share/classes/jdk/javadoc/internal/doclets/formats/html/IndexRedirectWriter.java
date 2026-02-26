@@ -42,6 +42,8 @@ import jdk.javadoc.internal.html.HtmlTree;
 import jdk.javadoc.internal.html.Script;
 import jdk.javadoc.internal.html.Text;
 
+import org.frgaal.CollectionShims;
+
 /**
  * Writes a file that tries to redirect to an alternate page.
  * The redirect uses JavaScript, if enabled, falling back on
@@ -77,7 +79,7 @@ public class IndexRedirectWriter extends HtmlDocletWriter {
                 .setTimestamp(!options.noTimestamp())
                 .setDescription("index redirect")
                 .setGenerator(getGenerator(getClass()))
-                .setStylesheets(configuration.getMainStylesheet(), List.of(), List.of())
+                .setStylesheets(configuration.getMainStylesheet(), CollectionShims.list(), CollectionShims.list())
                 .addDefaultScript(false);
 
         String title = (options.windowTitle().length() > 0)

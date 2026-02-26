@@ -65,6 +65,8 @@ import com.sun.tools.javac.util.DefinedBy;
 import com.sun.tools.javac.util.DefinedBy.Api;
 import com.sun.tools.javac.util.StringUtils.DamerauLevenshteinDistance;
 import jdk.javadoc.internal.tool.AccessLevel;
+import org.frgaal.CollectionShims;
+import org.frgaal.StreamShims;
 
 /**
  * Multi-function entry point for the doc check utility.
@@ -380,14 +382,14 @@ public class DocLint extends com.sun.tools.doclint.DocLint {
     public static List<String> suggestSimilar(Collection<String> knownTags, String unknownTag) {
         final double MIN_SIMILARITY = 2.0 / 3;
         record Pair(String tag, double similarity) { }
-        return knownTags.stream()
+        return StreamShims.toList(StreamShims.takeWhile(knownTags.stream()
                 .distinct() // filter duplicates in known, otherwise they will result in duplicates in suggested
                 .map(t -> new Pair(t, similarity(t, unknownTag)))
                 .sorted(Comparator.comparingDouble(Pair::similarity).reversed() /* more similar first */)
                 // .peek(p -> System.out.printf("%.3f, (%s ~ %s)%n", p.similarity, p.tag, unknownTag)) // debug
-                .takeWhile(p -> Double.compare(p.similarity, MIN_SIMILARITY) >= 0)
+                , p -> Double.compare(p.similarity, MIN_SIMILARITY) >= 0)
                 .map(Pair::tag)
-                .toList();
+                );
     }
 
     // a value in [0, 1] range: the closer the value is to 1, the more similar

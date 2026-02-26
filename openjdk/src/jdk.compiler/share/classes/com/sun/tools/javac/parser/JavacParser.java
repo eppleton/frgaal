@@ -38,6 +38,7 @@ import com.sun.source.tree.ModuleTree.ModuleKind;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Source.Feature;
+import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.file.PathFileObject;
 import com.sun.tools.javac.parser.Tokens.*;
 import com.sun.tools.javac.resources.CompilerProperties.Errors;
@@ -103,6 +104,7 @@ public class JavacParser implements Parser {
 
     /** The Source language setting. */
     private Source source;
+    private Target target;
 
     /** The Preview language setting. */
     private Preview preview;
@@ -189,6 +191,7 @@ public class JavacParser implements Parser {
         this.log = fac.log;
         this.names = fac.names;
         this.source = fac.source;
+        this.target = fac.target;
         this.preview = fac.preview;
         this.deferredLintHandler = fac.deferredLintHandler;
         this.allowStringFolding = fac.options.getBoolean("allowStringFolding", true);
@@ -198,9 +201,9 @@ public class JavacParser implements Parser {
         this.keepLineMap = keepLineMap;
         this.errorTree = F.Erroneous();
         this.endPosTable = newEndPosTable(keepEndPositions);
-        this.allowYieldStatement = Feature.SWITCH_EXPRESSION.allowedInSource(source);
-        this.allowRecords = Feature.RECORDS.allowedInSource(source);
-        this.allowSealedTypes = Feature.SEALED_CLASSES.allowedInSource(source);
+        this.allowYieldStatement = Feature.SWITCH_EXPRESSION.allowedInSource(source, target);
+        this.allowRecords = Feature.RECORDS.allowedInSource(source, target);
+        this.allowSealedTypes = Feature.SEALED_CLASSES.allowedInSource(source, target);
         updateUnexpectedTopLevelDefinitionStartError(false);
     }
 
@@ -215,6 +218,7 @@ public class JavacParser implements Parser {
         this.log = parser.log;
         this.names = parser.names;
         this.source = parser.source;
+        this.target =parser.target;
         this.preview = parser.preview;
         this.deferredLintHandler = parser.deferredLintHandler;
         this.allowStringFolding = parser.allowStringFolding;
@@ -223,9 +227,9 @@ public class JavacParser implements Parser {
         this.docComments = parser.docComments;
         this.errorTree = F.Erroneous();
         this.endPosTable = newEndPosTable(false);
-        this.allowYieldStatement = Feature.SWITCH_EXPRESSION.allowedInSource(source);
-        this.allowRecords = Feature.RECORDS.allowedInSource(source);
-        this.allowSealedTypes = Feature.SEALED_CLASSES.allowedInSource(source);
+        this.allowYieldStatement = Feature.SWITCH_EXPRESSION.allowedInSource(source, target);
+        this.allowRecords = Feature.RECORDS.allowedInSource(source, target);
+        this.allowSealedTypes = Feature.SEALED_CLASSES.allowedInSource(source, target);
         updateUnexpectedTopLevelDefinitionStartError(false);
     }
 
@@ -778,7 +782,7 @@ public class JavacParser implements Parser {
                 return names.error;
             }
         } else if (token.kind == UNDERSCORE) {
-            if (Feature.UNDERSCORE_IDENTIFIER.allowedInSource(source)) {
+            if (Feature.UNDERSCORE_IDENTIFIER.allowedInSource(source, target)) {
                 log.warning(token.pos, Warnings.UnderscoreAsIdentifier);
             } else if (asVariable) {
                 checkSourceLevel(Feature.UNNAMED_VARIABLES);
@@ -786,7 +790,7 @@ public class JavacParser implements Parser {
                     log.error(DiagnosticFlag.SYNTAX, token.pos, Errors.UseOfUnderscoreNotAllowedWithBrackets);
                 }
             } else {
-                if (Feature.UNNAMED_VARIABLES.allowedInSource(source)) {
+                if (Feature.UNNAMED_VARIABLES.allowedInSource(source, target)) {
                     log.error(DiagnosticFlag.SYNTAX, token.pos, Errors.UseOfUnderscoreNotAllowedNonVariable);
                 } else {
                     log.error(DiagnosticFlag.SYNTAX, token.pos, Errors.UnderscoreAsIdentifier);
@@ -1022,7 +1026,7 @@ public class JavacParser implements Parser {
                 //type test pattern:
                 int varPos = token.pos;
                 Name name = identOrUnderscore();
-                if (Feature.UNNAMED_VARIABLES.allowedInSource(source) && name == names.underscore) {
+                if (Feature.UNNAMED_VARIABLES.allowedInSource(source, target) && name == names.underscore) {
                     name = names.empty;
                 }
                 JCVariableDecl var = toP(F.at(varPos).VarDef(mods, name, e, null));
@@ -2154,7 +2158,7 @@ public class JavacParser implements Parser {
                         (restrictedTypeName = restrictedTypeName(param.vartype, false)) != null &&
                         param.vartype.hasTag(TYPEARRAY)) {
                     log.error(DiagnosticFlag.SYNTAX, param.pos,
-                        Feature.VAR_SYNTAX_IMPLICIT_LAMBDAS.allowedInSource(source)
+                        Feature.VAR_SYNTAX_IMPLICIT_LAMBDAS.allowedInSource(source, target)
                             ? Errors.RestrictedTypeNotAllowedArray(restrictedTypeName) : Errors.RestrictedTypeNotAllowedHere(restrictedTypeName));
                 }
                 lambdaClassifier.addParameter(param);
@@ -2233,7 +2237,7 @@ public class JavacParser implements Parser {
                 kind = LambdaParameterKind.ERROR;
                 boolean varIndex = currentKind.index == LambdaParameterKind.VAR.index ||
                         newKind.index == LambdaParameterKind.VAR.index;
-                diagFragment = Feature.VAR_SYNTAX_IMPLICIT_LAMBDAS.allowedInSource(source) || !varIndex ?
+                diagFragment = Feature.VAR_SYNTAX_IMPLICIT_LAMBDAS.allowedInSource(source, target) || !varIndex ?
                         decisionTable[currentKind.index][newKind.index] : null;
             }
         }
@@ -3789,7 +3793,7 @@ public class JavacParser implements Parser {
         JCExpression init = null;
         type = bracketsOpt(type);
 
-        if (Feature.UNNAMED_VARIABLES.allowedInSource(source) && name == names.underscore) {
+        if (Feature.UNNAMED_VARIABLES.allowedInSource(source, target) && name == names.underscore) {
             if (!localDecl) {
                 log.error(DiagnosticFlag.SYNTAX, pos, Errors.UseOfUnderscoreNotAllowed);
             }
@@ -3804,7 +3808,7 @@ public class JavacParser implements Parser {
         }
         else if (reqInit) syntaxError(token.pos, Errors.Expected(EQ));
 
-        if (Feature.UNNAMED_VARIABLES.allowedInSource(source) && name == names.empty
+        if (Feature.UNNAMED_VARIABLES.allowedInSource(source, target) && name == names.empty
                 && localDecl
                 && init == null
                 && token.kind != COLON) { // if its unnamed local variable, it needs to have an init unless in enhanced-for
@@ -3853,7 +3857,7 @@ public class JavacParser implements Parser {
 
     Source restrictedTypeNameStartingAtSource(Name name, int pos, boolean shouldWarn) {
         if (name == names.var) {
-            if (Feature.LOCAL_VARIABLE_TYPE_INFERENCE.allowedInSource(source)) {
+            if (Feature.LOCAL_VARIABLE_TYPE_INFERENCE.allowedInSource(source, target)) {
                 return Source.JDK10;
             } else if (shouldWarn) {
                 log.warning(pos, Warnings.RestrictedTypeNotAllowed(name, Source.JDK10));
@@ -3946,7 +3950,7 @@ public class JavacParser implements Parser {
         }
         type = bracketsOpt(type);
 
-        if (Feature.UNNAMED_VARIABLES.allowedInSource(source) && name == names.underscore) {
+        if (Feature.UNNAMED_VARIABLES.allowedInSource(source, target) && name == names.underscore) {
             name = names.empty;
         }
 
@@ -5600,7 +5604,7 @@ public class JavacParser implements Parser {
         if (preview.isPreview(feature) && !preview.isEnabled()) {
             //preview feature without --preview flag, error
             log.error(DiagnosticFlag.SOURCE_LEVEL, pos, preview.disabledError(feature));
-        } else if (!feature.allowedInSource(source)) {
+        } else if (!feature.allowedInSource(source, target)) {
             //incompatible source level, error
             log.error(DiagnosticFlag.SOURCE_LEVEL, pos, feature.error(source.name));
         } else if (preview.isPreview(feature)) {
@@ -5613,7 +5617,7 @@ public class JavacParser implements Parser {
         //TODO: proper tests for this logic (and updates):
         if (parseModuleInfo) {
             unexpectedTopLevelDefinitionStartError = Errors.ExpectedModuleOrOpen;
-        } else if (Feature.IMPLICIT_CLASSES.allowedInSource(source) && !hasPackageDecl) {
+        } else if (Feature.IMPLICIT_CLASSES.allowedInSource(source, target) && !hasPackageDecl) {
             unexpectedTopLevelDefinitionStartError = Errors.ClassMethodOrFieldExpected;
         } else if (allowRecords) {
             unexpectedTopLevelDefinitionStartError = Errors.Expected4(CLASS, INTERFACE, ENUM, "record");

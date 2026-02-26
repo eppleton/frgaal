@@ -60,6 +60,7 @@ import jdk.javadoc.internal.doclets.formats.html.HtmlLinkInfo;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.HtmlTree;
@@ -653,7 +654,7 @@ public class ThrowsTaglet extends BaseTaglet implements InheritableTaglet {
         if (result instanceof DocFinder.Result.Conclude<Map<ThrowsTree, ExecutableElement>> c) {
             return c.value();
         }
-        return Map.of(); // an empty map is effectively ordered
+        return CollectionShims.map(); // an empty map is effectively ordered
     }
 
     private static DocFinder.Result<Map<ThrowsTree, ExecutableElement>> toResult(Element target,
@@ -707,7 +708,7 @@ public class ThrowsTaglet extends BaseTaglet implements InheritableTaglet {
                 result.add(t);
             }
         }
-        return List.copyOf(result);
+        return CollectionShims.listCopyOf(result);
     }
 
     /*
@@ -802,7 +803,7 @@ public class ThrowsTaglet extends BaseTaglet implements InheritableTaglet {
         assert !i1.hasNext() && !i2.hasNext();
         // copyOf is unordered and this is fine: this map is for queries;
         // it doesn't control rendering order
-        return Map.copyOf(map);
+        return CollectionShims.mapCopyOf(map);
     }
 
     private static AssertionError newAssertionError(Object... objects) {

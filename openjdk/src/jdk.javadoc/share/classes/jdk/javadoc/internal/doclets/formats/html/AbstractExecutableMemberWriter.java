@@ -50,6 +50,7 @@ import static jdk.javadoc.internal.doclets.formats.html.HtmlLinkInfo.Kind.LINK_T
 import static jdk.javadoc.internal.doclets.formats.html.HtmlLinkInfo.Kind.PLAIN;
 import static jdk.javadoc.internal.doclets.formats.html.HtmlLinkInfo.Kind.SHOW_PREVIEW;
 import static jdk.javadoc.internal.doclets.formats.html.HtmlLinkInfo.Kind.SHOW_TYPE_PARAMS_AND_BOUNDS;
+import org.frgaal.CollectionShims;
 
 /**
  * Abstract "member writer" for executable elements.
@@ -132,7 +133,7 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
         String title = name + utils.makeSignature(ee, typeElement, false, true);
         target.add(writer.getLink(new HtmlLinkInfo(configuration, PLAIN, te)
                 .label(name)
-                .fragment(htmlIds.forMember(ee).getFirst().name())
+                .fragment(CollectionShims.getFirst(htmlIds.forMember(ee)).name())
                 .targetMember(member)
                 .title(title)));
     }

@@ -30,12 +30,13 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.frgaal.CollectionShims;
 
 /**
  * A sequence of Content nodes.
  */
 public class ContentBuilder extends Content {
-    protected List<Content> contents = List.of();
+    protected List<Content> contents = CollectionShims.list();
 
     public ContentBuilder() { }
 

@@ -31,6 +31,8 @@ import com.sun.tools.javac.resources.LauncherProperties.Errors;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.frgaal.CollectionShims;
+import org.frgaal.StringShims;
 
 /**
  * Represents runtime arguments that are relevant to {@code javac}.
@@ -64,8 +66,8 @@ record RelevantJavacOptions(List<String> forProgramCompilation,
             if (source == null) {
                 throw new Fault(Errors.InvalidValueForSource(sourceOpt));
             }
-            programOptions.addAll(List.of("--release", sourceOpt));
-            subsequentOptions.addAll(List.of("--release", sourceOpt));
+            programOptions.addAll(CollectionShims.list("--release", sourceOpt));
+            subsequentOptions.addAll(CollectionShims.list("--release", sourceOpt));
         }
 
         for (int i = 0; i < runtimeArgs.length; i++) {
@@ -115,8 +117,8 @@ record RelevantJavacOptions(List<String> forProgramCompilation,
                     subsequentOptions.add(opt);
                     if (sourceOpt == null) {
                         String feature = String.valueOf(Runtime.version().feature());
-                        programOptions.addAll(List.of("--release", feature));
-                        subsequentOptions.addAll(List.of("--release", feature));
+                        programOptions.addAll(CollectionShims.list("--release", feature));
+                        subsequentOptions.addAll(CollectionShims.list("--release", feature));
                     }
                 }
                 case "--enable-native-access" -> {
@@ -153,8 +155,8 @@ record RelevantJavacOptions(List<String> forProgramCompilation,
                 -Xlint:-options
                 -XDsourceLauncher
                 """;
-        implicitOptions.lines()
-                .filter(line -> !line.isBlank())
+        StringShims.lines(implicitOptions)
+                .filter(line -> !StringShims.isBlank(line))
                 .forEach(option -> {
                     programOptions.add(option);
                     subsequentOptions.add(option);
@@ -166,8 +168,8 @@ record RelevantJavacOptions(List<String> forProgramCompilation,
                 List.copyOf(enableNativeAccessForModules));
     }
 
-    private static List<String> computeListOfModules(ProgramDescriptor program, String value) {
-        var modules = new ArrayList<>(List.of(value.split(",")));
+    private static List<String> computeListOfAddModules(ProgramDescriptor program, String value) {
+        var modules = new ArrayList<>(CollectionShims.list(value.split(",")));
         // these options are only supported at run time;
         // they are not required or supported at compile time
         modules.remove("ALL-DEFAULT");

@@ -36,6 +36,7 @@ import javax.lang.model.element.TypeParameterElement;
 import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyles;
 import jdk.javadoc.internal.doclets.toolkit.BaseOptions;
 import jdk.javadoc.internal.doclets.toolkit.util.VisibleMemberTable;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.Entity;
@@ -120,7 +121,7 @@ public class ConstructorWriter extends AbstractExecutableMemberWriter {
                 buildTagInfo(div);
                 constructorContent.add(div);
                 memberList.add(getMemberListItem(constructorContent));
-                writer.tableOfContents.addLink(htmlIds.forMember(currentConstructor).getFirst(),
+                writer.tableOfContents.addLink(CollectionShims.getFirst(htmlIds.forMember(currentConstructor)),
                         Text.of(utils.getSimpleName(constructor)
                                 + utils.makeSignature(currentConstructor, typeElement, false, true)),
                         TableOfContents.Level.SECOND);
@@ -214,11 +215,11 @@ public class ConstructorWriter extends AbstractExecutableMemberWriter {
 
         var anchors = htmlIds.forMember(constructor);
         if (anchors.size() > 1) {
-            heading.setId(anchors.getLast());
+            heading.setId(CollectionShims.getLast(anchors));
         }
         content.add(heading);
         return HtmlTree.SECTION(HtmlStyles.detail, content)
-                .setId(anchors.getFirst());
+                .setId(CollectionShims.getFirst(anchors));
     }
 
     protected Content getSignature(ExecutableElement constructor) {

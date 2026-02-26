@@ -167,10 +167,9 @@ public class DeferredLintHandler {
      * @param lint lint configuration corresponding to {@code decl}
      */
     public void flush(JCTree decl, Lint lint) {
-        Optional.of(decl)
-          .map(deferralMap::remove)
-          .stream()
-          .flatMap(ArrayList::stream)
-          .forEach(logger -> logger.report(lint));
+        ArrayList<LintLogger> existing = deferralMap.remove(decl);
+        if (existing != null) {
+            existing.forEach(logger -> logger.report(lint));
+        }
     }
 }

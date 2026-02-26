@@ -1,2 +1,0 @@
-# Requires jcmd
-jdk/test/lib/hprof/HprofTest.java   8346719 generic-all

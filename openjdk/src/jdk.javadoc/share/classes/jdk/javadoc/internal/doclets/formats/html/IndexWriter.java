@@ -28,6 +28,7 @@ package jdk.javadoc.internal.doclets.formats.html;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -45,6 +46,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexBuilder;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexItem;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.Entity;
@@ -85,7 +87,7 @@ public class IndexWriter extends HtmlDocletWriter {
             while (iter.hasNext()) {
                 Character ch = iter.next();
                 DocPath file = DocPaths.INDEX_FILES.resolve(DocPaths.indexN(iter.nextIndex()));
-                writerFactory.newIndexWriter(file, firstCharacters, List.of(ch)).buildPage();
+                writerFactory.newIndexWriter(file, firstCharacters, CollectionShims.list(ch)).buildPage();
             }
         } else {
             writerFactory.newIndexWriter(DocPaths.INDEX_ALL, firstCharacters, firstCharacters).buildPage();
@@ -290,7 +292,7 @@ public class IndexWriter extends HtmlDocletWriter {
             div.add(span);
             var tags = utils.getDeprecatedTrees(element);
             if (!tags.isEmpty())
-                addInlineDeprecatedComment(element, tags.getFirst(), div);
+                addInlineDeprecatedComment(element, CollectionShims.getFirst(tags), div);
             content.add(div);
         } else {
             TypeElement encl = utils.getEnclosingTypeElement(element);
@@ -359,7 +361,7 @@ public class IndexWriter extends HtmlDocletWriter {
                 .sorted((i1,i2)-> utils.compareStrings(i1.getLabel(), i2.getLabel()))
                 .map(i -> links.createLink(pathToRoot.resolve(i.getUrl()),
                         contents.getNonBreakString(i.getLabel())))
-                .toList();
+                .collect(Collectors.toList());
         content.add(contents.join(getVerticalSeparator(), pageLinks));
     }
 

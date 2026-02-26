@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import jdk.internal.module.Resources;
+import org.frgaal.CollectionShims;
 
 /**
  * An in-memory module finder, that uses an in-memory cache of classes written by
@@ -69,7 +70,7 @@ record MemoryModuleFinder(Map<String, byte[]> classes,
 
     @Override
     public Set<ModuleReference> findAll() {
-        return Set.of(new MemoryModuleReference());
+        return CollectionShims.set(new MemoryModuleReference());
     }
 
     class MemoryModuleReference extends ModuleReference {

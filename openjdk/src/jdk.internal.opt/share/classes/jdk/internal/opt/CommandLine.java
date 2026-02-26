@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import org.frgaal.CollectionShims;
 
 /*
  * This file was originally a copy of CommandLine.java in
@@ -52,7 +53,7 @@ public final class CommandLine {
      * @see #parse(List)
      */
     public static String[] parse(String... args) throws IOException {
-        return parse(List.of(args)).toArray(String[]::new);
+        return parse(CollectionShims.list(args)).toArray(new String[0]);
     }
 
     /**

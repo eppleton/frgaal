@@ -57,6 +57,7 @@ import jdk.javadoc.internal.doclets.toolkit.util.CommentHelper;
 import jdk.javadoc.internal.doclets.toolkit.util.DocLink;
 import jdk.javadoc.internal.doclets.toolkit.util.IndexItem;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+import org.frgaal.PredicateShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.HtmlId;
@@ -195,7 +196,7 @@ public class TagletWriter {
      */
     public Content invalidTagOutput(String summary, Optional<String> detail) {
         return htmlWriter.invalidTagOutput(summary,
-                detail.isEmpty() || detail.get().isEmpty()
+                !detail.isPresent() || detail.get().isEmpty()
                         ? Optional.empty()
                         : Optional.of(Text.of(Text.normalizeNewlines(detail.get()))));
     }
@@ -455,7 +456,7 @@ public class TagletWriter {
         boolean hasLongLabels = items.stream().anyMatch(this::isLongOrHasComma);
         var list = HtmlTree.UL(hasLongLabels ? HtmlStyles.tagListLong : HtmlStyles.tagList);
         items.stream()
-                .filter(Predicate.not(Content::isEmpty))
+                .filter(PredicateShims.not(Content::isEmpty))
                 .forEach(item -> list.add(HtmlTree.LI(item)));
         return list;
     }

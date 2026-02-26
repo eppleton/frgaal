@@ -34,6 +34,7 @@ import java.util.List;
 
 
 import static com.sun.source.doctree.DocTree.Kind.SINCE;
+import org.frgaal.CollectionShims;
 
 /**
  * Build list of all the packages, classes, constructors, fields and methods
@@ -63,6 +64,6 @@ public class NewAPIBuilder extends SummaryAPIListBuilder {
 
         // assumes a simple string value with no formatting
         return sinceTrees.stream()
-                .anyMatch(tree -> releases.contains(tree.getBody().getFirst().toString()));
+                .anyMatch(tree -> releases.contains(CollectionShims.getFirst(tree.getBody()).toString()));
     }
 }

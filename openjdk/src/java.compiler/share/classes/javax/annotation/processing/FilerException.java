@@ -26,7 +26,7 @@
 package javax.annotation.processing;
 
 import java.io.IOException;
-import java.io.Serial;
+//import java.io.Serial;
 
 /**
  * Indicates a {@link Filer} detected an attempt to open a file that
@@ -40,7 +40,7 @@ import java.io.Serial;
  */
 public class FilerException extends IOException {
 
-    @Serial
+//    @Serial
     private static final long serialVersionUID = 8426423106453163293L;
 
     /**

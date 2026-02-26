@@ -57,7 +57,7 @@ public abstract class AbstractElementVisitor7<R, P> extends AbstractElementVisit
      * @deprecated Release 7 is obsolete; update to a visitor for a newer
      * release level.
      */
-    @Deprecated(since="12")
+    @Deprecated(/*since="12"*/)
     protected AbstractElementVisitor7(){
         super(); // Superclass constructor deprecated too
     }

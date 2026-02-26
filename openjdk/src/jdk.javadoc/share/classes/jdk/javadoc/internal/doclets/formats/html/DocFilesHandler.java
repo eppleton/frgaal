@@ -49,6 +49,19 @@ import jdk.javadoc.internal.doclets.toolkit.util.DocFileIOException;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPath;
 import jdk.javadoc.internal.doclets.toolkit.util.DocPaths;
 import jdk.javadoc.internal.doclets.toolkit.util.Utils;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ModuleElement;
+import javax.lang.model.element.PackageElement;
+import javax.tools.JavaFileManager.Location;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
+import jdk.javadoc.internal.doclets.formats.html.Navigation.PageMode;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.HtmlTag;
 import jdk.javadoc.internal.html.HtmlTree;
@@ -232,7 +245,7 @@ public class DocFilesHandler {
                     .setHeader(getHeader(PageMode.DOC_FILE, dfElement.getElement()))
                     .addMainContent(pageContent)
                     .setFooter(getFooter()));
-            printHtmlDocument(List.of(), null, localTagsContent, List.of(), htmlContent);
+            printHtmlDocument(CollectionShims.list(), null, localTagsContent, CollectionShims.list(), htmlContent);
         }
 
         @Override

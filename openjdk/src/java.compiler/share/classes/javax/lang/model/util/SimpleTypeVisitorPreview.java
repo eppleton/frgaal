@@ -25,7 +25,7 @@
 
 package javax.lang.model.util;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -63,7 +63,7 @@ import static javax.lang.model.SourceVersion.*;
  * @since 23
  */
 @SupportedSourceVersion(RELEASE_25)
-@PreviewFeature(feature=PreviewFeature.Feature.LANGUAGE_MODEL, reflective=true)
+//@PreviewFeature(feature=PreviewFeature.Feature.LANGUAGE_MODEL, reflective=true)
 public class SimpleTypeVisitorPreview<R, P> extends SimpleTypeVisitor14<R, P> {
     /**
      * Constructor for concrete subclasses; uses {@code null} for the

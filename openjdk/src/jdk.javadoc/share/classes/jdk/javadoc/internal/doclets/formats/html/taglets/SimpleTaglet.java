@@ -43,6 +43,7 @@ import com.sun.source.doctree.DocTree;
 import jdk.javadoc.doclet.Taglet;
 import jdk.javadoc.internal.doclets.formats.html.HtmlConfiguration;
 import jdk.javadoc.internal.doclets.toolkit.util.DocFinder;
+import org.frgaal.CollectionShims;
 import jdk.javadoc.internal.html.Content;
 import jdk.javadoc.internal.html.ContentBuilder;
 import jdk.javadoc.internal.html.HtmlTree;
@@ -146,7 +147,7 @@ public class SimpleTaglet extends BaseTaglet implements InheritableTaglet {
                     }
                 }
 
-                return List.of();
+                return CollectionShims.list();
             }
 
             private boolean isNestedType(Element e) {
@@ -171,9 +172,9 @@ public class SimpleTaglet extends BaseTaglet implements InheritableTaglet {
                         m -> DocFinder.Result.fromOptional(extractFirst(m))).toOptional();
             }
             return r.map(result -> new Output(result.tag, result.method, result.description, true))
-                    .orElseGet(()->new Output(null, null, List.of(), true));
+                    .orElseGet(()->new Output(null, null, CollectionShims.list(), true));
         } catch (DocFinder.NoOverriddenMethodFound e) {
-            return new Output(null, null, List.of(), false);
+            return new Output(null, null, CollectionShims.list(), false);
         }
     }
 
@@ -231,7 +232,7 @@ public class SimpleTaglet extends BaseTaglet implements InheritableTaglet {
     }
 
     protected List<? extends BlockTagTree> getDefaultBlockTags(Element e, Predicate<? super BlockTagTree> accepts) {
-        return List.of();
+        return CollectionShims.list();
     }
 
     /**

@@ -25,7 +25,7 @@
 
 package javax.lang.model.util;
 
-import jdk.internal.javac.PreviewFeature;
+//import jdk.internal.javac.PreviewFeature;
 
 import static javax.lang.model.SourceVersion.*;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -51,7 +51,7 @@ import javax.annotation.processing.ProcessingEnvironment;
  * @since 23
  */
 @SupportedSourceVersion(RELEASE_25)
-@PreviewFeature(feature=PreviewFeature.Feature.LANGUAGE_MODEL, reflective=true)
+//@PreviewFeature(feature=PreviewFeature.Feature.LANGUAGE_MODEL, reflective=true)
 public abstract class AbstractAnnotationValueVisitorPreview<R, P> extends AbstractAnnotationValueVisitor14<R, P> {
 
     /**

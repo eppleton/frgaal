@@ -27,7 +27,7 @@ package javax.lang.model.type;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serial;
+//import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +44,7 @@ import javax.lang.model.element.Element;
  */
 public class MirroredTypesException extends RuntimeException {
 
-    @Serial
+//    @Serial
     private static final long serialVersionUID = 269L;
 
     transient List<? extends TypeMirror> types; // cannot be serialized
@@ -89,7 +89,7 @@ public class MirroredTypesException extends RuntimeException {
      * deserialization
      * @throws IOException for an IO problem during deserialization
      */
-    @Serial
+//    @Serial
     private void readObject(ObjectInputStream s)
         throws IOException, ClassNotFoundException {
         s.defaultReadObject();
